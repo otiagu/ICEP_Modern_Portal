@@ -159,33 +159,33 @@
         <div class="panel-title"><i class="fas fa-user-plus"></i> Add Student Profile</div>
         <div class="form-group">
           <label>Full Name</label>
-          <input type="text" class="form-control" placeholder="e.g. John Doe">
+          <input type="text" id="add-student-name" class="form-control" placeholder="e.g. John Doe">
         </div>
         <div class="form-group">
           <label>Matric Number</label>
-          <input type="text" class="form-control" placeholder="2026/MKT/...">
+          <input type="text" id="add-student-matric" class="form-control" placeholder="2026/MKT/...">
         </div>
         <div class="form-group">
           <label>Level</label>
-          <select class="form-control">
-            <option>100 Level</option><option>200 Level</option><option>300 Level</option><option>400 Level</option>
+          <select id="add-student-level" class="form-control">
+            <option value="100">100 Level</option><option value="200">200 Level</option><option value="300">300 Level</option><option value="400">400 Level</option>
           </select>
         </div>
         <div class="form-group">
           <label>Faculty</label>
-          <select class="form-control">
-            <option>Management Sciences</option><option>Engineering</option><option>Arts</option>
+          <select id="add-student-faculty" class="form-control">
+            <option value="Management Sciences">Management Sciences</option><option value="Engineering">Engineering</option><option value="Arts">Arts</option>
           </select>
         </div>
         <div class="form-group">
           <label>Department</label>
-          <input type="text" class="form-control" placeholder="e.g. Marketing">
+          <input type="text" id="add-student-dept" class="form-control" placeholder="e.g. Marketing">
         </div>
         <div class="form-group">
           <label>Avatar Upload</label>
-          <input type="file" class="form-control">
+          <input type="file" id="add-student-avatar" class="form-control">
         </div>
-        <button class="btn btn-cyan"><i class="fas fa-database"></i> Commit Student to Memory</button>
+        <button class="btn btn-cyan" onclick="commitStudent()"><i class="fas fa-database"></i> Commit Student to Memory</button>
       </div>
 
       <!-- Col 2 -->
@@ -193,34 +193,34 @@
         <div class="panel-title"><i class="fas fa-calendar-alt"></i> Assign Lecture / Schedule</div>
         <div class="form-group">
           <label>Course Code & Title</label>
-          <input type="text" class="form-control" placeholder="e.g. MKT 401 Advanced Research">
+          <input type="text" id="add-tt-course" class="form-control" placeholder="e.g. MKT 401 Advanced Research">
         </div>
         <div class="form-group">
           <label>Day</label>
-          <select class="form-control">
-            <option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option>
+          <select id="add-tt-day" class="form-control">
+            <option value="Monday">Monday</option><option value="Tuesday">Tuesday</option><option value="Wednesday">Wednesday</option><option value="Thursday">Thursday</option><option value="Friday">Friday</option>
           </select>
         </div>
         <div class="form-group">
           <label>Venue</label>
-          <input type="text" class="form-control" placeholder="e.g. Hall B">
+          <input type="text" id="add-tt-venue" class="form-control" placeholder="e.g. Hall B">
         </div>
         <div class="form-group">
           <label>Start Time</label>
-          <input type="time" class="form-control">
+          <input type="time" id="add-tt-start" class="form-control">
         </div>
         <div class="form-group">
           <label>End Time</label>
-          <input type="time" class="form-control">
+          <input type="time" id="add-tt-end" class="form-control">
         </div>
-        <button class="btn btn-blue" style="margin-top: 10px;"><i class="fas fa-paper-plane"></i> Publish Timetable Slot</button>
+        <button class="btn btn-blue" style="margin-top: 10px;" onclick="publishTimetable()"><i class="fas fa-paper-plane"></i> Publish Timetable Slot</button>
       </div>
 
       <!-- Col 3 -->
       <div class="panel">
         <div class="panel-title"><i class="fas fa-users-cog"></i> Live Persona Switcher</div>
         
-        <a href="ICEP_student_profile_modern.html" class="persona-btn">
+        <a href="#" class="persona-btn" onclick="setPersona('Emmanuel Chukwuemeka', 'Student', 'Management Sciences', 'Marketing', 400); return false;">
           <div class="persona-info">
             <span class="persona-name">Emmanuel Chukwuemeka</span>
             <span class="persona-role">Student Profile</span>
@@ -228,7 +228,7 @@
           <i class="fas fa-arrow-right"></i>
         </a>
         
-        <a href="ICEP_courserep_modern.html" class="persona-btn">
+        <a href="#" class="persona-btn" onclick="setPersona('Adaeze Okafor', 'Course Rep', 'Management Sciences', 'Marketing', 400); return false;">
           <div class="persona-info">
             <span class="persona-name">Adaeze Okafor</span>
             <span class="persona-role">Course Rep</span>
@@ -236,7 +236,7 @@
           <i class="fas fa-arrow-right"></i>
         </a>
         
-        <a href="ICEP_coordinator_modern.html" class="persona-btn">
+        <a href="#" class="persona-btn" onclick="setPersona('Dr. Sarah Alabi', 'Coordinator', 'Management Sciences', 'Marketing', 'Staff'); return false;">
           <div class="persona-info">
             <span class="persona-name">Dr. Sarah Alabi</span>
             <span class="persona-role">Coordinator</span>
@@ -256,6 +256,113 @@
         document.getElementById('stat-students').textContent = '245'; // fallback
       }
     });
+
+    function setPersona(name, role, faculty, dept, level) {
+      const persona = { name, role, faculty, dept, level };
+      localStorage.setItem('activePersona', JSON.stringify(persona));
+      if (role === 'Student') {
+        window.location.href = 'ICEP_student_profile_modern.html';
+      } else if (role === 'Course Rep') {
+        window.location.href = 'ICEP_courserep_modern.html';
+      } else if (role === 'Coordinator') {
+        window.location.href = 'ICEP_coordinator_modern.html';
+      }
+    }
+
+    function commitStudent() {
+      const name = document.getElementById('add-student-name').value;
+      const matric = document.getElementById('add-student-matric').value;
+      const level = parseInt(document.getElementById('add-student-level').value);
+      const faculty = document.getElementById('add-student-faculty').value;
+      const dept = document.getElementById('add-student-dept').value;
+
+      if (!name || !matric || !dept) {
+        alert("Please fill name, matric, and department.");
+        return;
+      }
+
+      const newStudent = {
+        id: 'S' + Math.floor(Math.random() * 10000),
+        name: name,
+        matriculationNumber: matric,
+        faculty: faculty,
+        department: dept,
+        level: level,
+        gpa: 0.0,
+        email: matric.replace(/\//g, '').toLowerCase() + '@icep.edu.ng'
+      };
+
+      let customStudents = [];
+      try {
+        const stored = localStorage.getItem('ICEP_STUDENTS_CUSTOM');
+        if (stored) customStudents = JSON.parse(stored);
+      } catch(e){}
+      
+      customStudents.push(newStudent);
+      localStorage.setItem('ICEP_STUDENTS_CUSTOM', JSON.stringify(customStudents));
+      
+      if (window.ICEP_STUDENTS) {
+        window.ICEP_STUDENTS.push(newStudent);
+        document.getElementById('stat-students').textContent = window.ICEP_STUDENTS.length;
+      }
+
+      alert("Student committed to memory!");
+      document.getElementById('add-student-name').value = '';
+      document.getElementById('add-student-matric').value = '';
+      document.getElementById('add-student-dept').value = '';
+    }
+
+    function publishTimetable() {
+      const course = document.getElementById('add-tt-course').value;
+      const day = document.getElementById('add-tt-day').value;
+      const venue = document.getElementById('add-tt-venue').value;
+      const start = document.getElementById('add-tt-start').value;
+      const end = document.getElementById('add-tt-end').value;
+
+      if (!course || !venue || !start || !end) {
+        alert("Please fill all timetable fields.");
+        return;
+      }
+
+      const parts = course.split(' ');
+      let courseCode = parts.slice(0, 2).join(' ');
+      let courseTitle = parts.slice(2).join(' ');
+      if (parts.length < 3) {
+        courseCode = course;
+        courseTitle = course;
+      }
+
+      const newSlot = {
+        id: 'T' + Math.floor(Math.random() * 10000),
+        day: day,
+        startTime: start,
+        endTime: end,
+        courseCode: courseCode,
+        courseTitle: courseTitle,
+        venue: venue,
+        lecturer: 'TBD',
+        semester: 1
+      };
+
+      let customTT = [];
+      try {
+        const stored = localStorage.getItem('ICEP_TIMETABLE_CUSTOM');
+        if (stored) customTT = JSON.parse(stored);
+      } catch(e){}
+
+      customTT.push(newSlot);
+      localStorage.setItem('ICEP_TIMETABLE_CUSTOM', JSON.stringify(customTT));
+      
+      if (window.ICEP_TIMETABLE) {
+        window.ICEP_TIMETABLE.push(newSlot);
+      }
+
+      alert("Timetable slot published!");
+      document.getElementById('add-tt-course').value = '';
+      document.getElementById('add-tt-venue').value = '';
+      document.getElementById('add-tt-start').value = '';
+      document.getElementById('add-tt-end').value = '';
+    }
   </script>
 </body>
 </html>

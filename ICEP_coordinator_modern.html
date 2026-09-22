@@ -1220,12 +1220,12 @@
             <div class="hero-content">
                 <div class="hero-profile">
                     <div class="hero-avatar-wrapper">
-                        <img src="https://ui-avatars.com/api/?name=Dr+Emeka+Nwosu&size=200&background=8b5cf6&color=fff&bold=true" alt="Dr. Emeka Nwosu" class="hero-avatar">
+                        <img src="https://ui-avatars.com/api/?name=Dr+Emeka+Nwosu&size=200&background=8b5cf6&color=fff&bold=true" alt="Dr. Emeka Nwosu" class="hero-avatar" id="heroCoordAvatar">
                         <span class="status-pill">Active — Coordinator</span>
                     </div>
                     <div class="hero-info">
-                        <h1 class="hero-name">Dr. Emeka Nwosu</h1>
-                        <p class="hero-title">Departmental Coordinator | Faculty of Management Sciences</p>
+                        <h1 class="hero-name" id="heroCoordName">Dr. Emeka Nwosu</h1>
+                        <p class="hero-title" id="heroCoordTitle">Departmental Coordinator | Faculty of Management Sciences</p>
                     </div>
                     <div class="hero-actions">
                         <button class="btn-outline">Manage Staff</button>
@@ -1695,6 +1695,24 @@
             if (isDark) {
                 icon.classList.replace('fa-moon', 'fa-sun');
             }
+            
+            try {
+              const personaStr = localStorage.getItem('activePersona');
+              if (personaStr) {
+                 const persona = JSON.parse(personaStr);
+                 if (persona.role === 'coordinator' || persona.faculty) {
+                    const nameEl = document.getElementById('heroCoordName');
+                    const titleEl = document.getElementById('heroCoordTitle');
+                    const avatarEl = document.getElementById('heroCoordAvatar');
+                    if (nameEl) nameEl.textContent = persona.name || 'Coordinator';
+                    if (titleEl) titleEl.textContent = `Departmental Coordinator | ${persona.faculty || 'Faculty of Management Sciences'}`;
+                    if (avatarEl && persona.name) {
+                       avatarEl.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(persona.name)}&size=200&background=8b5cf6&color=fff&bold=true`;
+                    }
+                 }
+              }
+            } catch(e) {}
+            
             initSearchDropdowns();
             renderDeptOverview();
         });
@@ -1821,7 +1839,17 @@
         function renderDeptOverview() {
           const container = document.getElementById('deptOverviewGrid');
           if (!container || typeof ICEP_DEPARTMENTS === 'undefined') return;
-          const depts = ICEP_DEPARTMENTS.filter(d => d.faculty === 'Management Sciences');
+          let facultyToFilter = 'Management Sciences';
+          try {
+             if (!window.ALLOW_CROSS_TENANT_TESTING) {
+                const personaStr = localStorage.getItem('activePersona');
+                if (personaStr) {
+                   const persona = JSON.parse(personaStr);
+                   if (persona.faculty) facultyToFilter = persona.faculty;
+                }
+             }
+          } catch(e) {}
+          const depts = ICEP_DEPARTMENTS.filter(d => d.faculty === facultyToFilter);
           container.innerHTML = depts.map(d => {
             const rep = typeof ICEP_COURSE_REPS !== 'undefined'
               ? ICEP_COURSE_REPS.find(r => r.department === d.name && r.level === 400)
@@ -1865,9 +1893,22 @@
           
           let results = [];
           
+          let enforcedFaculty = '';
+          try {
+             if (!window.ALLOW_CROSS_TENANT_TESTING) {
+                const personaStr = localStorage.getItem('activePersona');
+                if (personaStr) {
+                   const persona = JSON.parse(personaStr);
+                   if (persona.faculty) enforcedFaculty = persona.faculty;
+                }
+             }
+          } catch(e) {}
+          
+          const finalFaculty = enforcedFaculty || faculty;
+          
           if (role === 'Course Rep' || role === '') {
             let reps = ICEP_COURSE_REPS.filter(r => {
-              if (faculty && r.faculty !== faculty) return false;
+              if (finalFaculty && r.faculty !== finalFaculty) return false;
               if (dept && r.department !== dept) return false;
               if (level && r.level !== Number(level)) return false;
               if (text && !r.name.toLowerCase().includes(text) && !r.matric.toLowerCase().includes(text)) return false;
@@ -1878,7 +1919,7 @@
           
           if (role === 'Student' || role === '') {
             let studs = ICEP_STUDENTS.filter(s => {
-              if (faculty && s.faculty !== faculty) return false;
+              if (finalFaculty && s.faculty !== finalFaculty) return false;
               if (dept && s.department !== dept) return false;
               if (level && s.level !== Number(level)) return false;
               if (text && !s.name.toLowerCase().includes(text) && !s.matric.toLowerCase().includes(text)) return false;

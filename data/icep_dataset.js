@@ -34140,5 +34140,28 @@ const ICEP_LECTURERS = [
   { id: 'L8', name: 'Dr. F. Eze', title: 'Dr.', department: 'Sociology', courses: ['SOC 101'] }
 ];
 
-const ALLOW_CROSS_TENANT_TESTING = false;
+try {
+  const customStudentsStr = localStorage.getItem('ICEP_STUDENTS_CUSTOM');
+  if (customStudentsStr) {
+    const customStudents = JSON.parse(customStudentsStr);
+    if (Array.isArray(customStudents)) {
+      ICEP_STUDENTS.push(...customStudents);
+    }
+  }
+} catch (e) {
+  console.error("Error loading custom students", e);
+}
 
+try {
+  const customTimetableStr = localStorage.getItem('ICEP_TIMETABLE_CUSTOM');
+  if (customTimetableStr) {
+    const customTimetable = JSON.parse(customTimetableStr);
+    if (Array.isArray(customTimetable)) {
+      ICEP_TIMETABLE.push(...customTimetable);
+    }
+  }
+} catch (e) {
+  console.error("Error loading custom timetable", e);
+}
+
+const ALLOW_CROSS_TENANT_TESTING = false;

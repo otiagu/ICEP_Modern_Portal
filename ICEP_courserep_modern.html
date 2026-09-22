@@ -1141,9 +1141,20 @@
       { id: 15, name: "Chukwudi Opara", matric: "2026/MKT/0486", avatar: "images/student_03.jpg", track: "Media Relations", cgpa: "4.38", attendance: "89%", dues: "PAID", advisor: "Dr. S. I. Ahmed" },
       { id: 16, name: "Yetunde Sowore", matric: "2026/MKT/0487", avatar: "images/student_04.jpg", track: "Strategic Mkt", cgpa: "4.70", attendance: "97%", dues: "PAID", advisor: "Prof. C. E. Chukwu" }
     ];
-    let classListStudents = typeof ICEP_STUDENTS !== 'undefined'
-      ? ICEP_STUDENTS.filter(s => s.department === 'Marketing' && s.level === 400)
-      : _classListFallback;
+    let classListStudents = typeof ICEP_STUDENTS !== 'undefined' ? [...ICEP_STUDENTS] : _classListFallback;
+    try {
+      const personaStr = localStorage.getItem('activePersona');
+      if (!window.ALLOW_CROSS_TENANT_TESTING && personaStr) {
+        const persona = JSON.parse(personaStr);
+        if (persona.department && persona.level) {
+          classListStudents = classListStudents.filter(s => s.department === persona.department && s.level === persona.level);
+        }
+      } else if (typeof ICEP_STUDENTS !== 'undefined') {
+        classListStudents = classListStudents.filter(s => s.department === 'Marketing' && s.level === 400);
+      }
+    } catch (e) {
+      console.error(e);
+    }
     if (!classListStudents || classListStudents.length === 0) classListStudents = _classListFallback;
     const DEFAULT_BROADSHEET_SCORES = [96, 89, 78, 92, 85, 74, 68, 91, 82, 95, 63, 88, 79, 97, 71, 90];
 
@@ -1631,7 +1642,36 @@
         { day: "Friday", slots: [{code: "MKT 409", title: "Strategic Marketing", time: "10:00-12:00", venue: "Hall D"}, {code: "GST 402", title: "General Studies II", time: "13:00-15:00", venue: "Lecture Hall 2"}] }
       ];
 
-      const data = (window.ICEP_TIMETABLE && window.ICEP_TIMETABLE.length > 0) ? window.ICEP_TIMETABLE : fallbackData;
+      let data = fallbackData;
+      if (window.ICEP_TIMETABLE && window.ICEP_TIMETABLE.length > 0) {
+        let rawTimetable = window.ICEP_TIMETABLE;
+        // Check if flat format
+        if (rawTimetable[0].startTime) {
+          // Filter by persona department if not cross-tenant
+          try {
+            const personaStr = localStorage.getItem('activePersona');
+            if (!window.ALLOW_CROSS_TENANT_TESTING && personaStr) {
+              const persona = JSON.parse(personaStr);
+              // A simple way to filter courses by department is to check if the lecturer is from the department, or courseCode matches dept prefix.
+              // Assuming ICEP_LECTURERS is available:
+              if (typeof window.ICEP_LECTURERS !== 'undefined' && persona.department) {
+                const deptLecturers = window.ICEP_LECTURERS.filter(l => l.department === persona.department).map(l => l.name);
+                rawTimetable = rawTimetable.filter(t => deptLecturers.includes(t.lecturer));
+              }
+            }
+          } catch(e) {}
+          
+          // Group by day
+          const grouped = {};
+          rawTimetable.forEach(t => {
+            if (!grouped[t.day]) grouped[t.day] = [];
+            grouped[t.day].push({ code: t.courseCode, title: t.courseTitle, time: `${t.startTime}-${t.endTime}`, venue: t.venue });
+          });
+          data = Object.keys(grouped).map(day => ({ day, slots: grouped[day] }));
+        } else {
+          data = rawTimetable;
+        }
+      }
 
       const now = new Date();
       const currentHours = now.getHours();
