@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ICEP - Academic Excellence Portal | Login</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <script>
+        // Dark Mode Preload
+        const storedTheme = localStorage.getItem('icep_modern_theme');
+        if (storedTheme === 'dark' || (!storedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+    </script>
+    <style>
+        :root {
+            --accent-color: #D9534F;
+            --accent-hover: #c9302c;
+            --bg-color: #f8f9fa;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --text-color: #212529;
+            --text-muted: #6c757d;
+            --border-color: #dee2e6;
+            --shadow-color: rgba(0, 0, 0, 0.08);
+            --dropdown-bg: rgba(255, 255, 255, 0.95);
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #0d1117;
+            --card-bg: rgba(22, 27, 34, 0.85);
+            --text-color: #f0f6fc;
+            --text-muted: #8b949e;
+            --border-color: #30363d;
+            --shadow-color: rgba(0, 0, 0, 0.4);
+            --dropdown-bg: rgba(22, 27, 34, 0.95);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, h5, h6, .brand-name {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* Layout */
+        .split-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .left-panel {
+            width: 40%;
+            background: linear-gradient(135deg, #1a0a0a, var(--accent-color), #401010);
+            background-size: 300% 300%;
+            animation: gradientBG 15s ease infinite;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 5px 0 20px rgba(0,0,0,0.3);
+            z-index: 2;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .right-panel {
+            width: 60%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background: var(--bg-color);
+        }
+
+        /* Left Panel Content */
+        .brand-logo {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            z-index: 10;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        
+        .brand-name {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            z-index: 10;
+            letter-spacing: 2px;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .tagline {
+            font-size: 1.25rem;
+            font-weight: 400;
+            opacity: 0.95;
+            z-index: 10;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        /* Floating Icons */
+        .floating-icon {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.15);
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .icon-1 { top: 15%; left: 20%; font-size: 3rem; animation-delay: 0s; }
+        .icon-2 { top: 75%; left: 15%; font-size: 4.5rem; animation-delay: 1.5s; }
+        .icon-3 { top: 25%; right: 20%; font-size: 2.5rem; animation-delay: 2.5s; }
+        .icon-4 { top: 60%; right: 15%; font-size: 3.5rem; animation-delay: 3.5s; }
+        .icon-5 { top: 85%; right: 35%; font-size: 3rem; animation-delay: 4.5s; }
+        .icon-6 { top: 40%; left: 10%; font-size: 2rem; animation-delay: 5.5s; }
+
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-20px) rotate(5deg); }
+            66% { transform: translateY(10px) rotate(-5deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+
+        /* Top Bar */
+        .top-bar {
+            position: absolute;
+            top: 1.5rem;
+            right: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            z-index: 20;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            background: transparent;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: color 0.3s, transform 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px var(--shadow-color);
+        }
+
+        .theme-toggle:hover {
+            color: var(--accent-color);
+            transform: scale(1.1) rotate(15deg);
+        }
+
+        /* View Other Side Dropdown */
+        .dropdown {
+            position: relative;
+        }
+        
+        .dropdown-btn {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 0.6rem 1.2rem;
+            border-radius: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px var(--shadow-color);
+        }
+        
+        .dropdown-btn:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 120%;
+            background-color: var(--dropdown-bg);
+            min-width: 220px;
+            box-shadow: 0 10px 25px var(--shadow-color);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            z-index: 100;
+            overflow: hidden;
+            backdrop-filter: blur(16px);
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .dropdown-content a, .dropdown-content span {
+            color: var(--text-color);
+            padding: 12px 20px;
+            text-decoration: none;
+            display: block;
+            font-size: 0.95rem;
+            transition: background-color 0.2s;
+        }
+        
+        .dropdown-content a:hover {
+            background-color: rgba(217, 83, 79, 0.1);
+            color: var(--accent-color);
+            padding-left: 24px;
+        }
+
+        .dropdown-content .active-portal {
+            background-color: rgba(217, 83, 79, 0.15);
+            color: var(--accent-color);
+            font-weight: 600;
+            cursor: default;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        /* Login Container */
+        .login-container-wrapper {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            margin-top: 4rem; /* offset for top bar */
+        }
+
+        .login-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            box-shadow: 0 20px 40px var(--shadow-color);
+            width: 100%;
+            max-width: 480px;
+            padding: 2.5rem;
+            animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(50px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-header h2 {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+        
+        .login-header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* Role Selector */
+        .role-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            justify-content: center;
+            background: rgba(0,0,0,0.03);
+            padding: 0.5rem;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        [data-theme="dark"] .role-selector {
+            background: rgba(255,255,255,0.02);
+        }
+
+        .role-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 0.6rem 1rem;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .role-btn:hover {
+            color: var(--text-color);
+            background: rgba(0,0,0,0.05);
+        }
+        
+        [data-theme="dark"] .role-btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .role-btn.active {
+            background: var(--accent-color);
+            color: white;
+            box-shadow: 0 4px 10px rgba(217, 83, 79, 0.3);
+        }
+
+        /* Form Fields */
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--text-color);
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.9rem 1rem 0.9rem 2.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 4px rgba(217, 83, 79, 0.15);
+            background: var(--card-bg);
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 1.2rem;
+            color: var(--text-muted);
+            transition: color 0.3s;
+            pointer-events: none;
+        }
+
+        .form-control:focus ~ .input-icon {
+            color: var(--accent-color);
+        }
+
+        .forgot-password {
+            display: block;
+            text-align: right;
+            margin-top: -0.5rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .forgot-password:hover {
+            color: var(--accent-color);
+            text-decoration: underline;
+        }
+
+        /* Submit Button */
+        .btn-submit {
+            width: 100%;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 12px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 8px 15px rgba(217, 83, 79, 0.25);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-submit:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 20px rgba(217, 83, 79, 0.35);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 8px rgba(217, 83, 79, 0.25);
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .split-layout {
+                flex-direction: column;
+            }
+            .left-panel {
+                width: 100%;
+                padding: 3rem 1rem;
+                border-radius: 0 0 30px 30px;
+                box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            }
+            .brand-logo { font-size: 3.5rem; }
+            .brand-name { font-size: 2.5rem; }
+            .right-panel {
+                width: 100%;
+            }
+            .top-bar {
+                top: 1rem;
+                right: 1rem;
+                position: absolute;
+            }
+            .login-container-wrapper {
+                margin-top: 1rem;
+                padding: 1.5rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .login-container, .auth-container, .split-layout { flex-direction: column; }
+            /* Left panel becomes a compact top banner */
+            .left-panel, .branding-panel {
+                width: 100% !important;
+                min-height: 110px !important;
+                height: auto !important;
+                padding: 16px 20px;
+                justify-content: center;
+                border-radius: 0;
+            }
+            .floating-icon, .floating-icons, .animated-icons { display: none; }
+            .brand-logo { display: none; }
+            /* Right panel fills rest of screen */
+            .right-panel, .form-panel { width: 100% !important; flex: 1; border-radius: 0; }
+            /* Top bar: move BELOW left panel by making position relative within right panel */
+            .top-bar {
+                position: relative;
+                top: auto; right: auto;
+                justify-content: flex-end;
+                padding: 12px 20px 0;
+                background: var(--bg-color);
+            }
+            /* Reduce wrapper top margin since top-bar is now in-flow */
+            .login-container-wrapper { padding: 0.5rem 1rem 1.5rem; margin-top: 0; }
+            /* Touch-friendly inputs */
+            .btn-submit, .sign-in-btn, .login-btn, button[type='submit'] { width: 100%; min-height: 44px; font-size: 15px; }
+            input[type='text'], input[type='password'], input[type='email'] { font-size: 16px; min-height: 44px; }
+            /* Role selector horizontal scroll */
+            .role-selector, .role-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; justify-content: flex-start; padding-bottom: 4px; }
+            .role-btn, .role-tab { white-space: nowrap; flex-shrink: 0; }
+            /* Dropdown: always show on tap via JS class */
+            .dropdown-content { display: none; }
+            .dropdown.open .dropdown-content { display: block; }
+        }
+        @media (max-width: 480px) {
+            .left-panel, .branding-panel { min-height: 90px !important; padding: 12px 16px; }
+            .brand-name, .logo-text { font-size: clamp(18px, 5vw, 28px); }
+            .tagline { font-size: 0.8rem; }
+            .role-selector, .role-tabs { gap: 4px; }
+            .role-btn, .role-tab { padding: 7px 10px; font-size: 11px; }
+            .login-card { padding: 20px 16px; border-radius: 20px; }
+        }
+        /* Ensure tagline never overflows at any size */
+        .tagline { word-break: break-word; overflow-wrap: anywhere; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="split-layout">
+        <!-- Left Panel -->
+        <div class="left-panel">
+            <i class="fas fa-graduation-cap floating-icon icon-1"></i>
+            <i class="fas fa-book floating-icon icon-2"></i>
+            <i class="fas fa-flask floating-icon icon-3"></i>
+            <i class="fas fa-chart-line floating-icon icon-4"></i>
+            <i class="fas fa-award floating-icon icon-5"></i>
+            <i class="fas fa-lightbulb floating-icon icon-6"></i>
+
+            <div class="brand-logo">
+                <i class="fas fa-university"></i>
+            </div>
+            <h1 class="brand-name">ICEP</h1>
+            <p class="tagline">Academic Excellence Portal</p>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="right-panel">
+            <!-- Top Bar (Theme Toggle & Dropdown) -->
+            <div class="top-bar">
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+                    <i class="fas fa-moon" id="themeIcon"></i>
+                </button>
+                
+                <div class="dropdown">
+                    <button class="dropdown-btn">
+                        <i class="fas fa-compass"></i> View Other Side <i class="fas fa-chevron-down" style="font-size: 0.8rem;"></i>
+                    </button>
+                    <div class="dropdown-content">
+                        <span class="active-portal"><i class="fas fa-sign-in-alt"></i> Login Page</span>
+                        <a href="ICEP_student_profile_modern.html"><i class="fas fa-user-graduate"></i> Student Profile</a>
+                        <a href="ICEP_courserep_modern.html"><i class="fas fa-users"></i> Course Rep Portal</a>
+                        <a href="ICEP_coordinator_modern.html"><i class="fas fa-chalkboard-teacher"></i> Coordinator Portal</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Login Container -->
+            <div class="login-container-wrapper">
+                <div class="login-card">
+                    <div class="login-header">
+                        <h2>Welcome Back</h2>
+                        <p>Sign in to access your dashboard</p>
+                    </div>
+
+                    <!-- Role Selector -->
+                    <div class="role-selector" id="roleSelector">
+                        <button class="role-btn active" data-role="student" data-placeholder="Student ID" data-icon="fa-user-graduate" data-target="ICEP_student_profile_modern.html">Student</button>
+                        <button class="role-btn" data-role="courserep" data-placeholder="Student ID / Email" data-icon="fa-user-tie" data-target="ICEP_courserep_modern.html">Course Rep</button>
+                        <button class="role-btn" data-role="coordinator" data-placeholder="Staff Email" data-icon="fa-chalkboard-teacher" data-target="ICEP_coordinator_modern.html">Coordinator</button>
+                        <button class="role-btn" data-role="director" data-placeholder="Staff Email" data-icon="fa-sitemap" data-target="ICEP_director.html">Director</button>
+                        <button class="role-btn" data-role="registrar" data-placeholder="Staff Email" data-icon="fa-building" data-target="ICEP_registrar.html">Registrar</button>
+                    </div>
+
+                    <!-- Login Form -->
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label class="form-label" id="idLabel">Identifier</label>
+                            <div class="input-wrapper">
+                                <input type="text" class="form-control" id="userId" placeholder="Student ID" required>
+                                <i class="fas fa-user-graduate input-icon" id="userIdIcon"></i>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Password</label>
+                            <div class="input-wrapper">
+                                <input type="password" class="form-control" id="password" placeholder="Enter your password" required>
+                                <i class="fas fa-lock input-icon"></i>
+                            </div>
+                        </div>
+
+                        <a href="#" class="forgot-password">Forgot Password?</a>
+
+                        <button type="submit" class="btn-submit">
+                            Sign In <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme Toggle Logic
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        
+        function updateThemeIcon() {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            themeIcon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+        }
+        
+        updateThemeIcon();
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            if (currentTheme === 'dark') {
+                document.documentElement.removeAttribute('data-theme');
+                localStorage.setItem('icep_modern_theme', 'light');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('icep_modern_theme', 'dark');
+            }
+            updateThemeIcon();
+        });
+
+        // Role Selector Logic
+        const roleBtns = document.querySelectorAll('.role-btn');
+        const userIdInput = document.getElementById('userId');
+        const userIdIcon = document.getElementById('userIdIcon');
+        const idLabel = document.getElementById('idLabel');
+        const loginForm = document.getElementById('loginForm');
+        let currentTarget = 'ICEP_student_profile_modern.html';
+
+        roleBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Update active state
+                roleBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                // Update input placeholder and icon
+                const placeholder = btn.getAttribute('data-placeholder');
+                const icon = btn.getAttribute('data-icon');
+                currentTarget = btn.getAttribute('data-target');
+
+                userIdInput.placeholder = placeholder;
+                
+                // Keep the 'Identifier' label static or you can change it too if preferred
+                if(placeholder.includes('Email')) {
+                    idLabel.innerText = "Email Address";
+                } else {
+                    idLabel.innerText = "Student ID";
+                }
+
+                userIdIcon.className = `fas ${icon} input-icon`;
+            });
+        });
+
+        // Form Submit Redirect
+        const PORTAL_ROUTES = {
+            'student': 'ICEP_student_profile_modern.html',
+            'courserep': 'ICEP_courserep_modern.html',
+            'coordinator': 'ICEP_coordinator_modern.html',
+            'director': '#',
+            'registrar': '#'
+        };
+
+        function signIn(e) {
+            e.preventDefault();
+            const role = document.querySelector('.role-btn.active')?.dataset.role || 'student';
+            const dest = PORTAL_ROUTES[role];
+            if (dest && dest !== '#') {
+                window.location.href = dest;
+            } else {
+                alert('This portal is not yet available.');
+            }
+        }
+
+        loginForm.addEventListener('submit', signIn);
+
+        // Mobile: make dropdown work on tap (CSS :hover doesn't work on touch)
+        document.querySelectorAll('.dropdown').forEach(dd => {
+            const btn = dd.querySelector('.dropdown-btn');
+            if (btn) {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    dd.classList.toggle('open');
+                });
+            }
+        });
+        // Close dropdowns when tapping outside
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.dropdown.open').forEach(d => d.classList.remove('open'));
+        });
+    </script>
+</body>
+</html>

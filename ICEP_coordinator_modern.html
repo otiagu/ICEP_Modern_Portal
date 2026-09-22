@@ -1,0 +1,1930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ICEP - Coordinator Dashboard</title>
+    <script>
+        // Prevent flash of unstyled content
+        const theme = localStorage.getItem('icep_modern_theme');
+        if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --text-color: #1e293b;
+            --text-muted: #64748b;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            
+            --primary-color: #D9534F; /* ICEP Red */
+            --primary-hover: #c9302c;
+            --coord-color: #8b5cf6; /* Coordinator Purple */
+            --coord-hover: #7c3aed;
+            
+            --indigo: #6366f1;
+            --green: #22c55e;
+            --blue: #3b82f6;
+            --red: #ef4444;
+            --amber: #f59e0b;
+            
+            --nav-bg: rgba(255, 255, 255, 0.85);
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --border-radius: 12px;
+            
+            --transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #0d1117;
+            --text-color: #c9d1d9;
+            --text-muted: #b1bac4;
+            --card-bg: #161b22;
+            --border-color: #30363d;
+            --nav-bg: rgba(22, 27, 34, 0.85);
+            
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+        }
+
+        [data-theme="dark"] h1, [data-theme="dark"] h2, [data-theme="dark"] h3, [data-theme="dark"] h4 { color: #f0f6fc; }
+        [data-theme="dark"] .card-title, [data-theme="dark"] .section-title { color: #f0f6fc; }
+        [data-theme="dark"] .text-muted, [data-theme="dark"] p { color: #b1bac4; }
+        [data-theme="dark"] .notification-content p { color: #e2e8f0; }
+        [data-theme="dark"] .stat-details h5 { color: #f0f6fc; }
+        [data-theme="dark"] .stat-details p { color: #f0f6fc; }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
+            overflow-x: hidden;
+            padding-top: 70px;
+        }
+
+        h1, h2, h3, h4, h5, h6, .number-font {
+            font-family: 'Outfit', sans-serif;
+            color: var(--text-color);
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        button {
+            font-family: inherit;
+            cursor: pointer;
+            border: none;
+            background: none;
+        }
+
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background-color: var(--nav-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            transition: var(--transition);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            color: var(--text-muted);
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--text-color);
+        }
+
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -24px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background-color: var(--coord-color);
+            border-radius: 3px 3px 0 0;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .nav-icon-btn {
+            color: var(--text-muted);
+            font-size: 1.25rem;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .nav-icon-btn:hover {
+            background-color: var(--border-color);
+            color: var(--text-color);
+        }
+
+        .badge {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--card-bg);
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* Dropdowns */
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        .dropdown-toggle:hover {
+            border-color: var(--text-muted);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            width: 280px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: var(--transition);
+            z-index: 100;
+        }
+
+        .dropdown.open .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            display: block;
+            padding: 0.75rem 1.25rem;
+            color: var(--text-color);
+            transition: var(--transition);
+            border-left: 3px solid transparent;
+        }
+
+        .dropdown-item:hover {
+            background-color: rgba(0,0,0,0.03);
+        }
+
+        [data-theme="dark"] .dropdown-item:hover {
+            background-color: rgba(255,255,255,0.05);
+        }
+
+        .dropdown-item.active-portal {
+            font-weight: 600;
+            color: var(--coord-color);
+            border-left-color: var(--coord-color);
+            background-color: rgba(139, 92, 246, 0.1);
+            pointer-events: none;
+        }
+        
+        /* Notifications Dropdown */
+        .notifications-menu {
+            width: 350px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 0;
+        }
+        
+        .notifications-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            background-color: var(--card-bg);
+            z-index: 2;
+        }
+        
+        .notifications-header h4 {
+            margin: 0;
+        }
+        
+        .mark-read-btn {
+            font-size: 0.8rem;
+            color: var(--coord-color);
+            font-weight: 500;
+        }
+        
+        .notification-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+        }
+        
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+        
+        .notification-item:hover {
+            background-color: rgba(0,0,0,0.02);
+        }
+        [data-theme="dark"] .notification-item:hover {
+            background-color: rgba(255,255,255,0.02);
+        }
+        
+        .notification-icon {
+            font-size: 1.2rem;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        
+        .notification-content p {
+            margin: 0 0 0.25rem 0;
+            font-size: 0.9rem;
+            color: var(--text-color);
+        }
+        
+        .notification-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .dismiss-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            color: var(--text-muted);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .notification-item:hover .dismiss-btn {
+            opacity: 1;
+        }
+
+        .btn-outline {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-color);
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--text-muted);
+            background-color: rgba(0,0,0,0.03);
+        }
+        
+        [data-theme="dark"] .btn-outline:hover {
+            background-color: rgba(255,255,255,0.05);
+        }
+
+        .btn-primary {
+            padding: 0.5rem 1rem;
+            background-color: var(--coord-color);
+            color: white;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--coord-hover);
+        }
+
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            padding: 5px;
+        }
+        .hamburger span {
+            width: 25px;
+            height: 2px;
+            background-color: var(--text-color);
+            transition: var(--transition);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Hero Card */
+        .hero-card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .hero-banner {
+            height: 120px;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(139, 92, 246, 0.05) 100%);
+            position: relative;
+        }
+
+        .hero-content {
+            padding: 0 2rem 2rem;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .hero-profile {
+            display: flex;
+            gap: 2rem;
+            align-items: flex-end;
+            margin-top: -60px;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-avatar-wrapper {
+            position: relative;
+            width: 140px;
+            height: 140px;
+        }
+
+        .hero-avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 4px solid var(--card-bg);
+            object-fit: cover;
+            box-shadow: var(--shadow);
+            background-color: var(--card-bg);
+        }
+
+        .status-pill {
+            position: absolute;
+            bottom: 5px;
+            right: 0;
+            background-color: var(--coord-color);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 2px solid var(--card-bg);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .hero-info {
+            padding-bottom: 0.5rem;
+            flex: 1;
+        }
+
+        .hero-name {
+            font-size: 2rem;
+            margin-bottom: 0.25rem;
+            line-height: 1.2;
+        }
+
+        .hero-title {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 1rem;
+            padding-bottom: 0.5rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .stat-chip {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: var(--transition);
+            border-left-width: 4px;
+        }
+        
+        .stat-chip:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .stat-chip.dept { border-left-color: var(--indigo); }
+        .stat-chip.staff { border-left-color: var(--green); }
+        .stat-chip.students { border-left-color: var(--blue); }
+        .stat-chip.petitions { border-left-color: var(--red); }
+
+        .stat-icon {
+            font-size: 1.5rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stat-chip.dept .stat-icon { color: var(--indigo); background-color: rgba(99, 102, 241, 0.1); }
+        .stat-chip.staff .stat-icon { color: var(--green); background-color: rgba(34, 197, 94, 0.1); }
+        .stat-chip.students .stat-icon { color: var(--blue); background-color: rgba(59, 130, 246, 0.1); }
+        .stat-chip.petitions .stat-icon { color: var(--red); background-color: rgba(239, 68, 68, 0.1); }
+
+        .stat-details h5 {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-details p {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin: 0;
+            line-height: 1;
+        }
+
+        /* Section Header */
+        .section-header {
+            margin: 3rem 0 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .section-header h2 {
+            font-size: 1.5rem;
+        }
+        
+        .section-header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* Accordions */
+        .accordion {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .accordion-header {
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+            background-color: var(--card-bg);
+            transition: var(--transition);
+        }
+
+        .accordion-header:hover {
+            background-color: rgba(0,0,0,0.01);
+        }
+        
+        [data-theme="dark"] .accordion-header:hover {
+            background-color: rgba(255,255,255,0.01);
+        }
+
+        .accordion-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .accordion-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .acc-icon-purple { color: var(--coord-color); background-color: rgba(139, 92, 246, 0.1); }
+        .acc-icon-blue { color: var(--blue); background-color: rgba(59, 130, 246, 0.1); }
+        .acc-icon-green { color: var(--green); background-color: rgba(34, 197, 94, 0.1); }
+        .acc-icon-amber { color: var(--amber); background-color: rgba(245, 158, 11, 0.1); }
+
+        .accordion-toggle {
+            color: var(--text-muted);
+            transition: transform 0.3s ease;
+        }
+
+        .accordion.open .accordion-toggle {
+            transform: rotate(180deg);
+        }
+
+        .accordion-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background-color: var(--bg-color);
+        }
+
+        .accordion.open .accordion-body {
+            max-height: 1000px; /* Arbitrary large max-height */
+            border-top: 1px solid var(--border-color);
+        }
+
+        .accordion-content {
+            padding: 1.5rem;
+        }
+
+        .accordion-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        /* Preview Cards */
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+
+        .preview-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .preview-card h4 {
+            margin-bottom: 0.5rem;
+            font-size: 1.05rem;
+        }
+        
+        .preview-card p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .preview-card p i {
+            width: 16px;
+            text-align: center;
+        }
+
+        .badge-status {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+
+        .badge-active { background-color: rgba(34, 197, 94, 0.1); color: var(--green); border: 1px solid rgba(34, 197, 94, 0.2); }
+        .badge-leave { background-color: rgba(245, 158, 11, 0.1); color: var(--amber); border: 1px solid rgba(245, 158, 11, 0.2); }
+        .badge-pending { background-color: rgba(245, 158, 11, 0.1); color: var(--amber); border: 1px solid rgba(245, 158, 11, 0.2); }
+        .badge-confirmed { background-color: rgba(34, 197, 94, 0.1); color: var(--green); border: 1px solid rgba(34, 197, 94, 0.2); }
+        .badge-urgent { background-color: rgba(239, 68, 68, 0.1); color: var(--red); border: 1px solid rgba(239, 68, 68, 0.2); }
+        .badge-normal { background-color: rgba(59, 130, 246, 0.1); color: var(--blue); border: 1px solid rgba(59, 130, 246, 0.2); }
+
+        /* Modals */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-container {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-lg);
+            transform: scale(0.95);
+            transition: var(--transition);
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-overlay.open .modal-container {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-close {
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+        
+        .modal-overlay-coord { padding-bottom: env(safe-area-inset-bottom, 16px); }
+        @media(min-width:769px) { .modal-overlay { align-items: center; } .modal-sheet, .modal-container { border-radius: 24px; max-height: 84vh; } }
+        
+        /* Table Styles */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+        
+        .data-table th, .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .data-table th {
+            font-weight: 600;
+            color: var(--text-muted);
+            background-color: var(--bg-color);
+            position: sticky;
+            top: 0;
+        }
+
+        .data-table tr:hover td {
+            background-color: rgba(0,0,0,0.01);
+        }
+        
+        [data-theme="dark"] .data-table tr:hover td {
+            background-color: rgba(255,255,255,0.01);
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            transition: var(--transition);
+        }
+        .btn-icon.approve { background-color: var(--green); }
+        .btn-icon.approve:hover { background-color: #16a34a; }
+        .btn-icon.reject { background-color: var(--red); }
+        .btn-icon.reject:hover { background-color: #dc2626; }
+
+        @media (max-width: 900px) {
+            .hero-card, .coord-hero { flex-direction: column; text-align: center; }
+            .hero-profile {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            .hero-actions {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .topnav .nav-links { display: none; }
+            .hamburger, .menu-toggle { display: flex; }
+            .search-filters-row { flex-direction: column; gap: 10px; }
+            .search-select { width: 100%; }
+            .search-text-input { width: 100%; }
+            .search-results-grid { grid-template-columns: 1fr; }
+            .modal-sheet { max-height: 92vh; border-radius: 24px 24px 0 0; }
+            .preview-grid { grid-template-columns: 1fr 1fr; }
+            .stat-chips { grid-template-columns: 1fr 1fr; }
+            .nav-links, .dropdown-toggle span, .sign-out-text {
+                display: none;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .container {
+                padding: 1rem;
+            }
+            .hero-content {
+                padding: 0 1rem 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .search-filters-row { gap: 8px; }
+            .preview-grid { grid-template-columns: 1fr; }
+            .stat-chips { grid-template-columns: 1fr 1fr; }
+            input, select { font-size: 16px; min-height: 44px; }
+            .modal-body { padding: 16px 14px; }
+            .acc-header { padding: 14px 16px; }
+            .search-result-card { flex-direction: column; gap: 10px; }
+            .search-avatar { width: 48px; height: 48px; }
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ── HIERARCHICAL SEARCH CARD ── */
+        .search-card {
+          background: var(--card-bg);
+          border: 1px solid var(--border-color);
+          border-radius: 18px;
+          padding: 24px;
+          margin-bottom: 20px;
+          box-shadow: var(--shadow);
+          transition: box-shadow 0.3s;
+        }
+        .search-card-header {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          margin-bottom: 18px;
+        }
+        .search-icon-wrap {
+          width: 46px;
+          height: 46px;
+          border-radius: 14px;
+          background: rgba(139,92,246,0.12);
+          border: 1px solid rgba(139,92,246,0.3);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 18px;
+          color: var(--coord-color);
+          flex-shrink: 0;
+        }
+        .search-card-title {
+          font-family: 'Outfit', sans-serif;
+          font-size: 17px;
+          font-weight: 800;
+          color: var(--text-color);
+          margin: 0;
+        }
+        .search-card-sub {
+          font-size: 12.5px;
+          color: var(--text-muted);
+          margin: 2px 0 0;
+        }
+        .search-filters-row {
+          display: flex;
+          gap: 10px;
+          flex-wrap: wrap;
+          align-items: center;
+        }
+        .search-select {
+          padding: 9px 14px;
+          border: 1.5px solid var(--border-color);
+          border-radius: 14px;
+          background: var(--card-bg);
+          color: var(--text-color);
+          font-size: 13px;
+          font-weight: 600;
+          font-family: 'Inter', sans-serif;
+          cursor: pointer;
+          transition: border-color 0.25s;
+          min-width: 160px;
+        }
+        .search-select:focus { outline: none; border-color: var(--coord-color); }
+        .search-text-input {
+          flex: 1;
+          min-width: 180px;
+          padding: 9px 16px;
+          border: 1.5px solid var(--border-color);
+          border-radius: 14px;
+          background: var(--card-bg);
+          color: var(--text-color);
+          font-size: 13px;
+          font-weight: 500;
+          font-family: 'Inter', sans-serif;
+          transition: border-color 0.25s;
+        }
+        .search-text-input:focus { outline: none; border-color: var(--coord-color); }
+        .search-clear-btn {
+          padding: 9px 18px;
+          border: 1.5px solid var(--border-color);
+          border-radius: 14px;
+          background: var(--card-bg);
+          color: var(--text-muted);
+          font-size: 12.5px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.25s;
+          white-space: nowrap;
+          display: flex;
+          align-items: center;
+          gap: 7px;
+        }
+        .search-clear-btn:hover { border-color: #ef4444; color: #ef4444; }
+        .search-results-header {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 14px;
+        }
+        .search-count-badge {
+          background: rgba(139,92,246,0.15);
+          color: var(--coord-color);
+          font-size: 12px;
+          font-weight: 800;
+          padding: 4px 12px;
+          border-radius: 12px;
+        }
+        .search-results-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(240px,1fr));
+          gap: 14px;
+        }
+        .search-result-card {
+          background: var(--card-bg);
+          border: 1px solid var(--border-color);
+          border-radius: 14px;
+          padding: 16px;
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          transition: all 0.25s;
+        }
+        .search-result-card:hover {
+          border-color: var(--coord-color);
+          box-shadow: 0 4px 14px rgba(139,92,246,0.12);
+          transform: translateY(-2px);
+        }
+        .search-avatar {
+          width: 48px;
+          height: 48px;
+          border-radius: 50%;
+          object-fit: cover;
+          flex-shrink: 0;
+          border: 2px solid var(--border-color);
+        }
+        .search-result-info { flex: 1; min-width: 0; }
+        .search-result-name {
+          font-size: 13.5px;
+          font-weight: 800;
+          color: var(--text-color);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .search-result-matric {
+          font-size: 11.5px;
+          font-weight: 700;
+          color: var(--coord-color);
+        }
+        .search-result-meta {
+          font-size: 11px;
+          color: var(--text-muted);
+          margin-top: 2px;
+        }
+        .search-role-badge {
+          font-size: 9.5px;
+          font-weight: 900;
+          padding: 3px 9px;
+          border-radius: 10px;
+          white-space: nowrap;
+          flex-shrink: 0;
+        }
+        .badge-rep { background: rgba(139,92,246,0.15); color: var(--coord-color); }
+        .badge-student { background: rgba(217,83,79,0.12); color: #D9534F; }
+        @media(max-width:600px){
+          .search-filters-row { flex-direction: column; }
+          .search-select, .search-text-input { width: 100%; min-width: unset; }
+        }
+
+        /* ── MOBILE SLIDE-IN MENU ── */
+        .mob-backdrop{position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .35s;}
+        .mob-backdrop.open{opacity:1;pointer-events:auto;}
+        .mob-menu{position:fixed;top:0;right:0;bottom:0;z-index:9999;width:min(300px,82vw);background:var(--card-bg);backdrop-filter:blur(28px);border-left:1.5px solid var(--border-color);border-radius:24px 0 0 24px;box-shadow:-20px 0 60px rgba(0,0,0,0.18);display:flex;flex-direction:column;gap:8px;padding:24px 18px;transform:translateX(105%);transition:transform .35s cubic-bezier(0.16,1,0.3,1);overflow-y:auto;}
+        .mob-menu.open{transform:translateX(0);}
+        .mob-menu-header{display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;margin-bottom:4px;border-bottom:1px solid var(--border-color);}
+        .mob-menu-title{font-family:'Outfit',sans-serif;font-size:18px;font-weight:900;color:var(--text-color);display:flex;align-items:center;gap:10px;}
+        .mob-close-btn{background:rgba(15,23,42,0.06);border:1px solid var(--border-color);color:var(--text-color);width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;transition:all .25s;}
+        .mob-close-btn:hover{background:var(--coord-color);color:#fff;border-color:var(--coord-color);}
+        .mob-nav-link{padding:13px 16px;font-size:14px;font-weight:700;color:var(--text-color);text-decoration:none;border:1px solid var(--border-color);border-radius:14px;display:flex;align-items:center;justify-content:space-between;transition:all .25s;background:none;width:100%;text-align:left;cursor:pointer;font-family:'Inter',sans-serif;}
+        .mob-nav-link:hover{background:rgba(139,92,246,0.08);border-color:var(--coord-color);color:var(--coord-color);}
+        .mob-nav-link.active{background:rgba(139,92,246,0.08);border-color:var(--coord-color);color:var(--coord-color);}
+        .mob-section-label{padding:6px 16px;font-size:10.5px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+        .mob-divider{height:1px;background:var(--border-color);margin:4px 0;}
+        /* Table scroll on mobile */
+        @media (max-width:640px){
+          .table-container,.table-responsive{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+          table{min-width:520px;}
+          .dropdown-menu.notifications-menu{width:min(340px,92vw);right:-12px;}
+        }
+    </style>
+    <script src="data/icep_dataset.js"></script>
+</head>
+<body>
+
+    <!-- MOBILE BACKDROP -->
+    <div class="mob-backdrop" id="mobBackdrop" onclick="closeMobileMenu()"></div>
+
+    <!-- MOBILE SLIDE-IN MENU -->
+    <div class="mob-menu" id="mobMenu">
+      <div class="mob-menu-header">
+        <div class="mob-menu-title"><i class="fas fa-graduation-cap" style="color:var(--coord-color)"></i> ICEP</div>
+        <button class="mob-close-btn" onclick="closeMobileMenu()"><i class="fas fa-times"></i></button>
+      </div>
+      <a href="#" class="mob-nav-link active"><span><i class="fas fa-th-large" style="margin-right:10px"></i>Dashboard</span><i class="fas fa-chevron-right"></i></a>
+      <a href="#" class="mob-nav-link"><span><i class="fas fa-building-columns" style="margin-right:10px"></i>Departments</span><i class="fas fa-chevron-right"></i></a>
+      <a href="#" class="mob-nav-link"><span><i class="fas fa-person-chalkboard" style="margin-right:10px"></i>Staff</span><i class="fas fa-chevron-right"></i></a>
+      <a href="#" class="mob-nav-link"><span><i class="fas fa-clipboard-check" style="margin-right:10px"></i>Exam Board</span><i class="fas fa-chevron-right"></i></a>
+      <a href="#" class="mob-nav-link"><span><i class="fas fa-gavel" style="margin-right:10px"></i>Petitions</span><i class="fas fa-chevron-right"></i></a>
+      <div class="mob-divider"></div>
+      <div class="mob-section-label">Other Portals</div>
+      <a href="ICEP_login_modern.html" class="mob-nav-link"><span><i class="fas fa-right-to-bracket" style="margin-right:10px;color:#6366f1"></i>Login Page</span><i class="fas fa-chevron-right"></i></a>
+      <a href="ICEP_student_profile_modern.html" class="mob-nav-link"><span><i class="fas fa-user-graduate" style="margin-right:10px;color:#D9534F"></i>Student Profile</span><i class="fas fa-chevron-right"></i></a>
+      <a href="ICEP_courserep_modern.html" class="mob-nav-link"><span><i class="fas fa-users-rectangle" style="margin-right:10px;color:#10b981"></i>Course Rep Portal</span><i class="fas fa-chevron-right"></i></a>
+      <div class="mob-divider"></div>
+      <button class="mob-nav-link" onclick="toggleTheme();closeMobileMenu()"><span><i class="fas fa-moon" style="margin-right:10px;color:var(--coord-color)" id="mobThemeIcon"></i>Toggle Dark Mode</span><i class="fas fa-chevron-right"></i></button>
+      <a href="#" class="mob-nav-link" style="margin-top:auto;color:#ef4444;border-color:rgba(239,68,68,0.25);"><span><i class="fas fa-right-from-bracket" style="margin-right:10px"></i>Sign Out</span><i class="fas fa-chevron-right"></i></a>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="#" class="logo">
+                <i class="fa-solid fa-graduation-cap"></i> ICEP
+            </a>
+            <div class="nav-links">
+                <a href="#" class="nav-link active">Dashboard</a>
+                <a href="#" class="nav-link">Departments</a>
+                <a href="#" class="nav-link">Staff</a>
+                <a href="#" class="nav-link">Exam Board</a>
+                <a href="#" class="nav-link">Petitions</a>
+            </div>
+        </div>
+
+        <div class="nav-right">
+            <!-- View Other Side Dropdown -->
+            <div class="dropdown" id="portalDropdown">
+                <button class="dropdown-toggle" onclick="toggleDropdown('portalDropdown')">
+                    <i class="fa-solid fa-layer-group"></i> <span>Coordinator Portal</span>
+                </button>
+                <div class="dropdown-menu">
+                    <a href="ICEP_login_modern.html" class="dropdown-item">Login Page</a>
+                    <a href="ICEP_student_profile_modern.html" class="dropdown-item">Student Profile</a>
+                    <a href="ICEP_courserep_modern.html" class="dropdown-item">Course Rep Portal</a>
+                    <a href="ICEP_coordinator_modern.html" class="dropdown-item active-portal">Coordinator Portal</a>
+                </div>
+            </div>
+
+            <button class="nav-icon-btn" onclick="toggleTheme()" aria-label="Toggle Dark Mode">
+                <i class="fa-solid fa-moon" id="themeIcon"></i>
+            </button>
+
+            <!-- Notification Bell -->
+            <div class="dropdown" id="notificationDropdown">
+                <button class="nav-icon-btn" onclick="toggleDropdown('notificationDropdown')">
+                    <i class="fa-solid fa-bell"></i>
+                    <span class="badge" id="notifBadge">6</span>
+                </button>
+                <div class="dropdown-menu notifications-menu">
+                    <div class="notifications-header">
+                        <h4>Notifications</h4>
+                        <button class="mark-read-btn" onclick="markAllRead()">Mark all read</button>
+                    </div>
+                    
+                    <div class="notification-item">
+                        <div class="notification-icon" style="background-color: rgba(239, 68, 68, 0.1); color: var(--red);">
+                            📋
+                        </div>
+                        <div class="notification-content">
+                            <p><strong>7 student petitions</strong> awaiting review — 2 are urgent.</p>
+                            <span class="notification-time">10 mins ago</span>
+                        </div>
+                        <button class="dismiss-btn" onclick="dismissNotif(this)"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+
+                    <div class="notification-item">
+                        <div class="notification-icon" style="background-color: rgba(59, 130, 246, 0.1); color: var(--blue);">
+                            📅
+                        </div>
+                        <div class="notification-content">
+                            <p><strong>Faculty board meeting:</strong> Thursday October 1, 10am.</p>
+                            <span class="notification-time">1 hour ago</span>
+                        </div>
+                        <button class="dismiss-btn" onclick="dismissNotif(this)"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    
+                    <div class="notification-item">
+                        <div class="notification-icon" style="background-color: rgba(34, 197, 94, 0.1); color: var(--green);">
+                            👨‍🏫
+                        </div>
+                        <div class="notification-content">
+                            <p><strong>Dr. Adunola Bello</strong> submitted a leave request for October.</p>
+                            <span class="notification-time">2 hours ago</span>
+                        </div>
+                        <button class="dismiss-btn" onclick="dismissNotif(this)"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    
+                    <div class="notification-item">
+                        <div class="notification-icon" style="background-color: rgba(245, 158, 11, 0.1); color: var(--amber);">
+                            📊
+                        </div>
+                        <div class="notification-content">
+                            <p><strong>End-of-semester</strong> grade submissions deadline in 10 days.</p>
+                            <span class="notification-time">Yesterday</span>
+                        </div>
+                        <button class="dismiss-btn" onclick="dismissNotif(this)"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    
+                    <div class="notification-item">
+                        <div class="notification-icon" style="background-color: rgba(139, 92, 246, 0.1); color: var(--coord-color);">
+                            🎓
+                        </div>
+                        <div class="notification-content">
+                            <p><strong>2 students flagged</strong> for academic probation review.</p>
+                            <span class="notification-time">Yesterday</span>
+                        </div>
+                        <button class="dismiss-btn" onclick="dismissNotif(this)"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    
+                    <div class="notification-item">
+                        <div class="notification-icon" style="background-color: rgba(99, 102, 241, 0.1); color: var(--indigo);">
+                            📢
+                        </div>
+                        <div class="notification-content">
+                            <p><strong>New directive</strong> from the Dean's office regarding exam protocols.</p>
+                            <span class="notification-time">2 days ago</span>
+                        </div>
+                        <button class="dismiss-btn" onclick="dismissNotif(this)"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-outline">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> <span class="sign-out-text">Sign Out</span>
+            </button>
+            
+            <div class="hamburger" onclick="toggleMobileMenu()">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Hero Card -->
+        <div class="hero-card">
+            <div class="hero-banner"></div>
+            <div class="hero-content">
+                <div class="hero-profile">
+                    <div class="hero-avatar-wrapper">
+                        <img src="https://ui-avatars.com/api/?name=Dr+Emeka+Nwosu&size=200&background=8b5cf6&color=fff&bold=true" alt="Dr. Emeka Nwosu" class="hero-avatar">
+                        <span class="status-pill">Active — Coordinator</span>
+                    </div>
+                    <div class="hero-info">
+                        <h1 class="hero-name">Dr. Emeka Nwosu</h1>
+                        <p class="hero-title">Departmental Coordinator | Faculty of Management Sciences</p>
+                    </div>
+                    <div class="hero-actions">
+                        <button class="btn-outline">Manage Staff</button>
+                        <button class="btn-outline">Review Petitions</button>
+                        <button class="btn-primary">View Exam Board</button>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-chip dept">
+                        <div class="stat-icon"><i class="fa-solid fa-building-columns"></i></div>
+                        <div class="stat-details">
+                            <h5>Departments Supervised</h5>
+                            <p class="number-font">4</p>
+                        </div>
+                    </div>
+                    <div class="stat-chip staff">
+                        <div class="stat-icon"><i class="fa-solid fa-person-chalkboard"></i></div>
+                        <div class="stat-details">
+                            <h5>Academic Staff</h5>
+                            <p class="number-font">38</p>
+                        </div>
+                    </div>
+                    <div class="stat-chip students">
+                        <div class="stat-icon"><i class="fa-solid fa-user-graduate"></i></div>
+                        <div class="stat-details">
+                            <h5>Active Students</h5>
+                            <p class="number-font">1,204</p>
+                        </div>
+                    </div>
+                    <div class="stat-chip petitions">
+                        <div class="stat-icon"><i class="fa-solid fa-gavel"></i></div>
+                        <div class="stat-details">
+                            <h5>Pending Petitions</h5>
+                            <p class="number-font">7</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-header">
+            <h2>Departmental Administration</h2>
+            <p>Staff, Exams & Academic Governance</p>
+        </div>
+
+        <!-- HIERARCHICAL SEARCH CARD -->
+        <div class="search-card" id="searchCard">
+          <div class="search-card-header">
+            <div class="search-icon-wrap"><i class="fa-solid fa-magnifying-glass"></i></div>
+            <div>
+              <h3 class="search-card-title">Student & Course Rep Search</h3>
+              <p class="search-card-sub">Filter by department, level, or search by name / matric</p>
+            </div>
+          </div>
+          <!-- Cascade Filters -->
+          <div class="search-filters-row">
+            <select id="filterFaculty" onchange="applyHierarchicalSearch()" class="search-select">
+              <option value="">All Faculties</option>
+              <option value="Management Sciences">Management Sciences</option>
+              <option value="Social Sciences">Social Sciences</option>
+              <option value="Humanities">Humanities</option>
+              <option value="Education">Education</option>
+              <option value="Physical Science">Physical Science</option>
+            </select>
+            <select id="filterDept" onchange="applyHierarchicalSearch()" class="search-select">
+              <option value="">All Departments</option>
+            </select>
+            <select id="filterLevel" onchange="applyHierarchicalSearch()" class="search-select">
+              <option value="">All Levels</option>
+              <option value="100">100 Level</option>
+              <option value="200">200 Level</option>
+              <option value="300">300 Level</option>
+              <option value="400">400 Level</option>
+            </select>
+            <select id="filterRole" onchange="applyHierarchicalSearch()" class="search-select">
+              <option value="">All Roles</option>
+              <option value="Course Rep">Course Representatives</option>
+              <option value="Student">Students</option>
+            </select>
+            <input type="text" id="searchTextInput" class="search-text-input" placeholder="Search name or matric..." oninput="applyHierarchicalSearch()">
+            <button onclick="clearSearch()" class="search-clear-btn"><i class="fa-solid fa-xmark"></i> Clear</button>
+          </div>
+          <!-- Results -->
+          <div id="searchResultsArea" style="display:none;margin-top:16px">
+            <div class="search-results-header">
+              <span id="searchResultCount" class="search-count-badge">0 results</span>
+              <span style="font-size:12px;color:var(--text-muted)">Showing filtered records</span>
+            </div>
+            <div class="search-results-grid" id="searchResultsGrid"></div>
+          </div>
+          <div id="searchEmptyState" style="display:none;text-align:center;padding:30px;color:var(--text-muted)">
+            <i class="fa-solid fa-user-slash" style="font-size:28px;margin-bottom:10px;display:block"></i>
+            No records match your search.
+          </div>
+        </div>
+
+        <!-- Accordions -->
+        
+        <!-- 1. Department Overview -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <div class="accordion-title">
+                    <div class="accordion-icon acc-icon-purple"><i class="fa-solid fa-building-columns"></i></div>
+                    Department Overview
+                </div>
+                <div class="accordion-toggle"><i class="fa-solid fa-chevron-down"></i></div>
+            </div>
+            <div class="accordion-body">
+                <div class="accordion-content">
+                    <div class="preview-grid" id="deptOverviewGrid">
+                    </div>
+                </div>
+                <div class="accordion-footer">
+                    <button class="btn-primary" onclick="openModal('deptModal')">View Full Details</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Academic Staff Directory -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <div class="accordion-title">
+                    <div class="accordion-icon acc-icon-blue"><i class="fa-solid fa-person-chalkboard"></i></div>
+                    Academic Staff Directory
+                </div>
+                <div class="accordion-toggle"><i class="fa-solid fa-chevron-down"></i></div>
+            </div>
+            <div class="accordion-body">
+                <div class="accordion-content">
+                    <div class="preview-grid">
+                        <div class="preview-card">
+                            <h4>Dr. Adunola Bello</h4>
+                            <p><i class="fa-solid fa-briefcase"></i> Senior Lecturer (Accounting)</p>
+                            <p><i class="fa-solid fa-book"></i> Courses: ACC301, ACC402</p>
+                            <span class="badge-status badge-active">Active</span>
+                        </div>
+                        <div class="preview-card">
+                            <h4>Prof. Kingsley Eze</h4>
+                            <p><i class="fa-solid fa-briefcase"></i> Professor (Finance)</p>
+                            <p><i class="fa-solid fa-book"></i> Courses: FIN401, FIN405</p>
+                            <span class="badge-status badge-active">Active</span>
+                        </div>
+                        <div class="preview-card">
+                            <h4>Mr. Samuel Ojo</h4>
+                            <p><i class="fa-solid fa-briefcase"></i> Lecturer I (Marketing)</p>
+                            <p><i class="fa-solid fa-book"></i> Courses: MKT201</p>
+                            <span class="badge-status badge-leave">On Leave</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-footer">
+                    <button class="btn-primary" onclick="openModal('staffModal')">View Staff Directory</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Exam Board & Timetable -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <div class="accordion-title">
+                    <div class="accordion-icon acc-icon-green"><i class="fa-solid fa-calendar-days"></i></div>
+                    Exam Board & Timetable
+                </div>
+                <div class="accordion-toggle"><i class="fa-solid fa-chevron-down"></i></div>
+            </div>
+            <div class="accordion-body">
+                <div class="accordion-content">
+                    <div class="preview-grid">
+                        <div class="preview-card">
+                            <h4>BUS301: Business Law</h4>
+                            <p><i class="fa-regular fa-clock"></i> Oct 12, 2026 | 09:00 AM</p>
+                            <p><i class="fa-solid fa-location-dot"></i> Main Auditorium</p>
+                            <span class="badge-status badge-confirmed">Confirmed</span>
+                        </div>
+                        <div class="preview-card">
+                            <h4>ACC402: Auditing</h4>
+                            <p><i class="fa-regular fa-clock"></i> Oct 14, 2026 | 12:00 PM</p>
+                            <p><i class="fa-solid fa-location-dot"></i> Hall C</p>
+                            <span class="badge-status badge-confirmed">Confirmed</span>
+                        </div>
+                        <div class="preview-card">
+                            <h4>FIN401: Corp. Finance</h4>
+                            <p><i class="fa-regular fa-clock"></i> Oct 16, 2026 | 02:00 PM</p>
+                            <p><i class="fa-solid fa-location-dot"></i> TBD</p>
+                            <span class="badge-status badge-pending">Pending Venue</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-footer">
+                    <button class="btn-primary" onclick="openModal('examModal')">View Exam Schedule</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Student Petitions -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <div class="accordion-title">
+                    <div class="accordion-icon acc-icon-amber"><i class="fa-solid fa-gavel"></i></div>
+                    Student Petitions
+                </div>
+                <div class="accordion-toggle"><i class="fa-solid fa-chevron-down"></i></div>
+            </div>
+            <div class="accordion-body">
+                <div class="accordion-content">
+                    <div class="preview-grid">
+                        <div class="preview-card">
+                            <h4>Johnson, Sarah</h4>
+                            <p>Matric: 19/MAC/023</p>
+                            <p>Type: Grade Appeal (BUS301)</p>
+                            <span class="badge-status badge-urgent">Urgent</span>
+                        </div>
+                        <div class="preview-card">
+                            <h4>Obi, Michael</h4>
+                            <p>Matric: 20/ACC/112</p>
+                            <p>Type: Exam Deferral</p>
+                            <span class="badge-status badge-normal">Normal</span>
+                        </div>
+                        <div class="preview-card">
+                            <h4>Aliyu, Fatima</h4>
+                            <p>Matric: 21/FIN/005</p>
+                            <p>Type: Special Consideration</p>
+                            <span class="badge-status badge-urgent">Urgent</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-footer">
+                    <button class="btn-primary" onclick="openModal('petitionModal')">Review All Petitions</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODALS -->
+    
+    <!-- Department Modal -->
+    <div class="modal-overlay" id="deptModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Department Full Listing</h3>
+                <button class="modal-close" onclick="closeModal('deptModal')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Department</th>
+                            <th>HOD</th>
+                            <th>Course Rep (Lead)</th>
+                            <th>Students</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Business Administration</td>
+                            <td>Dr. O. Adebayo</td>
+                            <td>Sarah Johnson</td>
+                            <td>450</td>
+                        </tr>
+                        <tr>
+                            <td>Accounting</td>
+                            <td>Prof. K. Eze</td>
+                            <td>Michael Obi</td>
+                            <td>320</td>
+                        </tr>
+                        <tr>
+                            <td>Banking & Finance</td>
+                            <td>Dr. N. Peters</td>
+                            <td>Amaka Nnamdi</td>
+                            <td>210</td>
+                        </tr>
+                        <tr>
+                            <td>Marketing</td>
+                            <td>Dr. S. Kalu</td>
+                            <td>Daniel Craig</td>
+                            <td>224</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Staff Modal -->
+    <div class="modal-overlay" id="staffModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Academic Staff Directory</h3>
+                <button class="modal-close" onclick="closeModal('staffModal')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Role</th>
+                            <th>Department</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Dr. Adunola Bello</td>
+                            <td>Senior Lecturer</td>
+                            <td>Accounting</td>
+                            <td><span class="badge-status badge-active">Active</span></td>
+                        </tr>
+                        <tr>
+                            <td>Prof. Kingsley Eze</td>
+                            <td>Professor</td>
+                            <td>Banking & Finance</td>
+                            <td><span class="badge-status badge-active">Active</span></td>
+                        </tr>
+                        <tr>
+                            <td>Mr. Samuel Ojo</td>
+                            <td>Lecturer I</td>
+                            <td>Marketing</td>
+                            <td><span class="badge-status badge-leave">On Leave</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Exam Modal -->
+    <div class="modal-overlay" id="examModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Exam Schedule</h3>
+                <button class="modal-close" onclick="closeModal('examModal')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Course Code</th>
+                            <th>Date & Time</th>
+                            <th>Venue</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>BUS301</td>
+                            <td>Oct 12, 2026 | 09:00 AM</td>
+                            <td>Main Auditorium</td>
+                            <td><span class="badge-status badge-confirmed">Confirmed</span></td>
+                        </tr>
+                        <tr>
+                            <td>ACC402</td>
+                            <td>Oct 14, 2026 | 12:00 PM</td>
+                            <td>Hall C</td>
+                            <td><span class="badge-status badge-confirmed">Confirmed</span></td>
+                        </tr>
+                        <tr>
+                            <td>FIN401</td>
+                            <td>Oct 16, 2026 | 02:00 PM</td>
+                            <td>TBD</td>
+                            <td><span class="badge-status badge-pending">Pending</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Petition Modal -->
+    <div class="modal-overlay" id="petitionModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Student Petitions</h3>
+                <button class="modal-close" onclick="closeModal('petitionModal')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Type</th>
+                            <th>Urgency</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Sarah Johnson (19/MAC/023)</td>
+                            <td>Grade Appeal</td>
+                            <td><span class="badge-status badge-urgent">Urgent</span></td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="btn-icon approve" title="Approve"><i class="fa-solid fa-check"></i></button>
+                                    <button class="btn-icon reject" title="Reject"><i class="fa-solid fa-xmark"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Michael Obi (20/ACC/112)</td>
+                            <td>Exam Deferral</td>
+                            <td><span class="badge-status badge-normal">Normal</span></td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="btn-icon approve" title="Approve"><i class="fa-solid fa-check"></i></button>
+                                    <button class="btn-icon reject" title="Reject"><i class="fa-solid fa-xmark"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Fatima Aliyu (21/FIN/005)</td>
+                            <td>Special Consideration</td>
+                            <td><span class="badge-status badge-urgent">Urgent</span></td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="btn-icon approve" title="Approve"><i class="fa-solid fa-check"></i></button>
+                                    <button class="btn-icon reject" title="Reject"><i class="fa-solid fa-xmark"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme Toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const icon = document.getElementById('themeIcon');
+            const isDark = html.getAttribute('data-theme') === 'dark';
+            
+            if (isDark) {
+                html.removeAttribute('data-theme');
+                localStorage.setItem('icep_modern_theme', 'light');
+                icon.classList.replace('fa-sun', 'fa-moon');
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                localStorage.setItem('icep_modern_theme', 'dark');
+                icon.classList.replace('fa-moon', 'fa-sun');
+            }
+        }
+
+        // Mobile Menu
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobMenu');
+            const backdrop = document.getElementById('mobBackdrop');
+            if (menu.classList.contains('open')) {
+                closeMobileMenu();
+            } else {
+                menu.classList.add('open');
+                backdrop.classList.add('open');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+        function closeMobileMenu() {
+            document.getElementById('mobMenu').classList.remove('open');
+            document.getElementById('mobBackdrop').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        // Initialize Theme Icon
+        window.addEventListener('DOMContentLoaded', () => {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const icon = document.getElementById('themeIcon');
+            if (isDark) {
+                icon.classList.replace('fa-moon', 'fa-sun');
+            }
+            initSearchDropdowns();
+            renderDeptOverview();
+        });
+
+        // Dropdowns
+        function toggleDropdown(id) {
+            const dropdown = document.getElementById(id);
+            const isOpen = dropdown.classList.contains('open');
+            
+            // Close all dropdowns
+            document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open'));
+            
+            if (!isOpen) {
+                dropdown.classList.add('open');
+            }
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.dropdown')) {
+                document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open'));
+            }
+        });
+
+        // Notifications
+        let notifCount = 6;
+        function dismissNotif(btn) {
+            const item = btn.closest('.notification-item');
+            item.style.opacity = '0';
+            setTimeout(() => {
+                item.remove();
+                notifCount--;
+                updateBadge();
+            }, 300);
+        }
+
+        function markAllRead() {
+            const items = document.querySelectorAll('.notification-item');
+            items.forEach(item => {
+                item.style.opacity = '0';
+                setTimeout(() => item.remove(), 300);
+            });
+            notifCount = 0;
+            setTimeout(updateBadge, 300);
+        }
+
+        function updateBadge() {
+            const badge = document.getElementById('notifBadge');
+            if (notifCount > 0) {
+                badge.textContent = notifCount > 9 ? '9+' : notifCount;
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        // Accordions
+        function toggleAccordion(header) {
+            const accordion = header.closest('.accordion');
+            const isOpen = accordion.classList.contains('open');
+            
+            // Optional: Close other accordions
+            // document.querySelectorAll('.accordion').forEach(a => a.classList.remove('open'));
+            
+            if (!isOpen) {
+                accordion.classList.add('open');
+            } else {
+                accordion.classList.remove('open');
+            }
+        }
+
+        // Modals
+        function openModal(id) {
+            document.getElementById(id).classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        // Close modal on outside click
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    overlay.classList.remove('open');
+                    document.body.style.overflow = '';
+                }
+            });
+        });
+
+        function initSearchDropdowns() {
+          const deptSel = document.getElementById('filterDept');
+          if (!deptSel || typeof ICEP_DEPARTMENTS === 'undefined') return;
+          deptSel.innerHTML = '<option value="">All Departments</option>';
+          ICEP_DEPARTMENTS.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d.name;
+            opt.textContent = d.name + ' (' + d.faculty + ')';
+            deptSel.appendChild(opt);
+          });
+          const levelSel = document.getElementById('filterLevel');
+          if (levelSel && !levelSel.querySelector('[value="500"]')) {
+            const opt500 = document.createElement('option');
+            opt500.value = '500';
+            opt500.textContent = '500 Level';
+            levelSel.appendChild(opt500);
+          }
+        }
+
+        document.getElementById('filterFaculty')?.addEventListener('change', function() {
+          const fac = this.value;
+          const deptSel = document.getElementById('filterDept');
+          deptSel.innerHTML = '<option value="">All Departments</option>';
+          const depts = fac ? ICEP_DEPARTMENTS.filter(d => d.faculty === fac) : ICEP_DEPARTMENTS;
+          depts.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d.name; opt.textContent = d.name;
+            deptSel.appendChild(opt);
+          });
+          applyHierarchicalSearch();
+        });
+
+        function renderDeptOverview() {
+          const container = document.getElementById('deptOverviewGrid');
+          if (!container || typeof ICEP_DEPARTMENTS === 'undefined') return;
+          const depts = ICEP_DEPARTMENTS.filter(d => d.faculty === 'Management Sciences');
+          container.innerHTML = depts.map(d => {
+            const rep = typeof ICEP_COURSE_REPS !== 'undefined'
+              ? ICEP_COURSE_REPS.find(r => r.department === d.name && r.level === 400)
+              : null;
+            return `<div class="dept-card preview-card">
+              <div class="dept-icon"><i class="fas fa-building-columns"></i></div>
+              <div class="dept-info">
+                <h4>${d.name}</h4>
+                <p>${d.student_count} students · ${d.levels_offered.length * 2} semesters</p>
+                <p style="margin-top:4px;font-size:11px">HOD: ${d.hod}</p>
+                ${rep ? `<p style="font-size:11px;color:var(--coord-color)">400L Rep: ${rep.name}</p>` : ''}
+              </div>
+            </div>`;
+          }).join('');
+        }
+
+        function applyHierarchicalSearch() {
+          const faculty = document.getElementById('filterFaculty') ? document.getElementById('filterFaculty').value : '';
+          const dept = document.getElementById('filterDept').value;
+          const level = document.getElementById('filterLevel').value;
+          const role = document.getElementById('filterRole').value;
+          const text = document.getElementById('searchTextInput').value.toLowerCase().trim();
+          
+          const hasFilters = dept || level || role || text || faculty;
+          const resultsArea = document.getElementById('searchResultsArea');
+          const emptyState = document.getElementById('searchEmptyState');
+          const grid = document.getElementById('searchResultsGrid');
+          const countBadge = document.getElementById('searchResultCount');
+          
+          if (!hasFilters) {
+            resultsArea.style.display = 'none';
+            emptyState.style.display = 'none';
+            return;
+          }
+          
+          if (typeof ICEP_STUDENTS === 'undefined' || typeof ICEP_COURSE_REPS === 'undefined') {
+            emptyState.style.display = 'block';
+            emptyState.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="font-size:28px;margin-bottom:10px;display:block"></i>Dataset not loaded. Check icep_dataset.js.';
+            return;
+          }
+          
+          let results = [];
+          
+          if (role === 'Course Rep' || role === '') {
+            let reps = ICEP_COURSE_REPS.filter(r => {
+              if (faculty && r.faculty !== faculty) return false;
+              if (dept && r.department !== dept) return false;
+              if (level && r.level !== Number(level)) return false;
+              if (text && !r.name.toLowerCase().includes(text) && !r.matric.toLowerCase().includes(text)) return false;
+              return true;
+            }).map(r => ({...r, _role: 'Course Rep'}));
+            results = results.concat(reps);
+          }
+          
+          if (role === 'Student' || role === '') {
+            let studs = ICEP_STUDENTS.filter(s => {
+              if (faculty && s.faculty !== faculty) return false;
+              if (dept && s.department !== dept) return false;
+              if (level && s.level !== Number(level)) return false;
+              if (text && !s.name.toLowerCase().includes(text) && !s.matric.toLowerCase().includes(text)) return false;
+              return true;
+            }).map(s => ({...s, _role: 'Student'}));
+            results = results.concat(studs);
+          }
+          
+          const total = results.length;
+          const display = results.slice(0, 50);
+          
+          if (display.length === 0) {
+            resultsArea.style.display = 'none';
+            emptyState.style.display = 'block';
+            emptyState.innerHTML = '<i class="fa-solid fa-user-slash" style="font-size:28px;margin-bottom:10px;display:block"></i>No records match your search.';
+            return;
+          }
+          
+          emptyState.style.display = 'none';
+          resultsArea.style.display = 'block';
+          countBadge.textContent = `${total} result${total !== 1 ? 's' : ''}${total > 50 ? ' (showing first 50)' : ''}`;
+          
+          grid.innerHTML = display.map(p => `
+            <div class="search-result-card">
+              <img src="${p.avatar || 'images/student_01.jpg'}" class="search-avatar" alt="${p.name}"
+                onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(p.name)}&background=8b5cf6&color=fff&bold=true&size=100'">
+              <div class="search-result-info">
+                <div class="search-result-name">${p.name}</div>
+                <div class="search-result-matric">${p.matric}</div>
+                <div class="search-result-meta">${p.department || ''} · ${p.level ? p.level + 'L' : ''} · ${p.track || p.specialization || ''}</div>
+                <div class="search-result-meta" style="margin-top:2px">
+                  ${p._role === 'Course Rep' ? '📌 Rep since ' + (p.rep_since || '2025') : ''}
+                  ${p.advisor ? 'Advisor: ' + p.advisor : ''}
+                  ${p.cgpa ? '· CGPA: ' + p.cgpa : ''}
+                </div>
+              </div>
+              <span class="search-role-badge ${p._role === 'Course Rep' ? 'badge-rep' : 'badge-student'}">${p._role}</span>
+            </div>`).join('');
+        }
+
+        function clearSearch() {
+          document.getElementById('filterDept').value = '';
+          document.getElementById('filterLevel').value = '';
+          document.getElementById('filterRole').value = '';
+          document.getElementById('searchTextInput').value = '';
+          document.getElementById('searchResultsArea').style.display = 'none';
+          document.getElementById('searchEmptyState').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ICEP – Modern Student Dashboard</title>
+  <meta name="description" content="ICEP Academic Excellence Portal — Modern Minimalist Student Dashboard"/>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+
+  <!-- Dark mode pre-load: runs before paint to avoid flash -->
+  <script>
+    (function(){
+      var t = localStorage.getItem('icep_modern_theme');
+      if(t === 'dark') document.documentElement.setAttribute('data-theme','dark');
+    })();
+  </script>
+
+  <!-- Central ICEP Dataset -->
+  <script src="data/icep_dataset.js"></script>
+
+  <style>
+    :root {
+      --bg:            #f8fafc;
+      --card:          #ffffff;
+      --nav-bg:        rgba(255,255,255,0.88);
+      --border:        rgba(15,23,42,0.09);
+      --accent:        #D9534F;
+      --accent-dark:   #b8433f;
+      --accent-glow:   rgba(217,83,79,0.28);
+      --accent-light:  rgba(217,83,79,0.08);
+      --text:          #0f172a;
+      --muted:         #64748b;
+      --success:       #10b981;
+      --success-bg:    rgba(16,185,129,0.10);
+      --warn:          #f59e0b;
+      --warn-bg:       rgba(245,158,11,0.10);
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;line-height:1.6;min-height:100vh;overflow-x:hidden;}
+
+    /* BLOBS */
+    .blob{position:fixed;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0;}
+    .blob-1{width:500px;height:500px;top:-150px;left:-150px;background:rgba(217,83,79,0.07);}
+    .blob-2{width:600px;height:600px;bottom:-200px;right:-150px;background:rgba(16,185,129,0.05);}
+
+    /* ─── TOPNAV ─── */
+    .topnav{
+      position:fixed;top:0;left:0;right:0;z-index:1000;
+      height:70px;background:var(--nav-bg);
+      backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+      border-bottom:1px solid var(--border);
+      display:flex;align-items:center;justify-content:space-between;
+      padding:0 clamp(16px,4vw,60px);
+      box-shadow:0 4px 24px rgba(0,0,0,0.04);
+    }
+    .nav-brand{font-family:'Outfit',sans-serif;font-size:22px;font-weight:900;color:var(--text);letter-spacing:1px;display:flex;align-items:center;gap:10px;text-decoration:none;}
+    .nav-brand span{color:var(--accent);}
+    .nav-links{display:flex;gap:30px;list-style:none;}
+    .nav-links a{color:var(--muted);text-decoration:none;font-size:14px;font-weight:600;transition:color .25s,transform .25s;display:block;}
+    .nav-links a:hover,.nav-links a.active{color:var(--accent);transform:translateY(-1px);}
+    .nav-right{display:flex;align-items:center;gap:16px;}
+    .nav-bell{width:38px;height:38px;border-radius:50%;background:rgba(15,23,42,0.04);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--muted);cursor:pointer;transition:all .25s;position:relative;}
+    .nav-bell:hover{border-color:var(--accent);color:var(--accent);box-shadow:0 0 14px var(--accent-glow);}
+    .nav-bell::after{content:'';position:absolute;top:8px;right:9px;width:8px;height:8px;background:var(--accent);border:2px solid var(--bg);border-radius:50%;}
+    .btn-signout{background:transparent;border:1.5px solid var(--border);padding:9px 18px;border-radius:20px;font-size:13px;font-weight:700;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .25s;}
+    .btn-signout:hover{border-color:var(--accent);color:var(--accent);box-shadow:0 6px 18px var(--accent-glow);}
+
+    /* HAMBURGER */
+    .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px;border:1.5px solid var(--border);border-radius:10px;background:rgba(255,255,255,0.6);transition:all .25s;}
+    .hamburger:hover{border-color:var(--accent);}
+    .hamburger span{display:block;width:22px;height:2.5px;background:var(--text);border-radius:2px;transition:all .35s;}
+    .hamburger.open span:nth-child(1){transform:translateY(7.5px) rotate(45deg);}
+    .hamburger.open span:nth-child(2){opacity:0;transform:scaleX(0);}
+    .hamburger.open span:nth-child(3){transform:translateY(-7.5px) rotate(-45deg);}
+
+    /* MOBILE MENU */
+    .mobile-menu-backdrop{position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .35s;}
+    .mobile-menu-backdrop.open{opacity:1;pointer-events:auto;}
+    .mobile-menu{position:fixed;top:0;right:0;bottom:0;z-index:9999;width:min(300px,80vw);background:rgba(255,255,255,0.95);backdrop-filter:blur(28px);border-left:1.5px solid var(--border);border-radius:24px 0 0 24px;box-shadow:-20px 0 60px rgba(0,0,0,0.12);display:flex;flex-direction:column;gap:8px;padding:24px 18px;transform:translateX(105%);transition:transform .35s cubic-bezier(0.16,1,0.3,1);overflow-y:auto;}
+    .mobile-menu.open{transform:translateX(0);}
+    .mobile-menu-header{display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;margin-bottom:8px;border-bottom:1px solid var(--border);}
+    .mobile-menu-title{font-family:'Outfit',sans-serif;font-size:18px;font-weight:900;color:var(--text);display:flex;align-items:center;gap:8px;}
+    .mobile-menu-title span{color:var(--accent);}
+    .mobile-menu-close{background:rgba(15,23,42,0.06);border:1px solid var(--border);color:var(--text);width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;transition:all .25s;}
+    .mobile-menu-close:hover{background:var(--accent);color:#fff;border-color:var(--accent);}
+    .mobile-nav-link{padding:14px 18px;font-size:14.5px;font-weight:700;color:var(--text);text-decoration:none;border:1px solid var(--border);border-radius:14px;display:flex;align-items:center;justify-content:space-between;transition:all .25s;}
+    .mobile-nav-link:hover,.mobile-nav-link.active{background:var(--accent-light);border-color:var(--accent);color:var(--accent);transform:translateX(-3px);}
+    .mobile-nav-link i{font-size:12px;color:var(--muted);}
+
+    /* ─── MAIN CONTAINER ─── */
+    .page-wrap{max-width:1060px;margin:90px auto 60px;padding:0 clamp(16px,3vw,32px);position:relative;z-index:1;display:flex;flex-direction:column;gap:28px;}
+
+    /* ─── HERO SECTION ─── */
+    .hero-card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:28px;
+      box-shadow:0 20px 50px rgba(0,0,0,0.05),inset 0 2px 0 rgba(255,255,255,0.9);
+      overflow:hidden;
+      position:relative;
+    }
+    .hero-top-stripe{height:5px;background:linear-gradient(90deg,var(--accent),#f87171,var(--accent-dark));}
+    .hero-inner{display:flex;gap:clamp(20px,4vw,48px);padding:clamp(24px,4vw,42px);align-items:flex-start;position:relative;z-index:2;}
+    .hero-bg-blob{position:absolute;top:-60px;right:-60px;width:300px;height:300px;background:radial-gradient(circle,rgba(217,83,79,0.08) 0%,transparent 70%);pointer-events:none;z-index:1;}
+
+    /* PORTRAIT — BIG, BOLD, MAIN ATTRACTION */
+    .portrait-wrap{flex-shrink:0;position:relative;}
+    .portrait-img{
+      width:clamp(140px,18vw,200px);
+      height:clamp(180px,22vw,260px);
+      object-fit:cover;object-position:center 10%;
+      border-radius:20px;
+      border:3px solid transparent;
+      background-clip:padding-box;
+      box-shadow:0 20px 50px rgba(0,0,0,0.14),0 0 0 4px rgba(217,83,79,0.18);
+      transition:transform .4s cubic-bezier(0.175,0.885,0.32,1.275),box-shadow .4s;
+      display:block;
+    }
+    .portrait-img:hover{transform:scale(1.04) translateY(-4px);box-shadow:0 30px 65px rgba(0,0,0,0.18),0 0 0 4px rgba(217,83,79,0.4);}
+    .portrait-status{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);background:var(--success);color:#fff;font-size:10px;font-weight:800;padding:5px 14px;border-radius:20px;white-space:nowrap;border:2px solid var(--card);box-shadow:0 4px 12px rgba(16,185,129,0.35);letter-spacing:0.5px;}
+    /* year badge removed — was confusing without a click action */
+    /* coloured icon defaults per accordion */
+    .acc-icon-wrap.icon-blue{color:#3b82f6;background:rgba(59,130,246,0.08);border-color:rgba(59,130,246,0.2);}
+    .acc-icon-wrap.icon-amber{color:#f59e0b;background:rgba(245,158,11,0.08);border-color:rgba(245,158,11,0.2);}
+    .acc-icon-wrap.icon-green{color:#10b981;background:rgba(16,185,129,0.08);border-color:rgba(16,185,129,0.2);}
+    .acc-icon-wrap.icon-purple{color:#8b5cf6;background:rgba(139,92,246,0.08);border-color:rgba(139,92,246,0.2);}
+    /* when open, always goes accent */
+    .accordion-card.acc-open .acc-icon-wrap{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 8px 20px var(--accent-glow);}
+
+    /* STUDENT INFO */
+    .hero-info{flex:1;display:flex;flex-direction:column;gap:14px;}
+    .hero-eyebrow{font-size:11px;font-weight:800;color:var(--accent);letter-spacing:2.5px;text-transform:uppercase;display:flex;align-items:center;gap:8px;}
+    .hero-eyebrow::before{content:'';display:block;width:20px;height:2px;background:var(--accent);}
+    .hero-name{font-family:'Outfit',sans-serif;font-size:clamp(26px,3.5vw,38px);font-weight:900;color:var(--text);line-height:1.1;letter-spacing:-0.5px;}
+    .hero-sub{font-size:14px;color:var(--muted);font-weight:500;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+    .hero-sub i{color:var(--accent);}
+
+    /* STAT CHIPS — styled borders, each one distinct */
+    .stat-chips{display:flex;gap:14px;flex-wrap:wrap;margin-top:4px;}
+    .stat-chip{
+      border-radius:16px;padding:14px 20px;min-width:110px;
+      display:flex;flex-direction:column;gap:4px;
+      transition:transform .25s,box-shadow .25s;
+      position:relative;overflow:hidden;
+    }
+    .stat-chip::before{content:'';position:absolute;inset:0;border-radius:16px;border:1.5px solid transparent;background-clip:padding-box;}
+    .stat-chip:hover{transform:translateY(-4px);}
+
+    .stat-chip.chip-cgpa{background:linear-gradient(135deg,rgba(217,83,79,0.08) 0%,rgba(217,83,79,0.03) 100%);border:1.5px solid rgba(217,83,79,0.3);box-shadow:0 8px 24px rgba(217,83,79,0.1);}
+    .stat-chip.chip-cgpa:hover{box-shadow:0 16px 36px rgba(217,83,79,0.2);}
+    .stat-chip.chip-level{background:linear-gradient(135deg,rgba(16,185,129,0.08) 0%,rgba(16,185,129,0.03) 100%);border:1.5px solid rgba(16,185,129,0.3);box-shadow:0 8px 24px rgba(16,185,129,0.08);}
+    .stat-chip.chip-level:hover{box-shadow:0 16px 36px rgba(16,185,129,0.18);}
+    .stat-chip.chip-credits{background:linear-gradient(135deg,rgba(99,102,241,0.08) 0%,rgba(99,102,241,0.03) 100%);border:1.5px solid rgba(99,102,241,0.3);box-shadow:0 8px 24px rgba(99,102,241,0.08);}
+    .stat-chip.chip-credits:hover{box-shadow:0 16px 36px rgba(99,102,241,0.16);}
+    .stat-chip.chip-honors{background:linear-gradient(135deg,rgba(245,158,11,0.08) 0%,rgba(245,158,11,0.03) 100%);border:1.5px solid rgba(245,158,11,0.3);box-shadow:0 8px 24px rgba(245,158,11,0.08);}
+    .stat-chip.chip-honors:hover{box-shadow:0 16px 36px rgba(245,158,11,0.16);}
+
+    .chip-icon{font-size:18px;margin-bottom:4px;}
+    .chip-cgpa .chip-icon{color:var(--accent);}
+    .chip-level .chip-icon{color:var(--success);}
+    .chip-credits .chip-icon{color:#6366f1;}
+    .chip-honors .chip-icon{color:var(--warn);}
+    .chip-val{font-family:'Outfit',sans-serif;font-size:clamp(22px,2.8vw,30px);font-weight:900;line-height:1;}
+    .chip-cgpa .chip-val{color:var(--accent);}
+    .chip-level .chip-val{color:var(--success);}
+    .chip-credits .chip-val{color:#6366f1;}
+    .chip-honors .chip-val{color:var(--warn);}
+    .chip-label{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;}
+
+    /* HERO ACTIONS */
+    .hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px;}
+    .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent-dark));color:#fff;border:none;padding:12px 26px;border-radius:24px;font-size:13.5px;font-weight:800;cursor:pointer;box-shadow:0 10px 28px var(--accent-glow);transition:all .3s cubic-bezier(0.16,1,0.3,1);display:flex;align-items:center;gap:8px;}
+    .btn-primary:hover{transform:translateY(-3px);box-shadow:0 16px 36px rgba(217,83,79,0.45);}
+    .btn-secondary{background:rgba(255,255,255,0.7);border:1.5px solid var(--border);color:var(--text);padding:12px 26px;border-radius:24px;font-size:13.5px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;gap:8px;backdrop-filter:blur(8px);}
+    .btn-secondary:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-2px);}
+
+    /* ─── SECTION HEADER ─── */
+    .section-header{display:flex;flex-direction:column;gap:4px;padding:0 4px;}
+    .section-eyebrow{font-size:11px;font-weight:800;color:var(--accent);letter-spacing:2px;text-transform:uppercase;}
+    .section-title{font-family:'Outfit',sans-serif;font-size:clamp(20px,2.5vw,28px);font-weight:900;color:var(--text);letter-spacing:-0.3px;}
+
+    /* ─── ACCORDION CARDS ─── */
+    .accordion-card{
+      background:var(--card);border:1px solid var(--border);border-radius:22px;
+      overflow:hidden;
+      box-shadow:0 8px 24px rgba(0,0,0,0.04),inset 0 1px 0 rgba(255,255,255,0.8);
+      transition:box-shadow .35s,border-color .35s,transform .35s;
+    }
+    .accordion-card:hover{box-shadow:0 16px 40px rgba(0,0,0,0.07);transform:translateY(-2px);}
+    .accordion-card.acc-open{border-color:rgba(217,83,79,0.35);box-shadow:0 20px 50px rgba(217,83,79,0.10);}
+
+    .acc-header{display:flex;justify-content:space-between;align-items:center;padding:22px 28px;cursor:pointer;user-select:none;}
+    .acc-left{display:flex;align-items:center;gap:16px;}
+    .acc-icon-wrap{width:44px;height:44px;border-radius:14px;background:rgba(15,23,42,0.05);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--muted);transition:all .3s;}
+    .accordion-card.acc-open .acc-icon-wrap{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 8px 20px var(--accent-glow);}
+    .acc-titles{display:flex;flex-direction:column;gap:2px;}
+    .acc-title{font-size:16px;font-weight:800;color:var(--text);}
+    .acc-subtitle{font-size:13px;color:var(--muted);font-weight:500;}
+    .acc-right{display:flex;align-items:center;gap:16px;}
+    .acc-badge{background:rgba(15,23,42,0.05);border:1px solid var(--border);padding:7px 14px;border-radius:20px;font-size:12.5px;font-weight:700;color:var(--muted);white-space:nowrap;transition:all .3s;}
+    .acc-badge.badge-warn{background:var(--warn-bg);border-color:rgba(245,158,11,0.3);color:var(--warn);}
+    .acc-badge.badge-success{background:var(--success-bg);border-color:rgba(16,185,129,0.3);color:var(--success);}
+    .acc-badge.badge-accent{background:var(--accent-light);border-color:rgba(217,83,79,0.3);color:var(--accent);}
+    .acc-chevron{width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:rgba(15,23,42,0.04);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--muted);transition:all .4s cubic-bezier(0.16,1,0.3,1);}
+    .accordion-card.acc-open .acc-chevron{transform:rotate(180deg);background:var(--accent-light);border-color:rgba(217,83,79,0.3);color:var(--accent);}
+
+    /* ACCORDION BODY */
+    .acc-body{max-height:0;overflow:hidden;transition:max-height .5s cubic-bezier(0.16,1,0.3,1);}
+    .accordion-card.acc-open .acc-body{max-height:1200px;}
+    .acc-body-inner{padding:0 28px 28px;border-top:1px solid var(--border);}
+    .acc-intro{padding-top:20px;padding-bottom:16px;font-size:13.5px;color:var(--muted);font-weight:500;border-bottom:1px solid var(--border);margin-bottom:20px;}
+
+    /* PROGRESS BARS */
+    .prog-row{margin-bottom:18px;}
+    .prog-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
+    .prog-name{font-size:14px;font-weight:700;color:var(--text);}
+    .prog-score{font-size:14px;font-weight:800;color:var(--accent);}
+    .prog-track{background:rgba(15,23,42,0.07);height:9px;border-radius:5px;overflow:hidden;position:relative;}
+    /* Progress bar: color is set via JS based on score */
+    .prog-fill{height:100%;border-radius:5px;position:relative;overflow:hidden;transition:width .8s cubic-bezier(0.16,1,0.3,1);}
+    .prog-fill::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.35),transparent);animation:shimmer 2.2s ease infinite;}
+    @keyframes shimmer{0%{transform:translateX(-100%);}100%{transform:translateX(100%);}}
+    /* Grade F: 0–44 */ .prog-grade-f{background:linear-gradient(90deg,#ef4444,#f87171);box-shadow:0 0 8px rgba(239,68,68,0.4);}
+    /* Grade E: 45–49 */ .prog-grade-e{background:linear-gradient(90deg,#f97316,#fdba74);box-shadow:0 0 8px rgba(249,115,22,0.35);}
+    /* Grade D: 50–59 */ .prog-grade-d{background:linear-gradient(90deg,#f59e0b,#fcd34d);box-shadow:0 0 8px rgba(245,158,11,0.35);}
+    /* Grade C: 60–69 */ .prog-grade-c{background:linear-gradient(90deg,#84cc16,#bef264);box-shadow:0 0 8px rgba(132,204,22,0.35);}
+    /* Grade B: 70–79 */ .prog-grade-b{background:linear-gradient(90deg,#22c55e,#86efac);box-shadow:0 0 8px rgba(34,197,94,0.35);}
+    /* Grade A: 80+ */  .prog-grade-a{background:linear-gradient(90deg,#10b981,#34d399);box-shadow:0 0 8px rgba(16,185,129,0.4);}
+
+    /* ALERT BANNER */
+    .alert-wrap{display:flex;flex-direction:column;gap:12px;}
+    .alert-item{display:flex;align-items:flex-start;gap:14px;padding:16px 18px;border-radius:14px;border:1px solid rgba(217,83,79,0.2);background:var(--accent-light);}
+    .alert-item i{font-size:20px;color:var(--accent);margin-top:2px;flex-shrink:0;}
+    .alert-body h4{font-size:14px;font-weight:800;color:var(--accent);margin-bottom:3px;}
+    .alert-body p{font-size:13px;font-weight:500;color:var(--text);line-height:1.5;}
+    .alert-item.warn-item{background:var(--warn-bg);border-color:rgba(245,158,11,0.3);}
+    .alert-item.warn-item i,.alert-item.warn-item h4{color:var(--warn);}
+
+    /* GPA BARS */
+    .gpa-chart{display:flex;align-items:flex-end;justify-content:space-between;height:160px;padding:16px;background:rgba(248,250,252,0.6);border:1px solid var(--border);border-radius:16px;gap:10px;margin-top:8px;}
+    .gpa-col{display:flex;flex-direction:column;align-items:center;gap:10px;flex:1;height:100%;justify-content:flex-end;cursor:pointer;}
+    .gpa-bar-wrap{position:relative;width:100%;display:flex;align-items:flex-end;justify-content:center;}
+    .gpa-bar{width:clamp(28px,5vw,52px);border-radius:8px 8px 0 0;background:linear-gradient(180deg,var(--accent) 0%,var(--accent-dark) 100%);box-shadow:0 -4px 14px var(--accent-glow);transition:all .35s;position:relative;}
+    .gpa-tooltip{position:absolute;top:-34px;left:50%;transform:translateX(-50%);background:var(--text);color:#fff;font-size:11px;font-weight:800;padding:4px 10px;border-radius:8px;white-space:nowrap;opacity:0;transition:opacity .25s;pointer-events:none;}
+    .gpa-col:hover .gpa-bar{background:linear-gradient(180deg,#f87171 0%,var(--accent) 100%);box-shadow:0 -6px 20px rgba(217,83,79,0.45);}
+    .gpa-col:hover .gpa-tooltip{opacity:1;}
+    .gpa-label{font-size:12px;font-weight:700;color:var(--muted);}
+
+    /* DEGREE CHECKLIST */
+    .check-list{display:flex;flex-direction:column;gap:10px;}
+    .check-row{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;background:rgba(248,250,252,0.7);border:1px solid var(--border);border-radius:14px;transition:all .25s;}
+    .check-row:hover{border-color:rgba(217,83,79,0.25);transform:translateX(4px);background:#fff;}
+    .check-row-left{display:flex;align-items:center;gap:12px;font-size:14px;font-weight:600;color:var(--text);}
+    .check-row-left .check-ico{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+    .check-ico.ico-done{background:var(--success-bg);color:var(--success);}
+    .check-ico.ico-pend{background:var(--warn-bg);color:var(--warn);}
+    .check-ico.ico-danger{background:var(--accent-light);color:var(--accent);}
+    .check-status{font-size:12.5px;font-weight:800;padding:5px 12px;border-radius:12px;}
+    .status-done{background:var(--success-bg);color:var(--success);}
+    .status-pend{background:var(--warn-bg);color:var(--warn);}
+    .status-bad{background:var(--accent-light);color:var(--accent);}
+
+    /* ─── FULL DETAIL BUTTON ─── */
+    .btn-full-detail{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:22px;padding:13px 28px;background:linear-gradient(135deg,var(--accent),var(--accent-dark));color:#fff;border:none;border-radius:24px;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 10px 28px var(--accent-glow);transition:all .3s;letter-spacing:0.3px;}
+    .btn-full-detail:hover{transform:translateY(-3px);box-shadow:0 16px 38px rgba(217,83,79,0.45);}
+
+    /* ─── FULL DETAIL MODAL ─── */
+    .modal-overlay{position:fixed;inset:0;z-index:5000;background:rgba(15,23,42,0.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .35s;}
+    .modal-overlay.modal-open{opacity:1;pointer-events:auto;}
+    .modal-sheet{background:var(--card);border-radius:28px 28px 0 0;width:100%;max-width:900px;max-height:88vh;overflow:hidden;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .45s cubic-bezier(0.16,1,0.3,1);box-shadow:0 -20px 60px rgba(0,0,0,0.15);}
+    .modal-overlay.modal-open .modal-sheet{transform:translateY(0);}
+    .modal-header{padding:24px 28px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+    .modal-header-left h3{font-family:'Outfit',sans-serif;font-size:22px;font-weight:900;color:var(--text);}
+    .modal-header-left p{font-size:13px;color:var(--muted);margin-top:2px;}
+    .modal-close{background:rgba(15,23,42,0.07);border:1px solid var(--border);color:var(--muted);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;transition:all .25s;}
+    .modal-close:hover{background:var(--accent);border-color:var(--accent);color:#fff;}
+    .modal-top-stripe{height:4px;background:linear-gradient(90deg,var(--accent),#f87171);flex-shrink:0;}
+    .modal-body{overflow-y:auto;padding:24px 28px;flex:1;}
+
+    /* TABS INSIDE MODAL */
+    .modal-tabs{display:flex;gap:8px;margin-bottom:24px;background:rgba(15,23,42,0.05);padding:5px;border-radius:16px;}
+    .modal-tab{flex:1;padding:10px 16px;border:none;border-radius:12px;font-size:13.5px;font-weight:700;color:var(--muted);cursor:pointer;background:transparent;transition:all .25s;text-align:center;}
+    .modal-tab.active-tab{background:var(--card);color:var(--accent);box-shadow:0 4px 14px rgba(0,0,0,0.07);}
+    .modal-tab-panel{display:none;}
+    .modal-tab-panel.active-panel{display:block;}
+
+    /* TABLE */
+    .result-table{width:100%;border-collapse:collapse;font-size:13.5px;}
+    .result-table th{background:rgba(15,23,42,0.04);font-weight:800;color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:0.5px;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+    .result-table td{padding:12px 14px;border-bottom:1px solid rgba(15,23,42,0.06);color:var(--text);font-weight:500;}
+    .result-table tr:last-child td{border-bottom:none;}
+    .result-table tr:hover td{background:rgba(217,83,79,0.04);}
+    .grade-badge{display:inline-block;padding:4px 10px;border-radius:8px;font-size:12px;font-weight:800;}
+    .grade-A{background:var(--success-bg);color:var(--success);}
+    .grade-B{background:rgba(99,102,241,0.1);color:#6366f1;}
+    .grade-C{background:var(--warn-bg);color:var(--warn);}
+    .grade-F{background:var(--accent-light);color:var(--accent);}
+    .modal-summary-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px;padding-top:20px;border-top:1px solid var(--border);}
+    .modal-summary-chip{flex:1;min-width:120px;background:rgba(248,250,252,0.9);border:1px solid var(--border);border-radius:14px;padding:14px 18px;}
+    .modal-summary-chip .m-val{font-family:'Outfit',sans-serif;font-size:22px;font-weight:900;color:var(--text);}
+    .modal-summary-chip .m-lbl{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-top:2px;}
+
+    /* PRINT / TRANSCRIPT SECTION */
+    .transcript-header{display:flex;align-items:center;gap:16px;margin-bottom:20px;padding:18px;background:linear-gradient(135deg,rgba(217,83,79,0.08),rgba(217,83,79,0.02));border:1px solid rgba(217,83,79,0.2);border-radius:16px;}
+    .transcript-header i{font-size:28px;color:var(--accent);}
+    .transcript-header h4{font-size:16px;font-weight:800;color:var(--text);}
+    .transcript-header p{font-size:13px;color:var(--muted);}
+
+    /* ─── DARK MODE VARIABLES ─── */
+    [data-theme="dark"] {
+      --bg:           #0d1117;
+      --card:         #161b22;
+      --nav-bg:       rgba(22,27,34,0.94);
+      --border:       rgba(255,255,255,0.08);
+      --text:         #e2e8f0;
+      --muted:        #b1bac4;
+      --success-bg:   rgba(16,185,129,0.15);
+      --warn-bg:      rgba(245,158,11,0.15);
+      --accent-light: rgba(217,83,79,0.12);
+    }
+    /* ── DARK MODE: HIGH-CONTRAST TEXT ── */
+    [data-theme="dark"] h1,[data-theme="dark"] h2,[data-theme="dark"] h3,[data-theme="dark"] h4{color:#f0f6fc;}
+    [data-theme="dark"] .acc-title{color:#f0f6fc;}
+    [data-theme="dark"] .acc-subtitle{color:#b1bac4;}
+    [data-theme="dark"] .acc-intro{color:#b1bac4;border-bottom:1px solid rgba(255,255,255,0.07);}
+    [data-theme="dark"] .hero-name{color:#f0f6fc;}
+    [data-theme="dark"] .hero-sub{color:#b1bac4;}
+    [data-theme="dark"] .hero-eyebrow{color:var(--accent);}
+    [data-theme="dark"] .chip-label{color:#b1bac4;}
+    [data-theme="dark"] .prog-name{color:#e2e8f0;}
+    [data-theme="dark"] .modal-header-left h3{color:#f0f6fc;}
+    [data-theme="dark"] .modal-header-left p{color:#b1bac4;}
+    [data-theme="dark"] .result-table td{color:#e2e8f0;}
+    [data-theme="dark"] .check-row-left{color:#e2e8f0;}
+    [data-theme="dark"] .transcript-header h4{color:#f0f6fc;}
+    [data-theme="dark"] .transcript-header p{color:#b1bac4;}
+    [data-theme="dark"] .notif-text p{color:#e2e8f0;}
+    [data-theme="dark"] .notif-panel-header h4{color:#f0f6fc;}
+    [data-theme="dark"] .section-title{color:#f0f6fc;}
+    [data-theme="dark"] .blob-1{background:rgba(217,83,79,0.06);}
+    [data-theme="dark"] .blob-2{background:rgba(16,185,129,0.04);}
+    [data-theme="dark"] .prog-track{background:rgba(255,255,255,0.07);}
+    [data-theme="dark"] .gpa-chart{background:rgba(255,255,255,0.03);}
+    [data-theme="dark"] .check-row{background:rgba(255,255,255,0.03);}
+    [data-theme="dark"] .check-row:hover{background:rgba(255,255,255,0.06);}
+    [data-theme="dark"] .modal-sheet{background:#161b22;}
+    [data-theme="dark"] .modal-tab.active-tab{background:#0d1117;}
+    [data-theme="dark"] .modal-tabs{background:rgba(255,255,255,0.04);}
+    [data-theme="dark"] .result-table th{background:rgba(255,255,255,0.04);color:#b1bac4;}
+    [data-theme="dark"] .result-table tr:hover td{background:rgba(217,83,79,0.07);}
+    [data-theme="dark"] .modal-summary-chip{background:rgba(255,255,255,0.04);}
+    [data-theme="dark"] .modal-summary-chip .m-val{color:#f0f6fc;}
+    [data-theme="dark"] .modal-summary-chip .m-lbl{color:#b1bac4;}
+    [data-theme="dark"] .transcript-header{background:linear-gradient(135deg,rgba(217,83,79,0.1),rgba(217,83,79,0.03));}
+    [data-theme="dark"] .mobile-menu{background:rgba(22,27,34,0.97);}
+    [data-theme="dark"] .alert-body p{color:#e2e8f0;}
+    [data-theme="dark"] .gpa-label{color:#b1bac4;}
+    /* ── NEW ITEM BADGE ── */
+    .new-badge{display:inline-block;background:var(--accent);color:#fff;font-size:9px;font-weight:900;padding:2px 7px;border-radius:10px;vertical-align:middle;margin-left:6px;letter-spacing:0.3px;animation:newPulse 2s ease-in-out infinite;}
+    @keyframes newPulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.75;transform:scale(0.96);}}
+    /* ── MODAL BOTTOM SPACING FIX ── */
+    .modal-overlay{padding-bottom:env(safe-area-inset-bottom,0px);}
+    @media(min-width:769px){.modal-overlay{align-items:center;}.modal-sheet{border-radius:28px;max-height:82vh;}}
+    .modal-body{padding-bottom:32px;}
+
+    /* ─── DARK MODE TOGGLE BUTTON ─── */
+    .btn-theme{width:38px;height:38px;border-radius:50%;background:rgba(15,23,42,0.04);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--muted);cursor:pointer;transition:all .25s;flex-shrink:0;}
+    .btn-theme:hover{border-color:var(--accent);color:var(--accent);box-shadow:0 0 14px var(--accent-glow);}
+    [data-theme="dark"] .btn-theme{background:rgba(255,255,255,0.05);}
+
+    /* ─── NOTIFICATION PANEL ─── */
+    .notif-count{position:absolute;top:-4px;right:-4px;background:var(--accent);color:#fff;font-size:9px;font-weight:900;min-width:18px;height:18px;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid var(--bg);pointer-events:none;line-height:1;}
+    .notif-panel{
+      position:absolute;top:calc(100% + 10px);right:0;
+      width:340px;background:var(--card);
+      border:1px solid var(--border);border-radius:20px;
+      box-shadow:0 20px 60px rgba(0,0,0,0.16);
+      overflow:hidden;opacity:0;pointer-events:none;
+      transform:translateY(-8px) scale(0.97);
+      transition:all .3s cubic-bezier(0.16,1,0.3,1);
+      z-index:2000;
+    }
+    .notif-panel.notif-open{opacity:1;pointer-events:auto;transform:translateY(0) scale(1);}
+    .notif-panel-header{padding:14px 18px 10px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+    .notif-panel-header h4{font-size:14px;font-weight:800;color:var(--text);}
+    .notif-mark-all{font-size:12px;font-weight:700;color:var(--accent);cursor:pointer;background:none;border:none;padding:0;}
+    .notif-mark-all:hover{text-decoration:underline;}
+    .notif-list{max-height:320px;overflow-y:auto;}
+    .notif-item{display:flex;align-items:flex-start;gap:12px;padding:14px 18px;border-bottom:1px solid var(--border);transition:background .2s;cursor:pointer;}
+    .notif-item:last-child{border-bottom:none;}
+    .notif-item:hover{background:rgba(217,83,79,0.04);}
+    .notif-item.notif-read{opacity:0.5;}
+    .notif-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:6px;}
+    .notif-item.notif-read .notif-dot{background:var(--muted);}
+    .notif-text{flex:1;}
+    .notif-text p{font-size:13px;font-weight:600;color:var(--text);line-height:1.4;}
+    .notif-text span{font-size:11px;color:var(--muted);margin-top:3px;display:block;}
+    .notif-dismiss{background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;padding:4px;border-radius:6px;transition:all .2s;flex-shrink:0;}
+    .notif-dismiss:hover{color:var(--accent);background:var(--accent-light);}
+    .notif-empty{padding:28px;text-align:center;color:var(--muted);font-size:13px;font-weight:600;}
+    .notif-wrap{position:relative;}
+
+    /* ─── VIEW OTHER SIDE DROPDOWN ─── */
+    .portal-switcher{position:relative;}
+    .btn-portal{background:rgba(15,23,42,0.05);border:1.5px solid var(--border);color:var(--text);padding:9px 16px;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .25s;white-space:nowrap;}
+    .btn-portal:hover{border-color:var(--accent);color:var(--accent);}
+    .btn-portal i{font-size:11px;transition:transform .25s;}
+    .btn-portal.open i{transform:rotate(180deg);}
+    .portal-menu{
+      position:absolute;top:calc(100% + 10px);right:0;
+      min-width:220px;background:var(--card);
+      border:1px solid var(--border);border-radius:16px;
+      box-shadow:0 20px 50px rgba(0,0,0,0.14);
+      overflow:hidden;opacity:0;pointer-events:none;
+      transform:translateY(-8px) scale(0.97);
+      transition:all .3s cubic-bezier(0.16,1,0.3,1);
+      z-index:2001;
+    }
+    .portal-menu.portal-open{opacity:1;pointer-events:auto;transform:translateY(0) scale(1);}
+    .portal-menu-item{display:flex;align-items:center;gap:12px;padding:13px 18px;font-size:13.5px;font-weight:600;color:var(--text);text-decoration:none;transition:background .2s;}
+    .portal-menu-item:hover{background:var(--accent-light);color:var(--accent);}
+    .portal-menu-item.active-portal{background:var(--accent-light);color:var(--accent);font-weight:800;pointer-events:none;}
+    .portal-menu-item i{width:18px;text-align:center;font-size:14px;}
+    .portal-menu-divider{height:1px;background:var(--border);margin:4px 0;}
+
+    .sem-tab-row{display:flex;gap:6px;margin-bottom:20px;}
+    .sem-tab{padding:8px 18px;border:1.5px solid var(--border);border-radius:20px;font-size:12.5px;font-weight:700;color:var(--muted);background:transparent;cursor:pointer;transition:all .25s;}
+    .sem-tab:hover{border-color:var(--accent);color:var(--accent);}
+    .sem-tab.sem-active{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 4px 14px var(--accent-glow);}
+    .sem-panel{display:none;}
+    .sem-panel.sem-show{display:block;}
+
+    /* IN-MODAL SEMESTER FILTER ROW */
+    .modal-sem-row{
+      display:flex;gap:8px;padding:12px 0 4px;
+      border-bottom:1px solid var(--border);
+      margin-bottom:16px;flex-wrap:wrap;
+    }
+    .modal-sem-tab{
+      padding:8px 20px;border:1.5px solid var(--border);border-radius:20px;
+      font-size:12.5px;font-weight:700;color:var(--muted);
+      background:transparent;cursor:pointer;transition:all .25s;
+    }
+    .modal-sem-tab:hover{border-color:var(--accent);color:var(--accent);}
+    .modal-sem-tab.modal-sem-active{
+      background:var(--accent);border-color:var(--accent);color:#fff;
+      box-shadow:0 4px 14px var(--accent-glow);
+    }
+    /* Semester-hidden rows inside modal tables */
+    .modal-tab-panel tr.sem-hidden{display:none;}
+    [data-theme="dark"] .modal-sem-row{border-bottom-color:rgba(255,255,255,0.07);}
+
+    /* ─── RESPONSIVE ─── */
+    @media(max-width:900px){
+      .hero-card{flex-direction:column;text-align:center;}
+      .hero-avatar{margin:0 auto 16px;}
+      .hero-inner{flex-direction:column;align-items:center;text-align:center;}
+      .hero-eyebrow{justify-content:center;}
+      .hero-sub{justify-content:center;}
+      .stat-chips{justify-content:center;}
+      .hero-actions{justify-content:center;}
+      .portrait-wrap{margin-bottom:8px;}
+    }
+    @media(max-width:768px){
+      .topnav .nav-links,.topnav .nav-actions{display:none;}
+      .nav-links{display:none;}
+      .btn-signout{display:none;}
+      .btn-portal span{display:none;}
+      .hamburger{display:flex;}
+      .acc-header{padding:16px 20px;}
+      .acc-body-inner{padding:0 20px 20px;}
+      .acc-badge{display:none;}
+      .modal-tabs{flex-wrap:wrap;}
+      .modal-sheet{max-height:92vh;border-radius:24px 24px 0 0;}
+      .modal-body{padding:16px 18px;}
+      .modal-header{padding:18px 20px 14px;}
+      .notif-panel{width:min(340px,92vw);right:-12px;}
+      .portal-menu{right:-12px;}
+      .result-table{font-size:12px;}
+      .result-table th,.result-table td{padding:6px 8px;}
+      .table-responsive{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+    }
+    @media(max-width:480px){
+      .stat-chips{grid-template-columns:1fr 1fr;gap:10px;display:grid;}
+      .stat-chip{padding:12px 14px;min-width:90px;}
+      .acc-card .acc-header{padding:14px 16px;}
+      .chip-val{font-size:20px;}
+      .gpa-chart{height:120px;}
+      .hero-name{font-size:26px;}
+      .sem-tab-row{flex-wrap:wrap;}
+      .modal-body{padding:16px;}
+      input,select{font-size:16px;min-height:44px;}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- DECORATIVE BLOBS -->
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+
+  <!-- MOBILE MENU BACKDROP -->
+  <div class="mobile-menu-backdrop" id="mobileBackdrop" onclick="closeMobileMenu()"></div>
+
+  <!-- MOBILE SLIDE-IN MENU -->
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-header">
+      <div class="mobile-menu-title"><i class="fas fa-graduation-cap" style="color:var(--accent)"></i> ICE<span>P</span></div>
+      <button class="mobile-menu-close" onclick="closeMobileMenu()"><i class="fas fa-times"></i></button>
+    </div>
+    <a href="#" class="mobile-nav-link active"><span><i class="fas fa-th-large" style="margin-right:10px"></i>Dashboard</span><i class="fas fa-chevron-right"></i></a>
+    <a href="#" class="mobile-nav-link"><span><i class="fas fa-book" style="margin-right:10px"></i>Courses &amp; Resources</span><i class="fas fa-chevron-right"></i></a>
+    <a href="#" class="mobile-nav-link"><span><i class="fas fa-chart-bar" style="margin-right:10px"></i>Academic Audit</span><i class="fas fa-chevron-right"></i></a>
+    <a href="#" class="mobile-nav-link"><span><i class="fas fa-wallet" style="margin-right:10px"></i>Financial Audit</span><i class="fas fa-chevron-right"></i></a>
+    <a href="#" class="mobile-nav-link"><span><i class="fas fa-calendar-alt" style="margin-right:10px"></i>Timetable</span><i class="fas fa-chevron-right"></i></a>
+    <a href="#" class="mobile-nav-link"><span><i class="fas fa-cog" style="margin-right:10px"></i>Settings</span><i class="fas fa-chevron-right"></i></a>
+    <div class="mobile-menu-divider"></div>
+    <div class="mobile-menu-section" style="padding:8px 18px;font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;">Other Portals</div>
+    <a href="ICEP_login_modern.html" class="mobile-nav-link"><span><i class="fas fa-right-to-bracket" style="margin-right:10px;color:#6366f1"></i>Login Page</span><i class="fas fa-chevron-right"></i></a>
+    <a href="ICEP_courserep_modern.html" class="mobile-nav-link"><span><i class="fas fa-users-rectangle" style="margin-right:10px;color:#10b981"></i>Course Rep Portal</span><i class="fas fa-chevron-right"></i></a>
+    <a href="ICEP_coordinator_modern.html" class="mobile-nav-link"><span><i class="fas fa-chalkboard-user" style="margin-right:10px;color:#f59e0b"></i>Coordinator Portal</span><i class="fas fa-chevron-right"></i></a>
+    <div class="mobile-menu-divider"></div>
+    <button class="mobile-nav-link" onclick="toggleDarkMode();closeMobileMenu()" style="background:none;border:none;width:100%;text-align:left;cursor:pointer;"><span><i class="fas fa-moon" style="margin-right:10px;color:var(--accent)" id="mobileThemeIcon"></i><span id="mobileThemeLabel">Toggle Dark Mode</span></span><i class="fas fa-chevron-right"></i></button>
+    <a href="ICEP_login_modern.html" class="mobile-nav-link" style="margin-top:auto;color:var(--accent);border-color:rgba(217,83,79,0.3);"><span><i class="fas fa-right-from-bracket" style="margin-right:10px"></i>Sign Out</span><i class="fas fa-chevron-right"></i></a>
+  </div>
+
+  <!-- TOPNAV -->
+  <nav class="topnav">
+    <a href="#" class="nav-brand"><i class="fas fa-graduation-cap" style="color:var(--accent);font-size:20px"></i>ICE<span style="color:var(--accent)">P</span></a>
+    <ul class="nav-links">
+      <li><a href="#" class="active">Dashboard</a></li>
+      <li><a href="#">Courses</a></li>
+      <li><a href="#">Academic Audit</a></li>
+      <li><a href="#">Financial Audit</a></li>
+      <li><a href="#">Timetable</a></li>
+    </ul>
+    <div class="nav-right">
+      <!-- PORTAL SWITCHER -->
+      <div class="portal-switcher" id="portalSwitcherWrap">
+        <button class="btn-portal" id="btnPortal" onclick="togglePortalMenu(event)">
+          <i class="fas fa-globe"></i><span>View Other Side</span><i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="portal-menu" id="portalMenu">
+          <a href="ICEP_login_modern.html" class="portal-menu-item"><i class="fas fa-right-to-bracket" style="color:#6366f1"></i>Login Page</a>
+          <a href="ICEP_student_profile_modern.html" class="portal-menu-item active-portal"><i class="fas fa-user-graduate" style="color:var(--accent)"></i>Student Profile</a>
+          <div class="portal-menu-divider"></div>
+          <a href="ICEP_courserep_modern.html" class="portal-menu-item"><i class="fas fa-users-rectangle" style="color:#10b981"></i>Course Rep Portal</a>
+          <a href="ICEP_coordinator_modern.html" class="portal-menu-item"><i class="fas fa-chalkboard-user" style="color:#f59e0b"></i>Coordinator Portal</a>
+        </div>
+      </div>
+      <!-- DARK MODE TOGGLE -->
+      <button class="btn-theme" id="btnTheme" onclick="toggleDarkMode()" title="Toggle dark mode"><i class="fas fa-moon" id="themeIcon"></i></button>
+      <!-- NOTIFICATION BELL -->
+      <div class="notif-wrap">
+        <div class="nav-bell" id="notifBell" onclick="toggleNotifPanel(event)" title="Notifications">
+          <i class="fas fa-bell"></i>
+          <span class="notif-count" id="notifCount">5</span>
+        </div>
+        <div class="notif-panel" id="notifPanel">
+          <div class="notif-panel-header">
+            <h4><i class="fas fa-bell" style="color:var(--accent);margin-right:6px"></i>Notifications</h4>
+            <button class="notif-mark-all" onclick="markAllRead()">Mark all read</button>
+          </div>
+          <div class="notif-list" id="notifList"></div>
+        </div>
+      </div>
+      <button class="btn-signout" onclick="window.location.href='ICEP_login_modern.html'"><i class="fas fa-right-from-bracket"></i> Sign Out</button>
+      <div class="hamburger" id="hamburger" onclick="toggleMobileMenu()">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN PAGE CONTENT -->
+  <div class="page-wrap">
+
+    <!-- ── HERO CARD ── -->
+    <div class="hero-card">
+      <div class="hero-top-stripe"></div>
+      <div class="hero-inner">
+        <div class="hero-bg-blob"></div>
+
+        <!-- PORTRAIT — MAIN ATTRACTION -->
+        <div class="portrait-wrap">
+          <img src="images/emmanuel_portrait.jpg" alt="Emmanuel Chukwuemeka" class="portrait-img" id="studentAvatar" onerror="this.src='https://ui-avatars.com/api/?name=Emmanuel+Chukwuemeka&size=200&background=D9534F&color=fff&bold=true&font-size=0.4'" />
+          <div class="portrait-status"><i class="fas fa-circle" style="font-size:7px"></i> Active &amp; Verified</div>
+          <!-- year badge removed -->
+        </div>
+
+        <!-- STUDENT INFO -->
+        <div class="hero-info">
+          <div class="hero-eyebrow">Verified Student Profile</div>
+          <div class="hero-name" id="heroStudentName">Emmanuel Chukwuemeka</div>
+          <div class="hero-sub">
+            <i class="fas fa-id-badge"></i> 2026/MKT/0472
+            &nbsp;•&nbsp;
+            <i class="fas fa-building-columns"></i> Dept. of Marketing, Faculty of Management Sciences
+          </div>
+
+          <!-- STAT CHIPS: CGPA, Level, Credits, Honors -->
+          <div class="stat-chips">
+            <div class="stat-chip chip-cgpa">
+              <div class="chip-icon"><i class="fas fa-star-half-stroke"></i></div>
+              <div class="chip-val">4.82</div>
+              <div class="chip-label">Current CGPA</div>
+            </div>
+            <div class="stat-chip chip-level">
+              <div class="chip-icon"><i class="fas fa-layer-group"></i></div>
+              <div class="chip-val">400L</div>
+              <div class="chip-label">Academic Level</div>
+            </div>
+            <div class="stat-chip chip-credits">
+              <div class="chip-icon"><i class="fas fa-coins"></i></div>
+              <div class="chip-val">112<span style="font-size:14px;font-weight:600;opacity:0.6">/120</span></div>
+              <div class="chip-label">Credits Earned</div>
+            </div>
+            <div class="stat-chip chip-honors">
+              <div class="chip-icon"><i class="fas fa-trophy"></i></div>
+              <div class="chip-val">1st</div>
+              <div class="chip-label">Class Honours</div>
+            </div>
+          </div>
+
+          <div class="hero-actions">
+            <button class="btn-primary" onclick="openModal('profileModal')"><i class="fas fa-user"></i> Full Profile</button>
+            <button class="btn-secondary"><i class="fas fa-file-lines"></i> Request Transcript</button>
+            <button class="btn-secondary"><i class="fas fa-book-open"></i> Browse Courses</button>
+            <button class="btn-secondary" style="border-color:rgba(217,83,79,0.3);color:var(--accent);" onclick="openModal('semesterModal')"><i class="fas fa-chart-bar"></i> My Results</button>
+          </div>
+        </div>
+      </div>
+    </div><!-- end hero-card -->
+
+    <!-- SECTION LABEL -->
+    <div class="section-header">
+      <span class="section-eyebrow">Academic Performance</span>
+      <h2 class="section-title">Screening, Results &amp; Degree Audit</h2>
+    </div>
+
+    <!-- ── ACCORDION 1: Semester Results ── -->
+    <div class="accordion-card" id="acc1">
+      <div class="acc-header" onclick="toggleAcc('acc1')">
+        <div class="acc-left">
+          <div class="acc-icon-wrap icon-blue"><i class="fas fa-book-open-reader"></i></div>
+          <div class="acc-titles">
+            <div class="acc-title">Semester Results &amp; Passed Courses</div>
+            <div class="acc-subtitle">400L First Semester — Academic Year 2025/2026</div>
+          </div>
+        </div>
+        <div class="acc-right">
+          <span class="acc-badge badge-success">Latest: 96% (A)</span>
+          <div class="acc-chevron"><i class="fas fa-chevron-down"></i></div>
+        </div>
+      </div>
+      <div class="acc-body">
+        <div class="acc-body-inner">
+          <div class="acc-intro">
+            Preview of your top courses this semester. Click <strong>Full Detail</strong> for the complete broadsheet with semester filtering.
+          </div>
+
+          <div class="prog-row">
+            <div class="prog-meta">
+              <span class="prog-name"><i class="fas fa-dot-circle" style="color:#10b981;margin-right:6px;font-size:10px"></i>MKT 401 — Consumer Behavior</span>
+              <span class="prog-score" style="color:#10b981">96% &nbsp;<span class="grade-badge grade-A">A</span></span>
+            </div>
+            <div class="prog-track"><div class="prog-fill prog-grade-a" style="width:96%"></div></div>
+          </div>
+
+          <div class="prog-row">
+            <div class="prog-meta">
+              <span class="prog-name"><i class="fas fa-dot-circle" style="color:#10b981;margin-right:6px;font-size:10px"></i>MKT 403 — Marketing Research Methods</span>
+              <span class="prog-score" style="color:#10b981">88% &nbsp;<span class="grade-badge grade-A">A</span></span>
+            </div>
+            <div class="prog-track"><div class="prog-fill prog-grade-a" style="width:88%"></div></div>
+          </div>
+
+          <div class="prog-row">
+            <div class="prog-meta">
+              <span class="prog-name"><i class="fas fa-dot-circle" style="color:#10b981;margin-right:6px;font-size:10px"></i>MGT 405 — Strategic Management</span>
+              <span class="prog-score" style="color:#10b981">92% &nbsp;<span class="grade-badge grade-A">A</span></span>
+            </div>
+            <div class="prog-track"><div class="prog-fill prog-grade-a" style="width:92%"></div></div>
+          </div>
+
+          <button class="btn-full-detail" onclick="openModal('semesterModal')">
+            <i class="fas fa-table-list"></i> Full Detail — All Courses &amp; Complete Results Broadsheet
+          </button>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ── ACCORDION 2: Deferred Course Obligations (renamed from Carryovers) ── -->
+    <div class="accordion-card" id="acc2">
+      <div class="acc-header" onclick="toggleAcc('acc2')">
+        <div class="acc-left">
+          <div class="acc-icon-wrap icon-amber"><i class="fas fa-hourglass-half"></i></div>
+          <div class="acc-titles">
+            <div class="acc-title">Deferred Course Obligations</div>
+            <div class="acc-subtitle">Modules requiring academic resolution</div>
+          </div>
+        </div>
+        <div class="acc-right">
+          <!-- Quiet notification pill — no alarming language -->
+          <span class="acc-badge" style="background:rgba(245,158,11,0.08);border-color:rgba(245,158,11,0.25);color:#b45309;font-size:11.5px;">
+            <i class="fas fa-circle" style="font-size:6px;margin-right:5px;color:#f59e0b;"></i>1 Pending
+          </span>
+          <div class="acc-chevron"><i class="fas fa-chevron-down"></i></div>
+        </div>
+      </div>
+      <div class="acc-body">
+        <div class="acc-body-inner">
+          <div class="acc-intro">You have <strong>1 deferred module</strong> that needs to be resolved before graduation. Expand below for details and next steps.</div>
+          <div class="alert-wrap">
+            <div class="alert-item" style="background:rgba(245,158,11,0.07);border-color:rgba(245,158,11,0.25);">
+              <i class="fas fa-hourglass-half" style="color:#f59e0b;"></i>
+              <div class="alert-body">
+                <h4 style="color:#92400e;">MKT 202 — Introduction to Advertising</h4>
+                <p>2 Credit Units &nbsp;•&nbsp; 200L Second Semester &nbsp;•&nbsp; Score: 58/100 &nbsp;•&nbsp; Status: Deferred (Grade D) &nbsp;•&nbsp; Requires re-sit next semester.</p>
+              </div>
+            </div>
+            <div class="alert-item warn-item">
+              <i class="fas fa-calendar-clock"></i>
+              <div class="alert-body">
+                <h4>Re-sit Registration Window</h4>
+                <p>Opens <strong>October 15, 2026</strong>. Visit the Exams &amp; Records portal or consult your academic advisor to register.</p>
+              </div>
+            </div>
+          </div>
+          <button class="btn-full-detail" onclick="openModal('carryoverModal')" style="background:linear-gradient(135deg,#f59e0b,#d97706);box-shadow:0 10px 28px rgba(245,158,11,0.3);">
+            <i class="fas fa-clipboard-list"></i> Full Detail — Course Obligation Log &amp; Resolution Steps
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ACCORDION 3: GPA Matrix ── -->
+    <div class="accordion-card" id="acc3">
+      <div class="acc-header" onclick="toggleAcc('acc3')">
+        <div class="acc-left">
+          <div class="acc-icon-wrap icon-green"><i class="fas fa-chart-line"></i></div>
+          <div class="acc-titles">
+            <div class="acc-title">Academic GPA Growth Matrix</div>
+            <div class="acc-subtitle">100 Level through 400 Level — Historical Trend</div>
+          </div>
+        </div>
+        <div class="acc-right">
+          <span class="acc-badge badge-success">Trending Up +0.32</span>
+          <div class="acc-chevron"><i class="fas fa-chevron-down"></i></div>
+        </div>
+      </div>
+      <div class="acc-body">
+        <div class="acc-body-inner">
+          <div class="acc-intro">Your CGPA has shown consistent growth across all academic levels. Hover over each bar for the precise value.</div>
+          <div class="gpa-chart">
+            <div class="gpa-col">
+              <div class="gpa-bar-wrap" style="height:60%">
+                <div class="gpa-tooltip">CGPA: 4.50</div>
+                <div class="gpa-bar" style="height:100%;opacity:0.55;"></div>
+              </div>
+              <span class="gpa-label">100L</span>
+            </div>
+            <div class="gpa-col">
+              <div class="gpa-bar-wrap" style="height:72%">
+                <div class="gpa-tooltip">CGPA: 4.62</div>
+                <div class="gpa-bar" style="height:100%;opacity:0.7;"></div>
+              </div>
+              <span class="gpa-label">200L</span>
+            </div>
+            <div class="gpa-col">
+              <div class="gpa-bar-wrap" style="height:84%">
+                <div class="gpa-tooltip">CGPA: 4.76</div>
+                <div class="gpa-bar" style="height:100%;opacity:0.85;"></div>
+              </div>
+              <span class="gpa-label">300L</span>
+            </div>
+            <div class="gpa-col">
+              <div class="gpa-bar-wrap" style="height:100%">
+                <div class="gpa-tooltip">CGPA: 4.82</div>
+                <div class="gpa-bar" style="height:100%;"></div>
+              </div>
+              <span class="gpa-label" style="color:var(--accent);font-weight:800;">400L</span>
+            </div>
+          </div>
+          <button class="btn-full-detail" onclick="openModal('gpaModal')">
+            <i class="fas fa-chart-area"></i> Full Detail — Semester-by-Semester GPA Breakdown
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ACCORDION 4: Degree Path ── -->
+    <div class="accordion-card" id="acc4">
+      <div class="acc-header" onclick="toggleAcc('acc4')">
+        <div class="acc-left">
+          <div class="acc-icon-wrap icon-purple"><i class="fas fa-map-location-dot"></i></div>
+          <div class="acc-titles">
+            <div class="acc-title">Degree Path Planning</div>
+            <div class="acc-subtitle">Graduation readiness &amp; completion tracker</div>
+          </div>
+        </div>
+        <div class="acc-right">
+          <span class="acc-badge badge-success">93% to Graduation</span>
+          <div class="acc-chevron"><i class="fas fa-chevron-down"></i></div>
+        </div>
+      </div>
+      <div class="acc-body">
+        <div class="acc-body-inner">
+          <div class="acc-intro">Your progress toward BSc Marketing degree completion. All core requirements must be satisfied before graduation clearance.</div>
+          <div class="check-list">
+            <div class="check-row">
+              <div class="check-row-left">
+                <div class="check-ico ico-done"><i class="fas fa-check"></i></div>
+                Core Required Courses (Departments Courses)
+              </div>
+              <span class="check-status status-done">92/95 Credits</span>
+            </div>
+            <div class="check-row">
+              <div class="check-row-left">
+                <div class="check-ico ico-done"><i class="fas fa-check"></i></div>
+                Faculty &amp; General Electives
+              </div>
+              <span class="check-status status-done">20/25 Credits</span>
+            </div>
+            <div class="check-row">
+              <div class="check-row-left">
+                <div class="check-ico ico-pend"><i class="fas fa-clock"></i></div>
+                Final Year Project (MKT 499)
+              </div>
+              <span class="check-status status-pend">Pending Supervisor</span>
+            </div>
+            <div class="check-row">
+              <div class="check-row-left">
+                <div class="check-ico ico-danger"><i class="fas fa-exclamation"></i></div>
+                Outstanding Carryovers
+              </div>
+              <span class="check-status status-bad">1 Course Remaining</span>
+            </div>
+          </div>
+          <button class="btn-full-detail" onclick="openModal('degreeModal')">
+            <i class="fas fa-graduation-cap"></i> Full Detail — Full Degree Audit &amp; Graduation Clearance Report
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end page-wrap -->
+
+  <!-- ════════════════════════════════
+       MODALS
+  ════════════════════════════════ -->
+
+  <!-- SEMESTER RESULTS MODAL -->
+  <div class="modal-overlay" id="semesterModal" onclick="handleModalOverlayClick(event,'semesterModal')">
+    <div class="modal-sheet">
+      <div class="modal-top-stripe"></div>
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <h3><i class="fas fa-table-list" style="color:var(--accent);margin-right:8px"></i>Complete Results Broadsheet</h3>
+          <p>Emmanuel Chukwuemeka &nbsp;•&nbsp; 2026/MKT/0472 &nbsp;•&nbsp; Department of Marketing</p>
+        </div>
+        <button class="modal-close" onclick="closeModal('semesterModal')"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <!-- SEMESTER FILTER ROW (inside modal, above level tabs) -->
+        <div class="modal-sem-row" id="modalSemRow">
+          <button class="modal-sem-tab modal-sem-active" onclick="switchModalSem(event,'full')" id="semBtnFull">Full Year <span class="sem-count" id="semCountFull"></span></button>
+          <button class="modal-sem-tab" onclick="switchModalSem(event,'sem1')" id="semBtn1">1st Semester <span class="sem-count" id="semCount1"></span></button>
+          <button class="modal-sem-tab" onclick="switchModalSem(event,'sem2')" id="semBtn2">2nd Semester <span class="sem-count" id="semCount2"></span></button>
+        </div>
+
+        <div class="modal-tabs">
+          <button class="modal-tab active-tab" onclick="switchTab(event,'tab100L')">100 Level</button>
+          <button class="modal-tab" onclick="switchTab(event,'tab200L')">200 Level</button>
+          <button class="modal-tab" onclick="switchTab(event,'tab300L')">300 Level</button>
+          <button class="modal-tab" onclick="switchTab(event,'tab400L')">400 Level</button>
+        </div>
+
+        <!-- 100L -->
+        <div class="modal-tab-panel active-panel" id="tab100L">
+          <table class="result-table">
+            <thead><tr><th>#</th><th>Course Code</th><th>Course Title</th><th>Units</th><th>CA (40)</th><th>Exam (60)</th><th>Total</th><th>Grade</th></tr></thead>
+            <tbody>
+              <tr class="course-row" data-semester="1"><td class="course-row-num"></td><td>MKT 101</td><td>Introduction to Marketing</td><td>3</td><td>35</td><td>52</td><td>87</td><td><span class="grade-badge grade-A">A</span></td></tr>
+              <tr class="course-row" data-semester="1"><td class="course-row-num"></td><td>BUS 101</td><td>Business Mathematics</td><td>3</td><td>30</td><td>48</td><td>78</td><td><span class="grade-badge grade-B">B</span></td></tr>
+              <tr class="course-row" data-semester="1"><td class="course-row-num"></td><td>ECO 101</td><td>Principles of Economics I</td><td>3</td><td>32</td><td>50</td><td>82</td><td><span class="grade-badge grade-A">A</span></td></tr>
+              <tr class="course-row" data-semester="1"><td class="course-row-num"></td><td>GST 101</td><td>Use of English I</td><td>2</td><td>38</td><td>55</td><td>93</td><td><span class="grade-badge grade-A">A</span></td></tr>
+              <tr class="course-row" data-semester="1"><td class="course-row-num"></td><td>BUS 103</td><td>Introduction to Business</td><td>3</td><td>34</td><td>49</td><td>83</td><td><span class="grade-badge grade-A">A</span></td></tr>
+              <tr class="course-row" data-semester="1"><td class="course-row-num"></td><td>ACC 101</td><td>Principles of Accounting I</td><td>3</td><td>28</td><td>45</td><td>73</td><td><span class="grade-badge grade-B">B</span></td></tr>
+              <tr class="course-row" data-semester="2"><td class="course-row-num"></td><td>MKT 102</td><td>Consumer Behavior I</td><td>2</td><td>36</td><td>53</td><td>89</td><td><span class="grade-badge grade-A">A</span></td></tr>
+              <tr class="course-row" data-semester="2"><td class="course-row-num"></td><td>ECO 102</td><td>Principles of Economics II</td><td>3</td><td>31</td><td>46</td><td>77</td><td><span class="grade-badge grade-B">B</span></td></tr>
+              <tr class="course-row" data-semester="2"><td class="course-row-num"></td><td>GST 102</td><td>Use of English II</td><td>2</td><td>37</td><td>54</td><td>91</td><td><span class="grade-badge grade-A">A</span></td></tr>
+              <tr class="course-row" data-semester="2"><td class="course-row-num"></td><td>MTH 101</td><td>Elementary Mathematics</td><td>3</td><td>29</td><td>44</td><td>73</td><td><span class="grade-badge grade-B">B</span></td></tr>
+            </tbody>
+          </table>
+          <div class="modal-summary-row">
+            <div class="modal-summary-chip"><div class="m-val">27</div><div class="m-lbl">Total Units</div></div>
+            <div class="modal-summary-chip"><div class="m-val" style="color:var(--success)">4.50</div><div class="m-lbl">Semester CGPA</div></div>
+            <div class="modal-summary-chip"><div class="m-val" style="color:var(--accent)">0</div><div class="m-lbl">Carryovers</div></div>
+            <div class="modal-summary-chip"><div class="m-val">Good</div><div class="m-lbl">Standing</div></div>
+          </div>
+        </div>
+
+        <!-- 200L -->
+        <div class="modal-tab-panel" id="tab200L">
+          <table class="result-table">
+            <thead><tr><th>#</th><th>Course Code</th><th>Course Title</th><th>Units</th><th>CA (40)</th><th>Exam (60)</th><th>Total</th><th>Grade</th></tr></thead>
+            <tbody>
+              <tr class="course-row" data-semester="1"><td class="course-row-num"></td><td>MKT 201</td><td>Marketing Management</td><td>3</td><td>36</td><td>54</td><td>90</td><td><span class="grade-badge grade-A">A</span></td></tr>
+              <tr class="course-row" data-semester="1"><td class="course-row-num"></td><td>MKT 202</td><td>Introduction to Advertising</td><td>2</td><td>28</td><td>30</td><td>58</td><td><span class="grade-badge grade-C">D</span></td></tr>
+              <tr class="course-row" data-semester="1"><td class="course-row-num"></td><td>BUS 205</td><td>Business Communication</td><td>3</td><td>33</td><td>50</td><td>83</td><td><span class="grade-badge grade-A">A</span></td></tr>
+              <tr class="course-row" data-semester="1"><td class="course-row-num"></td><td>MGT 201</td><td>Principles of Management</td><td>3</td><td>35</td><td>52</td><td>87</td><td><span class="grade-badge grade-A">A</span></td></tr>
+              <tr class="course-row" data-semester="1"><td class="course-row-num"></td><td>ACC 202</td><td>Financial Accounting II</td><td>3</td><td>30</td><td>47</td><td>77</td><td><span class="grade-badge grade-B">B</span></td></tr>
+              <tr class="course-row" data-semester="2"><td class="course-row-num"></td><td>MKT 204</td><td>Sales Management</td><td>3</td><td>38</td><td>55</td><td>93</td><td><span class="grade-badge grade-A">A</span></td></tr>
+              <tr class="course-row" data-semester="2"><td class="course-row-num"></td><td>ECO 205</td><td>Microeconomics</td><td>3</td><td>32</td><td>49</td><td>81</td><td><span class="grade-badge grade-A">A</span></td></tr>
+              <tr class="course-row" data-semester="2"><td class="course-row-num"></td><td>BUS 207</td><td>Organizational Behavior</td><td>3</td><td>34</td><td>51</td><td>85</td><td><span class="grade-badge grade-A">A</span></td></tr>
+              <tr class="course-row" data-semester="2"><td class="course-row-num"></td><td>GST 201</td><td>Peace &amp; Conflict Resolution</td><td>2</td><td>37</td><td>55</td><td>92</td><td><span class="grade-badge grade-A">A</span></td></tr>
+            </tbody>
+          </table>
+          <div class="modal-summary-row">
+            <div class="modal-summary-chip"><div class="m-val">25</div><div class="m-lbl">Total Units</div></div>
+            <div class="modal-summary-chip"><div class="m-val" style="color:var(--success)">4.62</div><div class="m-lbl">CGPA (Cumulative)</div></div>
+            <div class="modal-summary-chip"><div class="m-val" style="color:var(--accent)">1</div><div class="m-lbl">Carryovers</div></div>
+            <div class="modal-summary-chip"><div class="m-val">Good</div><div class="m-lbl">Standing</div></div>
+          </div>
+        </div>
+
+        <!-- 300L -->
+        <div class="modal-tab-panel" id="tab300L">
+          <table class="result-table">
+            <thead><tr><th>#</th><th>Course Code</th><th>Course Title</th><th>Units</th><th>CA (40)</th><th>Exam (60)</th><th>Total</th><th>Grade</th></tr></thead>
+            <tbody>
+              <tr class="course-row" data-semester="1"><td class="course-row-num"></td><td>MKT 301</td><td>Marketing Research</td><td>3</td><td>37</td><td>56</td><td>93</td><td><span class="grade-badge grade-A">A</span></td></tr>
+              <tr class="course-row" data-semester="1"><td class="course-row-num"></td><td>MKT 303</td><td>Buyer Behavior</td><td>3</td><td>35</td><td>53</td><td>88</td><td><span class="grade-badge grade-A">A</span></td></tr>
+              <tr class="course-row" data-semester="1"><td class="course-row-num"></td><td>MKT 305</td><td>Industrial Marketing</td><td>3</td><td>33</td><td>51</td><td>84</td><td><span class="grade-badge grade-A">A</span></td></tr>
+              <tr class="course-row" data-semester="1"><td class="course-row-num"></td><td>MGT 303</td><td>Human Resource Management</td><td>3</td><td>36</td><td>54</td><td>90</td><td><span class="grade-badge grade-A">A</span></td></tr>
+              <tr class="course-row" data-semester="1"><td class="course-row-num"></td><td>BUS 301</td><td>Business Law</td><td>3</td><td>29</td><td>46</td><td>75</td><td><span class="grade-badge grade-B">B</span></td></tr>
+              <tr class="course-row" data-semester="2"><td class="course-row-num"></td><td>MKT 307</td><td>International Marketing</td><td>3</td><td>38</td><td>57</td><td>95</td><td><span class="grade-badge grade-A">A</span></td></tr>
+              <tr class="course-row" data-semester="2"><td class="course-row-num"></td><td>ECO 305</td><td>Macroeconomics</td><td>3</td><td>31</td><td>48</td><td>79</td><td><span class="grade-badge grade-B">B</span></td></tr>
+              <tr class="course-row" data-semester="2"><td class="course-row-num"></td><td>MKT 309</td><td>Distribution Management</td><td>3</td><td>34</td><td>52</td><td>86</td><td><span class="grade-badge grade-A">A</span></td></tr>
+              <tr class="course-row" data-semester="2"><td class="course-row-num"></td><td>MKT 311</td><td>Services Marketing</td><td>3</td><td>36</td><td>55</td><td>91</td><td><span class="grade-badge grade-A">A</span></td></tr>
+              <tr class="course-row" data-semester="2"><td class="course-row-num"></td><td>BUS 305</td><td>Research Methods in Business</td><td>3</td><td>35</td><td>53</td><td>88</td><td><span class="grade-badge grade-A">A</span></td></tr>
+            </tbody>
+          </table>
+          <div class="modal-summary-row">
+            <div class="modal-summary-chip"><div class="m-val">30</div><div class="m-lbl">Total Units</div></div>
+            <div class="modal-summary-chip"><div class="m-val" style="color:var(--success)">4.76</div><div class="m-lbl">CGPA (Cumulative)</div></div>
+            <div class="modal-summary-chip"><div class="m-val" style="color:var(--accent)">0</div><div class="m-lbl">Carryovers</div></div>
+            <div class="modal-summary-chip"><div class="m-val">First Class</div><div class="m-lbl">Standing</div></div>
+          </div>
+        </div>
+
+        <!-- 400L -->
+        <div class="modal-tab-panel" id="tab400L">
+          <table class="result-table">
+            <thead><tr><th>#</th><th>Course Code</th><th>Course Title</th><th>Units</th><th>CA (40)</th><th>Exam (60)</th><th>Total</th><th>Grade</th></tr></thead>
+            <tbody>
+              <tr class="course-row" data-semester="1"><td class="course-row-num"></td><td>MKT 401</td><td>Consumer Behavior (Advanced)</td><td>3</td><td>38</td><td>58</td><td>96</td><td><span class="grade-badge grade-A">A</span></td></tr>
+              <tr class="course-row" data-semester="1"><td class="course-row-num"></td><td>MKT 403</td><td>Marketing Research Methods</td><td>3</td><td>35</td><td>53</td><td>88</td><td><span class="grade-badge grade-A">A</span></td></tr>
+              <tr class="course-row" data-semester="1"><td class="course-row-num"></td><td>MGT 405</td><td>Strategic Management</td><td>3</td><td>37</td><td>55</td><td>92</td><td><span class="grade-badge grade-A">A</span></td></tr>
+              <tr class="course-row" data-semester="2"><td class="course-row-num"></td><td>MKT 405</td><td>Digital Marketing Strategy</td><td>3</td><td>39</td><td>57</td><td>96</td><td><span class="grade-badge grade-A">A</span></td></tr>
+              <tr class="course-row" data-semester="2"><td class="course-row-num"></td><td>MKT 407</td><td>Brand Management</td><td>3</td><td>36</td><td>54</td><td>90</td><td><span class="grade-badge grade-A">A</span></td></tr>
+              <tr class="course-row" data-semester="2"><td class="course-row-num"></td><td>BUS 401</td><td>Entrepreneurship Development</td><td>3</td><td>34</td><td>51</td><td>85</td><td><span class="grade-badge grade-A">A</span></td></tr>
+              <tr class="course-row" data-semester="2"><td class="course-row-num"></td><td>MKT 409</td><td>Public Relations Management</td><td>3</td><td>33</td><td>50</td><td>83</td><td><span class="grade-badge grade-A">A</span></td></tr>
+              <tr class="course-row" data-semester="2"><td class="course-row-num"></td><td>MKT 411</td><td>Marketing Ethics &amp; Society</td><td>3</td><td>36</td><td>53</td><td>89</td><td><span class="grade-badge grade-A">A</span></td></tr>
+              <tr class="course-row" data-semester="2"><td class="course-row-num"></td><td>MKT 499</td><td>Final Year Project</td><td>6</td><td colspan="3" style="font-style:italic;color:var(--muted)">In Progress — Supervisor Pending</td><td><span class="grade-badge" style="background:rgba(100,116,139,0.1);color:#64748b">Pending</span></td></tr>
+            </tbody>
+          </table>
+          <div class="modal-summary-row">
+            <div class="modal-summary-chip"><div class="m-val">30</div><div class="m-lbl">Total Units (Sem)</div></div>
+            <div class="modal-summary-chip"><div class="m-val" style="color:var(--success)">4.82</div><div class="m-lbl">CGPA (Cumulative)</div></div>
+            <div class="modal-summary-chip"><div class="m-val" style="color:var(--accent)">1*</div><div class="m-lbl">Outstanding (Carryover)</div></div>
+            <div class="modal-summary-chip"><div class="m-val" style="color:var(--warn)">First Class</div><div class="m-lbl">Honours Standing</div></div>
+          </div>
+        </div>
+
+      </div><!-- modal-body -->
+    </div><!-- modal-sheet -->
+  </div>
+
+  <!-- CARRYOVER MODAL -->
+  <div class="modal-overlay" id="carryoverModal" onclick="handleModalOverlayClick(event,'carryoverModal')">
+    <div class="modal-sheet">
+      <div class="modal-top-stripe"></div>
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <h3><i class="fas fa-rotate-right" style="color:var(--accent);margin-right:8px"></i>Carryover Resolution Log</h3>
+          <p>Emmanuel Chukwuemeka &nbsp;•&nbsp; Historical carryovers and resolution status</p>
+        </div>
+        <button class="modal-close" onclick="closeModal('carryoverModal')"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <table class="result-table">
+          <thead><tr><th>Course</th><th>Level</th><th>Year Incurred</th><th>Original Score</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td>MKT 202</td><td>200L</td><td>2023/2024</td><td>58/100 (D)</td><td><span class="grade-badge grade-F">Active</span></td><td><button style="background:var(--accent);color:#fff;border:none;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">Register</button></td></tr>
+          </tbody>
+        </table>
+        <div class="modal-summary-row">
+          <div class="modal-summary-chip"><div class="m-val" style="color:var(--accent)">1</div><div class="m-lbl">Active Carryovers</div></div>
+          <div class="modal-summary-chip"><div class="m-val" style="color:var(--success)">0</div><div class="m-lbl">Resolved Carryovers</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GPA MODAL -->
+  <div class="modal-overlay" id="gpaModal" onclick="handleModalOverlayClick(event,'gpaModal')">
+    <div class="modal-sheet">
+      <div class="modal-top-stripe"></div>
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <h3><i class="fas fa-chart-area" style="color:var(--accent);margin-right:8px"></i>Semester-by-Semester GPA Breakdown</h3>
+          <p>Emmanuel Chukwuemeka &nbsp;•&nbsp; Full academic GPA history</p>
+        </div>
+        <button class="modal-close" onclick="closeModal('gpaModal')"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <table class="result-table">
+          <thead><tr><th>Level</th><th>Semester</th><th>GP Earned</th><th>Units</th><th>GPA</th><th>Cumulative CGPA</th></tr></thead>
+          <tbody>
+            <tr><td>100L</td><td>First</td><td>116</td><td>27</td><td>4.30</td><td>4.30</td></tr>
+            <tr><td>100L</td><td>Second</td><td>122</td><td>26</td><td>4.69</td><td>4.50</td></tr>
+            <tr><td>200L</td><td>First</td><td>118</td><td>25</td><td>4.72</td><td>4.58</td></tr>
+            <tr><td>200L</td><td>Second</td><td>115</td><td>25</td><td>4.60</td><td>4.62</td></tr>
+            <tr><td>300L</td><td>First</td><td>145</td><td>30</td><td>4.83</td><td>4.68</td></tr>
+            <tr><td>300L</td><td>Second</td><td>148</td><td>30</td><td>4.93</td><td>4.76</td></tr>
+            <tr><td>400L</td><td>First</td><td>143</td><td>30</td><td>4.77</td><td>4.82</td></tr>
+          </tbody>
+        </table>
+        <div class="modal-summary-row">
+          <div class="modal-summary-chip"><div class="m-val" style="color:var(--success)">4.82</div><div class="m-lbl">Current CGPA</div></div>
+          <div class="modal-summary-chip"><div class="m-val">193</div><div class="m-lbl">Total Units Attempted</div></div>
+          <div class="modal-summary-chip"><div class="m-val">4.30</div><div class="m-lbl">Lowest GPA (100L S1)</div></div>
+          <div class="modal-summary-chip"><div class="m-val">4.93</div><div class="m-lbl">Highest GPA (300L S2)</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEGREE AUDIT MODAL -->
+  <div class="modal-overlay" id="degreeModal" onclick="handleModalOverlayClick(event,'degreeModal')">
+    <div class="modal-sheet">
+      <div class="modal-top-stripe"></div>
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <h3><i class="fas fa-graduation-cap" style="color:var(--accent);margin-right:8px"></i>Degree Audit &amp; Graduation Clearance Report</h3>
+          <p>BSc Marketing — Graduation Readiness: 93%</p>
+        </div>
+        <button class="modal-close" onclick="closeModal('degreeModal')"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="transcript-header">
+          <i class="fas fa-seal-check"></i>
+          <div>
+            <h4>Emmanuel Chukwuemeka — 2026/MKT/0472</h4>
+            <p>Degree Programme: Bachelor of Science (BSc) Marketing &nbsp;•&nbsp; Faculty of Management Sciences &nbsp;•&nbsp; Minimum Graduation Requirement: 120 Credit Units</p>
+          </div>
+        </div>
+        <table class="result-table">
+          <thead><tr><th>Requirement Category</th><th>Required Units</th><th>Earned Units</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>Core Departmental Courses</td><td>60</td><td>58</td><td><span class="grade-badge grade-A">95% Done</span></td></tr>
+            <tr><td>Faculty Courses</td><td>20</td><td>20</td><td><span class="grade-badge grade-A">Complete</span></td></tr>
+            <tr><td>General Studies (GST)</td><td>10</td><td>10</td><td><span class="grade-badge grade-A">Complete</span></td></tr>
+            <tr><td>Free Electives</td><td>15</td><td>14</td><td><span class="grade-badge grade-B">93%</span></td></tr>
+            <tr><td>Industrial Training (SIWES)</td><td>6</td><td>6</td><td><span class="grade-badge grade-A">Complete</span></td></tr>
+            <tr><td>Final Year Project (MKT 499)</td><td>6</td><td>0</td><td><span class="grade-badge grade-C">In Progress</span></td></tr>
+            <tr><td>Outstanding Carryovers</td><td>0</td><td>—</td><td><span class="grade-badge grade-F">1 Pending</span></td></tr>
+          </tbody>
+        </table>
+        <div class="modal-summary-row">
+          <div class="modal-summary-chip"><div class="m-val">112</div><div class="m-lbl">Credits Earned</div></div>
+          <div class="modal-summary-chip"><div class="m-val">120</div><div class="m-lbl">Credits Required</div></div>
+          <div class="modal-summary-chip"><div class="m-val" style="color:var(--warn)">8</div><div class="m-lbl">Credits Remaining</div></div>
+          <div class="modal-summary-chip"><div class="m-val" style="color:var(--success)">4.82</div><div class="m-lbl">Current CGPA</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- PROFILE MODAL -->
+  <div class="modal-overlay" id="profileModal" onclick="handleModalOverlayClick(event,'profileModal')">
+    <div class="modal-sheet">
+      <div class="modal-top-stripe"></div>
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <h3>Full Student Profile</h3>
+          <p>Detailed verification and academic information</p>
+        </div>
+        <button class="modal-close" onclick="closeModal('profileModal')"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="transcript-header">
+          <i class="fas fa-user-circle"></i>
+          <div>
+            <h4>Emmanuel Chukwuemeka</h4>
+            <p>2026/MKT/0472 • Department of Marketing</p>
+          </div>
+        </div>
+        <table class="result-table">
+          <tbody>
+            <tr><td><strong>Matriculation Number:</strong></td><td>2026/MKT/0472</td></tr>
+            <tr><td><strong>Faculty:</strong></td><td>Management Sciences</td></tr>
+            <tr><td><strong>Department:</strong></td><td>Marketing</td></tr>
+            <tr><td><strong>Program:</strong></td><td>B.Sc. Marketing</td></tr>
+            <tr><td><strong>Level:</strong></td><td>400 Level</td></tr>
+            <tr><td><strong>Admission Year:</strong></td><td>2023</td></tr>
+            <tr><td><strong>Current CGPA:</strong></td><td><span style="color:var(--accent);font-weight:900;">4.82</span></td></tr>
+            <tr><td><strong>Account Status:</strong></td><td><span class="acc-badge badge-success" style="display:inline-block">Active</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <script>
+    // ═══════════════════════════════════════════════
+    // DARK MODE
+    // ═══════════════════════════════════════════════
+    function toggleDarkMode() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      if (isDark) {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('icep_modern_theme', 'light');
+        document.getElementById('themeIcon').className = 'fas fa-moon';
+      } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem('icep_modern_theme', 'dark');
+        document.getElementById('themeIcon').className = 'fas fa-sun';
+      }
+    }
+    // Sync icon on load
+    (function(){
+      if(document.documentElement.getAttribute('data-theme') === 'dark')
+        document.addEventListener('DOMContentLoaded',()=>{ const i=document.getElementById('themeIcon'); if(i) i.className='fas fa-sun'; });
+    })();
+
+    // ═══════════════════════════════════════════════
+    // SMART NOTIFICATION BELL
+    // ═══════════════════════════════════════════════
+    // Each notification has: target (modal id or anchor), addedAt (timestamp ms)
+    const NOW = Date.now();
+    const NOTIFS = [
+      { id:1, icon:'📋', text:'Results for MKT 401 — Consumer Behavior have been uploaded.', time:'2 min ago', read:false, target:'semesterModal', addedAt: NOW - 2*60*1000 },
+      { id:2, icon:'📅', text:'Re-sit registration window opens October 15, 2026.', time:'1 hr ago', read:false, target:'acc2', addedAt: NOW - 60*60*1000 },
+      { id:3, icon:'🎓', text:'Supervisor assignment for MKT 499 (Final Year Project) is still pending.', time:'3 hrs ago', read:false, target:'degreeModal', addedAt: NOW - 3*60*60*1000 },
+      { id:4, icon:'📢', text:'Faculty notice: 400L exam timetable has been released.', time:'Yesterday', read:false, target:'acc3', addedAt: NOW - 26*60*60*1000 },
+      { id:5, icon:'💳', text:'School fees second instalment deadline is in 7 days.', time:'Yesterday', read:false, target:'acc4', addedAt: NOW - 27*60*60*1000 },
+    ];
+
+    function isNew(addedAt) { return (Date.now() - addedAt) < 86400000; }
+
+    function routeToTarget(target) {
+      // Close the notification panel first
+      document.getElementById('notifPanel').classList.remove('notif-open');
+      if (!target) return;
+      // Check if it's a modal id
+      const modal = document.getElementById(target);
+      if (modal && modal.classList.contains('modal-overlay')) {
+        openModal(target);
+      } else {
+        // It's an accordion or section id — scroll to it and open
+        const el = document.getElementById(target);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          if (el.classList.contains('accordion-card') && !el.classList.contains('acc-open')) {
+            toggleAcc(target);
+          }
+        }
+      }
+    }
+
+    function renderNotifs() {
+      const list = document.getElementById('notifList');
+      const countEl = document.getElementById('notifCount');
+      const unread = NOTIFS.filter(n => !n.read);
+      // Update count badge
+      if (unread.length === 0) {
+        countEl.style.display = 'none';
+      } else {
+        countEl.style.display = 'flex';
+        countEl.textContent = unread.length > 9 ? '9+' : unread.length;
+      }
+      if (NOTIFS.length === 0) {
+        list.innerHTML = '<div class="notif-empty"><i class="fas fa-bell-slash" style="font-size:24px;margin-bottom:8px;display:block"></i>No notifications</div>';
+        return;
+      }
+      list.innerHTML = NOTIFS.map(n => {
+        const newTag = isNew(n.addedAt) && !n.read ? '<span class="new-badge" style="font-size:8px;padding:1px 6px;">NEW</span>' : '';
+        return `
+        <div class="notif-item${n.read?' notif-read':''}" id="notif-${n.id}" onclick="handleNotifClick(event,${n.id})" style="cursor:${n.target?'pointer':'default'}">
+          <div class="notif-dot"></div>
+          <div class="notif-text">
+            <p>${n.icon} ${n.text} ${newTag}</p>
+            <span>${n.time}${n.target?' · <em style="color:var(--accent);font-size:10px;">Tap to view →</em>':''}</span>
+          </div>
+          ${!n.read ? `<button class="notif-dismiss" onclick="dismissNotif(event,${n.id})" title="Mark as read"><i class="fas fa-check"></i></button>` : ''}
+        </div>`;
+      }).join('');
+    }
+
+    function handleNotifClick(e, id) {
+      if (e.target.closest('.notif-dismiss')) return; // let dismiss handle it
+      const n = NOTIFS.find(x => x.id === id);
+      if (!n) return;
+      n.read = true;
+      renderNotifs();
+      if (n.target) routeToTarget(n.target);
+    }
+
+    function dismissNotif(e, id) {
+      e.stopPropagation();
+      const n = NOTIFS.find(x => x.id === id);
+      if (n) n.read = true;
+      renderNotifs();
+    }
+
+    function markAllRead() {
+      NOTIFS.forEach(n => n.read = true);
+      renderNotifs();
+    }
+
+    function toggleNotifPanel(e) {
+      e.stopPropagation();
+      const panel = document.getElementById('notifPanel');
+      const isOpen = panel.classList.contains('notif-open');
+      // Close all other dropdowns
+      closeAllDropdowns();
+      if (!isOpen) panel.classList.add('notif-open');
+    }
+
+    // ═══════════════════════════════════════════════
+    // VIEW OTHER SIDE PORTAL SWITCHER
+    // ═══════════════════════════════════════════════
+    function togglePortalMenu(e) {
+      e.stopPropagation();
+      const menu = document.getElementById('portalMenu');
+      const btn  = document.getElementById('btnPortal');
+      const isOpen = menu.classList.contains('portal-open');
+      closeAllDropdowns();
+      if (!isOpen) {
+        menu.classList.add('portal-open');
+        btn.classList.add('open');
+      }
+    }
+
+    function closeAllDropdowns() {
+      document.getElementById('notifPanel').classList.remove('notif-open');
+      document.getElementById('portalMenu').classList.remove('portal-open');
+      document.getElementById('btnPortal').classList.remove('open');
+    }
+
+    // Close dropdowns on outside click
+    document.addEventListener('click', closeAllDropdowns);
+
+    // ═══════════════════════════════════════════════
+    // SEMESTER FILTER TABS
+    // ═══════════════════════════════════════════════
+    function switchSemTab(e, panelId) {
+      const acc = e.target.closest('.acc-body-inner');
+      acc.querySelectorAll('.sem-tab').forEach(t => t.classList.remove('sem-active'));
+      acc.querySelectorAll('.sem-panel').forEach(p => p.classList.remove('sem-show'));
+      e.target.classList.add('sem-active');
+      acc.querySelector('#' + panelId).classList.add('sem-show');
+    }
+
+    // ═══════════════════════════════════════════════
+    // ACCORDION TOGGLE
+    // ═══════════════════════════════════════════════
+    function toggleAcc(id) {
+      const el = document.getElementById(id);
+      const isOpen = el.classList.contains('acc-open');
+      document.querySelectorAll('.accordion-card').forEach(c => c.classList.remove('acc-open'));
+      if (!isOpen) el.classList.add('acc-open');
+    }
+
+    // ═══════════════════════════════════════════════
+    // MODAL OPEN / CLOSE
+    // ═══════════════════════════════════════════════
+    function openModal(id) {
+      document.getElementById(id).classList.add('modal-open');
+      document.body.style.overflow = 'hidden';
+      if (id === 'semesterModal') { updateSemCounts(); renumberCourseRows(); }
+    }
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('modal-open');
+      document.body.style.overflow = '';
+    }
+    function handleModalOverlayClick(e, id) {
+      if (e.target === document.getElementById(id)) closeModal(id);
+    }
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay.modal-open').forEach(m => { m.classList.remove('modal-open'); document.body.style.overflow = ''; });
+        closeAllDropdowns();
+      }
+    });
+
+    // ── MODAL TAB SWITCHING ──
+    function switchTab(e, panelId) {
+      const modal = e.target.closest('.modal-body');
+      modal.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active-tab'));
+      modal.querySelectorAll('.modal-tab-panel').forEach(p => p.classList.remove('active-panel'));
+      e.target.classList.add('active-tab');
+      modal.querySelector('#' + panelId).classList.add('active-panel');
+    }
+
+    // ── IN-MODAL SEMESTER FILTER ──
+    // Rows without data-semester show in ALL filters (historical levels show everything).
+    // Only rows with data-semester="1" or "2" are filtered.
+    let currentModalSem = 'full';
+
+    function updateSemCounts() {
+      const allRows = document.querySelectorAll('.modal-tab-panel tbody tr');
+      let tot=0,s1=0,s2=0;
+      allRows.forEach(tr => {
+        const s = tr.getAttribute('data-semester');
+        tot++;
+        if (s === '1') s1++;
+        else if (s === '2') s2++;
+      });
+      const unsplit = tot - s1 - s2; // rows with no data-semester
+      const el1 = document.getElementById('semCount1');
+      const el2 = document.getElementById('semCount2');
+      const elF = document.getElementById('semCountFull');
+      if(elF) elF.textContent = `(${tot})`;
+      if(el1) el1.textContent = `(${s1 + unsplit})`;
+      if(el2) el2.textContent = `(${s2 + unsplit})`;
+    }
+
+    function switchModalSem(e, sem) {
+      currentModalSem = sem;
+      const row = e.target.closest('.modal-sem-row');
+      row.querySelectorAll('.modal-sem-tab').forEach(t => t.classList.remove('modal-sem-active'));
+      e.target.classList.add('modal-sem-active');
+      // Apply filtering — rows WITH data-semester get filtered; rows WITHOUT always show
+      document.querySelectorAll('.modal-tab-panel tbody tr').forEach(tr => {
+        const s = tr.getAttribute('data-semester');
+        if (!s || sem === 'full') {
+          tr.classList.remove('sem-hidden'); // no tag = always show
+        } else if (sem === 'sem1') {
+          tr.classList.toggle('sem-hidden', s === '2');
+        } else if (sem === 'sem2') {
+          tr.classList.toggle('sem-hidden', s === '1');
+        }
+      });
+      renumberCourseRows();
+    }
+
+    function renumberCourseRows() {
+      document.querySelectorAll('.modal-tab-panel.active-panel').forEach(panel => {
+        const visible = panel.querySelectorAll('.course-row:not(.sem-hidden)');
+        visible.forEach((row, i) => {
+          const numCell = row.querySelector('.course-row-num');
+          if (numCell) numCell.textContent = i + 1;
+        });
+      });
+    }
+
+    // ─── MOBILE MENU ───
+    function toggleMobileMenu() {
+      const menu = document.getElementById('mobileMenu');
+      const backdrop = document.getElementById('mobileBackdrop');
+      const hamburger = document.getElementById('hamburger');
+      const isOpen = menu.classList.contains('open');
+      if (isOpen) { closeMobileMenu(); }
+      else {
+        menu.classList.add('open');
+        backdrop.classList.add('open');
+        hamburger.classList.add('open');
+        document.body.style.overflow = 'hidden';
+      }
+    }
+    function closeMobileMenu() {
+      document.getElementById('mobileMenu').classList.remove('open');
+      document.getElementById('mobileBackdrop').classList.remove('open');
+      document.getElementById('hamburger').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    // ─── INIT ───
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('acc1').classList.add('acc-open');
+      renderNotifs();
+      // Sync dark mode icon
+      if(document.documentElement.getAttribute('data-theme') === 'dark') {
+        const i = document.getElementById('themeIcon');
+        if(i) i.className = 'fas fa-sun';
+      }
+    });
+  </script>
+</body>
+</html>

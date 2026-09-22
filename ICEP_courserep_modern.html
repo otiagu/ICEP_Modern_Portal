@@ -1,0 +1,1515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ICEP – Modern Course Rep Dashboard</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+
+  <!-- Dark mode pre-load -->
+  <script>
+    (function(){
+      var t = localStorage.getItem('icep_modern_theme');
+      if(t === 'dark') document.documentElement.setAttribute('data-theme','dark');
+    })();
+  </script>
+  
+  <style>
+    :root {
+      --bg:            #f8fafc;
+      --card:          #ffffff;
+      --nav-bg:        rgba(255,255,255,0.88);
+      --border:        rgba(15,23,42,0.09);
+      --accent:        #10b981; /* Green for course rep */
+      --accent-dark:   #059669;
+      --accent-glow:   rgba(16,185,129,0.28);
+      --accent-light:  rgba(16,185,129,0.08);
+      --text:          #0f172a;
+      --muted:         #64748b;
+      --success:       #10b981;
+      --success-bg:    rgba(16,185,129,0.10);
+      --warn:          #f59e0b;
+      --warn-bg:       rgba(245,158,11,0.10);
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;line-height:1.6;min-height:100vh;overflow-x:hidden;}
+
+    /* BLOBS */
+    .blob{position:fixed;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0;}
+    .blob-1{width:500px;height:500px;top:-150px;left:-150px;background:rgba(16,185,129,0.07);}
+    .blob-2{width:600px;height:600px;bottom:-200px;right:-150px;background:rgba(99,102,241,0.05);}
+
+    /* ─── TOPNAV ─── */
+    .topnav{
+      position:fixed;top:0;left:0;right:0;z-index:1000;
+      height:70px;background:var(--nav-bg);
+      backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+      border-bottom:1px solid var(--border);
+      display:flex;align-items:center;justify-content:space-between;
+      padding:0 clamp(16px,4vw,60px);
+      box-shadow:0 4px 24px rgba(0,0,0,0.04);
+    }
+    .nav-brand{font-family:'Outfit',sans-serif;font-size:22px;font-weight:900;color:var(--text);letter-spacing:1px;display:flex;align-items:center;gap:10px;text-decoration:none;}
+    .nav-brand span{color:var(--accent);}
+    .nav-links{display:flex;gap:30px;list-style:none;}
+    .nav-links a{color:var(--muted);text-decoration:none;font-size:14px;font-weight:600;transition:color .25s,transform .25s;display:block;}
+    .nav-links a:hover,.nav-links a.active{color:var(--accent);transform:translateY(-1px);}
+    .nav-right{display:flex;align-items:center;gap:16px;}
+    .nav-bell{width:38px;height:38px;border-radius:50%;background:rgba(15,23,42,0.04);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--muted);cursor:pointer;transition:all .25s;position:relative;}
+    .nav-bell:hover{border-color:var(--accent);color:var(--accent);box-shadow:0 0 14px var(--accent-glow);}
+    .nav-bell::after{content:'';position:absolute;top:8px;right:9px;width:8px;height:8px;background:var(--accent);border:2px solid var(--bg);border-radius:50%;}
+    .btn-signout{background:transparent;border:1.5px solid var(--border);padding:9px 18px;border-radius:20px;font-size:13px;font-weight:700;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .25s;}
+    .btn-signout:hover{border-color:var(--accent);color:var(--accent);box-shadow:0 6px 18px var(--accent-glow);}
+
+    /* HAMBURGER & MOBILE MENU */
+    .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px;border:1.5px solid var(--border);border-radius:10px;background:rgba(255,255,255,0.6);transition:all .25s;}
+    .hamburger:hover{border-color:var(--accent);}
+    .hamburger span{display:block;width:22px;height:2.5px;background:var(--text);border-radius:2px;transition:all .35s;}
+    .hamburger.open span:nth-child(1){transform:translateY(7.5px) rotate(45deg);}
+    .hamburger.open span:nth-child(2){opacity:0;transform:scaleX(0);}
+    .hamburger.open span:nth-child(3){transform:translateY(-7.5px) rotate(-45deg);}
+
+    .mobile-menu-backdrop{position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .35s;}
+    .mobile-menu-backdrop.open{opacity:1;pointer-events:auto;}
+    .mobile-menu{position:fixed;top:0;right:0;bottom:0;z-index:9999;width:min(300px,80vw);background:rgba(255,255,255,0.95);backdrop-filter:blur(28px);border-left:1.5px solid var(--border);border-radius:24px 0 0 24px;box-shadow:-20px 0 60px rgba(0,0,0,0.12);display:flex;flex-direction:column;gap:8px;padding:24px 18px;transform:translateX(105%);transition:transform .35s cubic-bezier(0.16,1,0.3,1);overflow-y:auto;}
+    .mobile-menu.open{transform:translateX(0);}
+    .mobile-menu-header{display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;margin-bottom:8px;border-bottom:1px solid var(--border);}
+    .mobile-menu-title{font-family:'Outfit',sans-serif;font-size:18px;font-weight:900;color:var(--text);display:flex;align-items:center;gap:8px;}
+    .mobile-menu-title span{color:var(--accent);}
+    .mobile-menu-close{background:rgba(15,23,42,0.06);border:1px solid var(--border);color:var(--text);width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;transition:all .25s;}
+    .mobile-menu-close:hover{background:var(--accent);color:#fff;border-color:var(--accent);}
+    .mobile-nav-link{padding:14px 18px;font-size:14.5px;font-weight:700;color:var(--text);text-decoration:none;border:1px solid var(--border);border-radius:14px;display:flex;align-items:center;justify-content:space-between;transition:all .25s;}
+    .mobile-nav-link:hover,.mobile-nav-link.active{background:var(--accent-light);border-color:var(--accent);color:var(--accent);transform:translateX(-3px);}
+    .mobile-menu-divider{height:1px;background:var(--border);margin:4px 0;}
+
+    /* MAIN CONTAINER */
+    .page-wrap{max-width:1060px;margin:90px auto 60px;padding:0 clamp(16px,3vw,32px);position:relative;z-index:1;display:flex;flex-direction:column;gap:28px;}
+
+    /* ─── HERO CARD ─── */
+    .hero-card{background:var(--card);border:1px solid var(--border);border-radius:28px;box-shadow:0 20px 50px rgba(0,0,0,0.05),inset 0 2px 0 rgba(255,255,255,0.9);overflow:hidden;position:relative;}
+    .hero-top-stripe{height:5px;background:linear-gradient(90deg,var(--accent),#34d399,var(--accent-dark));}
+    .hero-inner{display:flex;gap:clamp(20px,4vw,48px);padding:clamp(24px,4vw,42px);align-items:flex-start;position:relative;z-index:2;}
+    .hero-bg-blob{position:absolute;top:-60px;right:-60px;width:300px;height:300px;background:radial-gradient(circle,rgba(16,185,129,0.08) 0%,transparent 70%);pointer-events:none;z-index:1;}
+
+    .portrait-wrap{flex-shrink:0;position:relative;}
+    .portrait-img{width:clamp(140px,18vw,200px);height:clamp(180px,22vw,260px);object-fit:cover;object-position:center 10%;border-radius:20px;border:3px solid transparent;background-clip:padding-box;box-shadow:0 20px 50px rgba(0,0,0,0.14),0 0 0 4px rgba(16,185,129,0.18);transition:transform .4s,box-shadow .4s;}
+    .portrait-img:hover{transform:scale(1.04) translateY(-4px);box-shadow:0 30px 65px rgba(0,0,0,0.18),0 0 0 4px rgba(16,185,129,0.4);}
+    .portrait-status{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-size:10px;font-weight:800;padding:5px 14px;border-radius:20px;white-space:nowrap;border:2px solid var(--card);box-shadow:0 4px 12px rgba(16,185,129,0.35);letter-spacing:0.5px;}
+
+    .hero-info{flex:1;display:flex;flex-direction:column;gap:14px;}
+    .hero-eyebrow{font-size:11px;font-weight:800;color:var(--accent);letter-spacing:2.5px;text-transform:uppercase;display:flex;align-items:center;gap:8px;}
+    .hero-eyebrow::before{content:'';display:block;width:20px;height:2px;background:var(--accent);}
+    .hero-name{font-family:'Outfit',sans-serif;font-size:clamp(26px,3.5vw,38px);font-weight:900;color:var(--text);line-height:1.1;letter-spacing:-0.5px;}
+    .hero-sub{font-size:14px;color:var(--muted);font-weight:500;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+    .hero-sub i{color:var(--accent);}
+
+    .stat-chips{display:flex;gap:14px;flex-wrap:wrap;margin-top:4px;}
+    .stat-chip{border-radius:16px;padding:14px 20px;min-width:110px;display:flex;flex-direction:column;gap:4px;transition:transform .25s,box-shadow .25s;position:relative;overflow:hidden;}
+    .stat-chip::before{content:'';position:absolute;inset:0;border-radius:16px;border:1.5px solid transparent;background-clip:padding-box;}
+    .stat-chip:hover{transform:translateY(-4px);}
+    
+    .stat-chip.chip-cgpa{background:linear-gradient(135deg,rgba(16,185,129,0.08) 0%,rgba(16,185,129,0.03) 100%);border:1.5px solid rgba(16,185,129,0.3);box-shadow:0 8px 24px rgba(16,185,129,0.08);}
+    .stat-chip.chip-level{background:linear-gradient(135deg,rgba(16,185,129,0.08) 0%,rgba(16,185,129,0.03) 100%);border:1.5px solid rgba(16,185,129,0.3);box-shadow:0 8px 24px rgba(16,185,129,0.08);}
+    .stat-chip.chip-students{background:linear-gradient(135deg,rgba(139,92,246,0.08) 0%,rgba(139,92,246,0.03) 100%);border:1.5px solid rgba(139,92,246,0.3);box-shadow:0 8px 24px rgba(139,92,246,0.08);}
+    .stat-chip.chip-tenure{background:linear-gradient(135deg,rgba(245,158,11,0.08) 0%,rgba(245,158,11,0.03) 100%);border:1.5px solid rgba(245,158,11,0.3);box-shadow:0 8px 24px rgba(245,158,11,0.08);}
+    
+    .chip-icon{font-size:18px;margin-bottom:4px;}
+    .chip-val{font-family:'Outfit',sans-serif;font-size:clamp(22px,2.8vw,30px);font-weight:900;line-height:1;}
+    .chip-label{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;}
+    .chip-cgpa .chip-icon, .chip-cgpa .chip-val {color:var(--accent);}
+    .chip-level .chip-icon, .chip-level .chip-val {color:var(--accent);}
+    .chip-students .chip-icon, .chip-students .chip-val {color:#8b5cf6;}
+    .chip-tenure .chip-icon, .chip-tenure .chip-val {color:#f59e0b;}
+
+    .hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px;}
+    .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent-dark));color:#fff;border:none;padding:12px 26px;border-radius:24px;font-size:13.5px;font-weight:800;cursor:pointer;box-shadow:0 10px 28px var(--accent-glow);transition:all .3s cubic-bezier(0.16,1,0.3,1);display:flex;align-items:center;gap:8px;}
+    .btn-primary:hover{transform:translateY(-3px);box-shadow:0 16px 36px rgba(16,185,129,0.45);}
+    .btn-secondary{background:rgba(255,255,255,0.7);border:1.5px solid var(--border);color:var(--text);padding:12px 26px;border-radius:24px;font-size:13.5px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;gap:8px;backdrop-filter:blur(8px);}
+    .btn-secondary:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-2px);}
+
+    /* ─── SECTION HEADER ─── */
+    .section-header{display:flex;flex-direction:column;gap:4px;padding:0 4px;}
+    .section-eyebrow{font-size:11px;font-weight:800;color:var(--accent);letter-spacing:2px;text-transform:uppercase;}
+    .section-title{font-family:'Outfit',sans-serif;font-size:clamp(20px,2.5vw,28px);font-weight:900;color:var(--text);letter-spacing:-0.3px;}
+
+    /* ─── ACCORDION CARDS ─── */
+    .accordion-card{background:var(--card);border:1px solid var(--border);border-radius:22px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.04),inset 0 1px 0 rgba(255,255,255,0.8);transition:box-shadow .35s,border-color .35s,transform .35s;}
+    .accordion-card:hover{box-shadow:0 16px 40px rgba(0,0,0,0.07);transform:translateY(-2px);}
+    .accordion-card.acc-open{border-color:rgba(16,185,129,0.35);box-shadow:0 20px 50px rgba(16,185,129,0.10);}
+
+    .acc-header{display:flex;justify-content:space-between;align-items:center;padding:22px 28px;cursor:pointer;user-select:none;}
+    .acc-left{display:flex;align-items:center;gap:16px;}
+    .acc-icon-wrap{width:44px;height:44px;border-radius:14px;background:rgba(15,23,42,0.05);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--muted);transition:all .3s;}
+    .acc-titles{display:flex;flex-direction:column;gap:2px;}
+    .acc-title{font-size:16px;font-weight:800;color:var(--text);}
+    .acc-subtitle{font-size:13px;color:var(--muted);font-weight:500;}
+    .acc-right{display:flex;align-items:center;gap:16px;}
+    .acc-badge{background:rgba(15,23,42,0.05);border:1px solid var(--border);padding:7px 14px;border-radius:20px;font-size:12.5px;font-weight:700;color:var(--muted);white-space:nowrap;}
+    .acc-chevron{width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:rgba(15,23,42,0.04);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--muted);transition:all .4s;}
+    
+    .acc-icon-wrap.icon-green{color:#10b981;background:rgba(16,185,129,0.08);border-color:rgba(16,185,129,0.2);}
+    .acc-icon-wrap.icon-blue{color:#3b82f6;background:rgba(59,130,246,0.08);border-color:rgba(59,130,246,0.2);}
+    .acc-icon-wrap.icon-amber{color:#f59e0b;background:rgba(245,158,11,0.08);border-color:rgba(245,158,11,0.2);}
+    .acc-icon-wrap.icon-purple{color:#8b5cf6;background:rgba(139,92,246,0.08);border-color:rgba(139,92,246,0.2);}
+
+    .accordion-card.acc-open .acc-icon-wrap{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 8px 20px var(--accent-glow);}
+    .accordion-card.acc-open .acc-chevron{transform:rotate(180deg);background:var(--accent-light);border-color:rgba(16,185,129,0.3);color:var(--accent);}
+
+    .acc-body{max-height:0;overflow:hidden;transition:max-height .5s cubic-bezier(0.16,1,0.3,1);}
+    .accordion-card.acc-open .acc-body{max-height:1200px;}
+    .acc-body-inner{padding:0 28px 28px;border-top:1px solid var(--border);}
+    .acc-intro{padding-top:20px;padding-bottom:16px;font-size:13.5px;color:var(--muted);font-weight:500;margin-bottom:20px;}
+
+    .btn-full-detail{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:22px;padding:13px 28px;background:linear-gradient(135deg,var(--accent),var(--accent-dark));color:#fff;border:none;border-radius:24px;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 10px 28px var(--accent-glow);transition:all .3s;}
+    .btn-full-detail:hover{transform:translateY(-3px);box-shadow:0 16px 38px rgba(16,185,129,0.45);}
+    .btn-full-detail.blue-btn{background:linear-gradient(135deg,#3b82f6,#2563eb);box-shadow:0 10px 28px rgba(59,130,246,0.28);}
+    .btn-full-detail.amber-btn{background:linear-gradient(135deg,#f59e0b,#d97706);box-shadow:0 10px 28px rgba(245,158,11,0.28);}
+    .btn-full-detail.purple-btn{background:linear-gradient(135deg,#8b5cf6,#6d28d9);box-shadow:0 10px 28px rgba(139,92,246,0.28);}
+
+    /* ─── MODALS ─── */
+
+    .modal-overlay { padding-bottom: env(safe-area-inset-bottom, 0px); }
+    @media(min-width:769px) { .modal-overlay { align-items: center; } .modal-sheet { border-radius: 28px; max-height: 82vh; } }
+    .modal-body { padding-bottom: 32px; }
+
+    .modal-overlay{position:fixed;inset:0;z-index:5000;background:rgba(15,23,42,0.55);backdrop-filter:blur(8px);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .35s;}
+    .modal-overlay.modal-open{opacity:1;pointer-events:auto;}
+    .modal-sheet{background:var(--card);border-radius:28px 28px 0 0;width:100%;max-width:900px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .45s cubic-bezier(0.16,1,0.3,1);box-shadow:0 -20px 60px rgba(0,0,0,0.15);}
+    .modal-overlay.modal-open .modal-sheet{transform:translateY(0);}
+    .modal-header{padding:24px 28px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+    .modal-header-left h3{font-family:'Outfit',sans-serif;font-size:22px;font-weight:900;color:var(--text);}
+    .modal-header-left p{font-size:13px;color:var(--muted);margin-top:2px;}
+    .modal-close{background:rgba(15,23,42,0.07);border:1px solid var(--border);color:var(--muted);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;}
+    .modal-close:hover{background:var(--accent);border-color:var(--accent);color:#fff;}
+    .modal-top-stripe{height:4px;background:linear-gradient(90deg,var(--accent),#34d399);flex-shrink:0;}
+    .modal-body{overflow-y:auto;padding:24px 28px;flex:1;}
+
+    .modal-tabs{display:flex;gap:8px;margin-bottom:24px;background:rgba(15,23,42,0.05);padding:5px;border-radius:16px;}
+    .modal-tab{flex:1;padding:10px 16px;border:none;border-radius:12px;font-size:13.5px;font-weight:700;color:var(--muted);cursor:pointer;background:transparent;transition:all .25s;text-align:center;}
+    .modal-tab.active-tab{background:var(--card);color:var(--accent);box-shadow:0 4px 14px rgba(0,0,0,0.07);}
+    .modal-tab-panel{display:none;}
+    .modal-tab-panel.active-panel{display:block;}
+
+    /* TABLES & FORMS */
+    .input-group{margin-bottom:16px;}
+    .input-group label{display:block;font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;}
+    .input-group input, .input-group select{width:100%;padding:12px 16px;border:1px solid var(--border);border-radius:12px;background:rgba(248,250,252,0.5);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;transition:all .3s;}
+    .input-group input:focus, .input-group select:focus{outline:none;border-color:var(--accent);background:var(--card);box-shadow:0 0 0 4px var(--accent-light);}
+    .checkbox-wrap{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;color:var(--text);margin-bottom:16px;cursor:pointer;}
+    
+    .table-responsive{overflow-x:auto;width:100%;}
+    table{width:100%;border-collapse:collapse;font-size:13.5px;}
+    th{background:rgba(15,23,42,0.04);font-weight:800;color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:0.5px;padding:12px 14px;text-align:left;border-bottom:2px solid var(--border);white-space:nowrap;}
+    td{padding:14px;border-bottom:1px solid rgba(15,23,42,0.06);color:var(--text);font-weight:500;}
+    tr:hover td{background:rgba(16,185,129,0.04);}
+    
+    .score-input{width:60px;padding:8px;border:1px solid var(--border);border-radius:8px;text-align:center;font-weight:700;font-family:'Inter',sans-serif;}
+    .score-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-light);}
+    .toolbar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+    .toolbar button{background:rgba(15,23,42,0.05);border:1px solid var(--border);padding:8px 14px;border-radius:12px;font-size:13px;font-weight:700;color:var(--text);cursor:pointer;transition:all .2s;}
+    .toolbar button:hover{background:var(--accent);color:#fff;border-color:var(--accent);}
+
+    .badge{display:inline-block;padding:4px 10px;border-radius:8px;font-size:12px;font-weight:800;}
+    .badge-paid{background:var(--success-bg);color:var(--success);}
+    .badge-unpaid{background:var(--accent-light);color:#ef4444;}
+    
+    /* STUDENT FLOATING GRID */
+    .student-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;}
+    .student-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;display:flex;flex-direction:column;align-items:center;text-align:center;cursor:pointer;transition:transform .2s,box-shadow .2s;}
+    .student-card:hover{transform:translateY(-4px);box-shadow:0 12px 24px rgba(0,0,0,0.08);border-color:var(--accent);}
+    .s-card-img{width:60px;height:60px;border-radius:50%;object-fit:cover;margin-bottom:12px;box-shadow:0 4px 10px rgba(0,0,0,0.1);}
+    .s-card-name{font-size:14px;font-weight:700;color:var(--text);}
+    .s-card-mat{font-size:12px;color:var(--muted);margin-top:2px;}
+
+    /* NOTIFICATIONS & DROPDOWN */
+    .portal-switcher{position:relative;}
+    .btn-portal{background:rgba(15,23,42,0.05);border:1.5px solid var(--border);color:var(--text);padding:9px 16px;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .25s;}
+    .btn-portal:hover{border-color:var(--accent);color:var(--accent);}
+    .portal-menu{position:absolute;top:calc(100% + 10px);right:0;min-width:220px;background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 20px 50px rgba(0,0,0,0.14);opacity:0;pointer-events:none;transform:translateY(-8px) scale(0.97);transition:all .3s;}
+    .portal-menu.portal-open{opacity:1;pointer-events:auto;transform:translateY(0) scale(1);}
+    .portal-menu-item{display:flex;align-items:center;gap:12px;padding:13px 18px;font-size:13.5px;font-weight:600;color:var(--text);text-decoration:none;}
+    .portal-menu-item:hover{background:var(--accent-light);color:var(--accent);}
+    .portal-menu-item.active-portal{background:var(--accent-light);color:var(--accent);font-weight:800;pointer-events:none;}
+    
+    .btn-theme{width:38px;height:38px;border-radius:50%;background:rgba(15,23,42,0.04);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--muted);cursor:pointer;transition:all .25s;flex-shrink:0;}
+    .btn-theme:hover{border-color:var(--accent);color:var(--accent);}
+    
+    .notif-count{position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;font-size:9px;font-weight:900;min-width:18px;height:18px;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid var(--bg);}
+    .notif-panel{position:absolute;top:calc(100% + 10px);right:0;width:340px;background:var(--card);border:1px solid var(--border);border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.16);opacity:0;pointer-events:none;transform:translateY(-8px) scale(0.97);transition:all .3s;}
+    .notif-panel.notif-open{opacity:1;pointer-events:auto;transform:translateY(0) scale(1);}
+    .notif-panel-header{padding:14px 18px 10px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+    .notif-panel-header h4{font-size:14px;font-weight:800;color:var(--text);}
+    .notif-mark-all{font-size:12px;font-weight:700;color:var(--accent);cursor:pointer;background:none;border:none;}
+    .notif-list{max-height:320px;overflow-y:auto;}
+    .notif-item{display:flex;align-items:flex-start;gap:12px;padding:14px 18px;border-bottom:1px solid var(--border);cursor:pointer;}
+    .notif-item:hover{background:var(--accent-light);}
+    .notif-item.notif-read{opacity:0.5;}
+    .notif-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:6px;}
+    .notif-text{flex:1;font-size:13px;font-weight:600;}
+    .notif-text span{font-size:11px;color:var(--muted);display:block;}
+
+
+    /* DARK MODE */
+    [data-theme="dark"] {
+      --bg:           #0d1117;
+      --card:         #161b22;
+      --nav-bg:       rgba(22,27,34,0.94);
+      --border:       rgba(255,255,255,0.08);
+      --text:         #e2e8f0;
+      --muted:        #b1bac4;
+      --success-bg:   rgba(16,185,129,0.15);
+      --warn-bg:      rgba(245,158,11,0.15);
+      --accent-light: rgba(16,185,129,0.12);
+    }
+    [data-theme="dark"] h1,[data-theme="dark"] h2,[data-theme="dark"] h3,[data-theme="dark"] h4 { color: #f0f6fc; }
+    [data-theme="dark"] .acc-title { color: #f0f6fc; }
+    [data-theme="dark"] .acc-subtitle { color: #b1bac4; }
+    [data-theme="dark"] .hero-name, [data-theme="dark"] .hero-sub { color: #f0f6fc; }
+    [data-theme="dark"] .modal-header-left h3 { color: #f0f6fc; }
+    [data-theme="dark"] .modal-header-left p { color: #b1bac4; }
+    [data-theme="dark"] .notif-text p { color: #e2e8f0; }
+    [data-theme="dark"] .section-title { color: #f0f6fc; }
+
+    [data-theme="dark"] {
+      --bg:           #0d1117;
+      --card:         #161b22;
+      --nav-bg:       rgba(22,27,34,0.94);
+      --border:       rgba(255,255,255,0.08);
+      --text:         #e2e8f0;
+      
+      --success-bg:   rgba(16,185,129,0.15);
+      --warn-bg:      rgba(245,158,11,0.15);
+      --accent-light: rgba(16,185,129,0.12);
+    }
+    [data-theme="dark"] .blob-1{background:rgba(16,185,129,0.06);}
+    [data-theme="dark"] .blob-2{background:rgba(99,102,241,0.04);}
+    [data-theme="dark"] .modal-sheet{background:#161b22;}
+    [data-theme="dark"] .modal-tab.active-tab{background:#0d1117;}
+    [data-theme="dark"] th{background:rgba(255,255,255,0.04);}
+    [data-theme="dark"] tr:hover td{background:rgba(16,185,129,0.07);}
+    [data-theme="dark"] .mobile-menu{background:rgba(22,27,34,0.97);}
+    [data-theme="dark"] .input-group input, [data-theme="dark"] .input-group select{background:rgba(0,0,0,0.2);}
+
+
+    .new-badge { display:inline-block; background:#D9534F; color:#fff; font-size:9px; font-weight:900; padding:2px 7px; border-radius:10px; vertical-align:middle; margin-left:6px; animation:newPulse 2s ease-in-out infinite; }
+    @keyframes newPulse { 0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.75;transform:scale(0.96);} }
+
+    /* TOAST */
+    #toast{position:fixed;bottom:20px;right:20px;background:#333;color:#fff;padding:14px 20px;border-radius:12px;font-size:14px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,0.2);transform:translateY(150%);transition:transform .4s;z-index:9999;display:flex;align-items:center;gap:10px;}
+    #toast.show{transform:translateY(0);}
+    #toast.error{background:#ef4444;}
+    
+
+    /* NEUMORPHIC CARD STYLE */
+    :root {
+      --neu-bg: #e8edf2;
+      --neu-shadow-dark: rgba(163,177,198,0.6);
+      --neu-shadow-light: rgba(255,255,255,0.9);
+    }
+    [data-theme="dark"] {
+      --neu-bg: #1a2035;
+      --neu-shadow-dark: rgba(0,0,0,0.5);
+      --neu-shadow-light: rgba(255,255,255,0.04);
+    }
+    .neu-student-card {
+      background: var(--neu-bg);
+      border-radius: 20px;
+      box-shadow: 8px 8px 16px var(--neu-shadow-dark), -8px -8px 16px var(--neu-shadow-light);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.25s, box-shadow 0.25s;
+      position: relative;
+    }
+    .neu-student-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 12px 12px 24px var(--neu-shadow-dark), -12px -12px 24px var(--neu-shadow-light);
+    }
+    .neu-card-img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      object-position: center 10%;
+      display: block;
+    }
+    .neu-card-body {
+      padding: 14px 16px 16px;
+    }
+    .neu-card-name {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .neu-card-matric {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .neu-card-track {
+      display: inline-block;
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 10px;
+      background: rgba(16,185,129,0.12);
+      color: #10b981;
+    }
+    .neu-card-dues {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 9px;
+      font-weight: 900;
+      padding: 3px 8px;
+      border-radius: 10px;
+    }
+    .dues-paid { background: rgba(16,185,129,0.9); color: #fff; }
+    .dues-unpaid { background: rgba(239,68,68,0.9); color: #fff; }
+    .roster-search-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      align-items: center;
+    }
+    .roster-search-input {
+      flex: 1;
+      padding: 10px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      background: var(--card);
+      color: var(--text);
+      font-size: 13.5px;
+      font-weight: 500;
+      outline: none;
+      transition: border-color 0.25s;
+    }
+    .roster-search-input:focus { border-color: #10b981; }
+    .roster-export-btn {
+      padding: 9px 18px;
+      border-radius: 20px;
+      border: 1.5px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .roster-export-btn:hover { border-color: #10b981; color: #10b981; }
+    .roster-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    @media(max-width:700px) { .roster-grid { grid-template-columns: repeat(2,1fr); } }
+    @media(max-width:400px) { .roster-grid { grid-template-columns: 1fr; } }
+    .no-results-msg { text-align: center; color: var(--muted); padding: 40px; font-size: 14px; }
+
+    @media(max-width:900px){
+      .hero-inner{flex-direction:column;align-items:center;text-align:center;}
+      .hero-eyebrow{justify-content:center;}
+      .hero-sub{justify-content:center;}
+      .stat-chips{justify-content:center;}
+      .hero-actions{justify-content:center;}
+    }
+    @media(max-width:768px){
+      .nav-links, .btn-signout, .btn-portal span{display:none;}
+      .hamburger{display:flex;}
+      .modal-tabs{flex-wrap:wrap;}
+      .notif-panel, .portal-menu{right:-12px;width:min(340px,92vw);}
+    }
+    @media(max-width:480px){
+      .stat-chip{min-width:130px;}
+    }
+
+    @media (max-width: 900px) {
+      .hero-card { flex-direction: column; text-align: center; }
+    }
+    @media (max-width: 768px) {
+      .modal-sheet { max-height: 92vh; }
+      .roster-grid { grid-template-columns: repeat(2, 1fr); }
+      .broadsheet-form-grid { grid-template-columns: 1fr; }
+      .toolbar { flex-wrap: wrap; gap: 8px; }
+      table { font-size: 12px; }
+      .table-responsive { overflow-x: auto; }
+    }
+    @media (max-width: 480px) {
+      .roster-grid { grid-template-columns: 1fr 1fr; }
+      .stat-chips { grid-template-columns: 1fr 1fr; display: grid; }
+      input, select { font-size: 16px; min-height: 44px; }
+      .modal-body { padding: 16px; }
+      .modal-tabs { overflow-x: auto; flex-wrap: nowrap; }
+      .modal-tab { white-space: nowrap; flex-shrink: 0; }
+      button.btn-primary, button.btn-secondary { min-height: 44px; width: 100%; margin-bottom: 8px; justify-content: center; }
+    }
+    @media (max-width: 360px) {
+      .stat-chips { grid-template-columns: 1fr; }
+      .roster-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+  <script src="data/icep_dataset.js"></script>
+</head>
+<body>
+
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+
+  <!-- MOBILE MENU BACKDROP -->
+  <div class="mobile-menu-backdrop" id="mobileBackdrop" onclick="closeMobileMenu()"></div>
+
+  <!-- MOBILE MENU -->
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-header">
+      <div class="mobile-menu-title"><i class="fas fa-graduation-cap" style="color:var(--accent)"></i> ICE<span>P</span></div>
+      <button class="mobile-menu-close" onclick="closeMobileMenu()"><i class="fas fa-times"></i></button>
+    </div>
+    <a href="#" class="mobile-nav-link active"><span><i class="fas fa-th-large" style="margin-right:10px"></i>Dashboard</span></a>
+    <a href="#" class="mobile-nav-link"><span><i class="fas fa-users" style="margin-right:10px"></i>Class Roster</span></a>
+    <a href="#" class="mobile-nav-link"><span><i class="fas fa-chart-bar" style="margin-right:10px"></i>Results</span></a>
+    <a href="#" class="mobile-nav-link"><span><i class="fas fa-calendar-alt" style="margin-right:10px"></i>Timetable</span></a>
+    <a href="#" class="mobile-nav-link"><span><i class="fas fa-wallet" style="margin-right:10px"></i>Payments</span></a>
+    
+    <div class="mobile-menu-divider"></div>
+    <a href="ICEP_login_modern.html" class="mobile-nav-link"><span><i class="fas fa-right-to-bracket" style="margin-right:10px;color:#6366f1"></i>Login Page</span></a>
+    <a href="ICEP_student_profile_modern.html" class="mobile-nav-link"><span><i class="fas fa-user-graduate" style="margin-right:10px;color:var(--accent)"></i>Student Profile</span></a>
+    <a href="ICEP_coordinator_modern.html" class="mobile-nav-link"><span><i class="fas fa-chalkboard-user" style="margin-right:10px;color:#f59e0b"></i>Coordinator Portal</span></a>
+    
+    <div class="mobile-menu-divider"></div>
+    <button class="mobile-nav-link" onclick="toggleDarkMode();closeMobileMenu()" style="background:none;border:none;width:100%;text-align:left;cursor:pointer;">
+      <span><i class="fas fa-moon" style="margin-right:10px;color:var(--accent)" id="mobileThemeIcon"></i><span id="mobileThemeLabel">Dark Mode</span></span>
+    </button>
+  </div>
+
+  <!-- TOPNAV -->
+  <nav class="topnav">
+    <a href="#" class="nav-brand"><i class="fas fa-graduation-cap" style="color:var(--accent);font-size:20px"></i>ICE<span style="color:var(--accent)">P</span></a>
+    <ul class="nav-links">
+      <li><a href="#" class="active">Dashboard</a></li>
+      <li><a href="#">Class Roster</a></li>
+      <li><a href="#">Results</a></li>
+      <li><a href="#">Timetable</a></li>
+      <li><a href="#">Payments</a></li>
+    </ul>
+    <div class="nav-right">
+      <div class="portal-switcher">
+        <button class="btn-portal" onclick="toggleMenu('portalMenu')">
+          <i class="fas fa-globe"></i><span>View Other Side</span><i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="portal-menu" id="portalMenu">
+          <a href="ICEP_login_modern.html" class="portal-menu-item"><i class="fas fa-right-to-bracket" style="color:#6366f1"></i>Login Page</a>
+          <a href="ICEP_student_profile_modern.html" class="portal-menu-item"><i class="fas fa-user-graduate" style="color:var(--success)"></i>Student Profile</a>
+          <a href="ICEP_courserep_modern.html" class="portal-menu-item active-portal"><i class="fas fa-users-rectangle" style="color:var(--accent)"></i>Course Rep Portal</a>
+          <a href="ICEP_coordinator_modern.html" class="portal-menu-item"><i class="fas fa-chalkboard-user" style="color:#f59e0b"></i>Coordinator Portal</a>
+        </div>
+      </div>
+      
+      <button class="btn-theme" onclick="toggleDarkMode()"><i class="fas fa-moon" id="themeIcon"></i></button>
+      
+      <div style="position:relative;">
+        <div class="nav-bell" onclick="toggleMenu('notifPanel')">
+          <i class="fas fa-bell"></i>
+          <span class="notif-count" id="notifCount">2</span>
+        </div>
+        <div class="notif-panel" id="notifPanel">
+          <div class="notif-panel-header">
+            <h4>Notifications</h4>
+            <button class="notif-mark-all" onclick="markAllRead()">Mark all read</button>
+          </div>
+          <div class="notif-list" id="notifList"></div>
+        </div>
+      </div>
+      
+      <button class="btn-signout" onclick="window.location.href='ICEP_login_modern.html'"><i class="fas fa-right-from-bracket"></i> Sign Out</button>
+      <div class="hamburger" onclick="toggleMobileMenu()">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-wrap">
+    <!-- HERO -->
+    <div class="hero-card">
+      <div class="hero-top-stripe"></div>
+      <div class="hero-inner">
+        <div class="hero-bg-blob"></div>
+        <div class="portrait-wrap">
+          <img src="images/student_02.jpg" onerror="this.src='https://ui-avatars.com/api/?name=Adaeze+Okafor&size=200&background=10b981&color=fff&bold=true'" alt="Course Rep" class="portrait-img" />
+          <div class="portrait-status"><i class="fas fa-star" style="font-size:10px"></i> Rep Dashboard</div>
+        </div>
+        <div class="hero-info">
+          <div class="hero-eyebrow">Course Representative</div>
+          <div class="hero-name">Adaeze Okafor</div>
+          <div class="hero-sub">
+            <i class="fas fa-id-badge"></i> 2026/MKT/0472 &nbsp;•&nbsp;
+            <i class="fas fa-building-columns"></i> Dept. of Marketing, 400 Level, Faculty of Management Sciences
+          </div>
+          
+          <div class="stat-chips">
+            <div class="stat-chip chip-students">
+              <div class="chip-icon"><i class="fas fa-users"></i></div>
+              <div class="chip-val" data-stat="students">16</div>
+              <div class="chip-label">Students</div>
+            </div>
+            <div class="stat-chip chip-cgpa">
+              <div class="chip-icon"><i class="fas fa-check-circle"></i></div>
+              <div class="chip-val">93%</div>
+              <div class="chip-label">Avg. Attendance</div>
+            </div>
+          </div>
+          
+          <div class="hero-actions">
+            <button class="btn-primary" onclick="showToast('Student Added', false)" style="background:#10b981;box-shadow:none;"><i class="fas fa-plus"></i> Add Student</button>
+            <button class="btn-secondary" onclick="openModal('fullProfileModal')"><i class="fas fa-user"></i> View Full Profile</button>
+            <button class="btn-secondary" onclick="openModal('rosterModal')"><i class="fas fa-users"></i> Class Roster</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODULE 1: Result Broadsheet -->
+    <div class="accordion-card" id="modResult">
+      <div class="acc-header" onclick="toggleAcc('modResult')">
+        <div class="acc-left">
+          <div class="acc-icon-wrap icon-green"><i class="fas fa-file-contract"></i></div>
+          <div class="acc-titles">
+            <div class="acc-title">Result Broadsheet Generator</div>
+            <div class="acc-subtitle">Create and submit official class results</div>
+          </div>
+        </div>
+        <div class="acc-right">
+          <span class="acc-badge badge-paid">RESULT BROADSHEET</span>
+          <div class="acc-chevron"><i class="fas fa-chevron-down"></i></div>
+        </div>
+      </div>
+      <div class="acc-body">
+        <div class="acc-body-inner">
+          <div class="acc-intro">Select level, semester, and course code. Click Full Detail to open the broadsheet generator.</div>
+          <button class="btn-full-detail" onclick="openModal('resultModal')">Full Detail <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODULE 2: Timetable -->
+    <div class="accordion-card" id="modTime">
+      <div class="acc-header" onclick="toggleAcc('modTime')">
+        <div class="acc-left">
+          <div class="acc-icon-wrap icon-blue"><i class="fas fa-calendar-alt"></i></div>
+          <div class="acc-titles">
+            <div class="acc-title">Weekly Lecture Timetable</div>
+            <div class="acc-subtitle">Manage class schedules and reminders</div>
+          </div>
+        </div>
+        <div class="acc-right">
+          <span class="acc-badge" style="background:rgba(59,130,246,0.1);color:#3b82f6;">TIMETABLE ENGINE</span>
+          <div class="acc-chevron"><i class="fas fa-chevron-down"></i></div>
+        </div>
+      </div>
+      <div class="acc-body">
+        <div class="acc-body-inner">
+          <div class="acc-intro">
+            <strong>Mon 8:00 AM:</strong> MKT 401<br>
+            <strong>Tue 11:00 AM:</strong> MKT 403<br>
+            <strong>Wed 2:00 PM:</strong> MKT 405
+          </div>
+          <button class="btn-full-detail blue-btn" onclick="openModal('timetableModal')">Full Detail <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODULE 3: Fee Manager -->
+    <div class="accordion-card" id="modFee">
+      <div class="acc-header" onclick="toggleAcc('modFee')">
+        <div class="acc-left">
+          <div class="acc-icon-wrap icon-amber"><i class="fas fa-wallet"></i></div>
+          <div class="acc-titles">
+            <div class="acc-title">Textbook &amp; Fee Manager</div>
+            <div class="acc-subtitle">Track class dues and textbook payments</div>
+          </div>
+        </div>
+        <div class="acc-right">
+          <span class="acc-badge" style="background:rgba(245,158,11,0.1);color:#f59e0b;">TEXTBOOK / DUES</span>
+          <div class="acc-chevron"><i class="fas fa-chevron-down"></i></div>
+        </div>
+      </div>
+      <div class="acc-body">
+        <div class="acc-body-inner">
+          <div class="acc-intro">
+            Emmanuel Chukwuemeka - PAID<br>
+            Adaora Okonkwo - UNPAID<br>
+            Chidi Nwachukwu - UNPAID
+          </div>
+          <button class="btn-full-detail amber-btn" onclick="openModal('feeModal');switchViewMode('fee','create');" style="margin-top:10px;padding:8px 16px;font-size:12px;">+ Add New Fee Drive</button>
+          <button class="btn-full-detail amber-btn" onclick="openModal('feeModal')">Full Detail <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODULE 4: Class Roster -->
+    <div class="accordion-card" id="modRoster">
+      <div class="acc-header" onclick="toggleAcc('modRoster')">
+        <div class="acc-left">
+          <div class="acc-icon-wrap icon-purple"><i class="fas fa-users"></i></div>
+          <div class="acc-titles">
+            <div class="acc-title">Class List &amp; Attendance</div>
+            <div class="acc-subtitle">View student details and attendance records</div>
+          </div>
+        </div>
+        <div class="acc-right">
+          <span class="acc-badge" style="background:rgba(139,92,246,0.1);color:#8b5cf6;">16 STUDENTS ENROLLED</span>
+          <div class="acc-chevron"><i class="fas fa-chevron-down"></i></div>
+        </div>
+      </div>
+      <div class="acc-body">
+        <div class="acc-body-inner">
+          <div class="acc-intro">View the complete class list of 16 enrolled students in floating grid or list format.</div>
+          <button class="btn-full-detail purple-btn" onclick="openModal('rosterModal')">Full Detail <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALS -->
+
+  <!-- RESULT BROADSHEET MODAL -->
+  <div class="modal-overlay" id="resultModal" onclick="closeOnOutside(event, 'resultModal')">
+    <div class="modal-sheet">
+      <div class="modal-top-stripe"></div>
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <h3>Result Broadsheet Generator</h3>
+          <p>Create and submit class broadsheets</p>
+        </div>
+        <button class="modal-close" onclick="closeModal('resultModal')"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-tabs">
+          <button class="modal-tab active-tab" onclick="switchViewMode('result','master')">Master Broadsheet</button>
+          <button class="modal-tab" onclick="switchViewMode('result','cards')">Student Score Cards</button>
+          <button class="modal-tab" onclick="switchViewMode('result','history');renderBroadsheetHistory();">Submitted Results</button>
+        </div>
+
+        <div id="result-master" class="modal-tab-panel active-panel">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:20px;">
+            <div class="input-group">
+              <label>Academic Level</label>
+              <select id="bLevel">
+                <option>100 Level</option><option>200 Level</option><option>300 Level</option><option selected>400 Level</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>Semester</label>
+              <select id="bSem" onchange="updateCoursesBySelectedSem()">
+                <option value="1">1st Semester</option>
+                <option value="2">2nd Semester</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>Course Code</label>
+              <select id="bCode" onchange="syncCourseTitleFromCode()" style="border:1.5px solid var(--border);border-radius:12px;padding:10px 14px;background:var(--card);color:var(--text);font-size:13.5px;font-weight:500;width:100%;outline:none;">
+                <option value="MKT 401">MKT 401</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>Course Title</label>
+              <input type="text" id="bTitle" value="Consumer Behavior">
+            </div>
+            <div class="input-group">
+              <label>Lecturer in Charge</label>
+              <input type="text" id="bLec" value="Prof. O. K. Balogun">
+            </div>
+            <div class="input-group">
+              <label>Broadsheet Image Proof Upload</label>
+              <input type="file" id="bFile">
+            </div>
+          </div>
+          <label class="checkbox-wrap">
+            <input type="checkbox" id="bSkip" checked> Skip Image Proof (Testing Mode)
+          </label>
+          <button class="btn-primary" onclick="generateMasterBroadsheet()" style="margin-bottom:24px;">Create Broadsheet Sheet</button>
+
+          <div id="broadsheetTableWrap" style="display:none;">
+            <div class="toolbar">
+              <button onclick="quickFillScores('high')"><i class="fas fa-star"></i> High Scores</button>
+              <button onclick="quickFillScores('varied')"><i class="fas fa-random"></i> Varied Scores</button>
+              <button onclick="quickFillScores('clear')"><i class="fas fa-eraser"></i> Clear All</button>
+            </div>
+            <div class="table-responsive">
+              <table id="broadsheetTable">
+                <thead>
+                  <tr>
+                    <th>S/N</th>
+                    <th>Student Name</th>
+                    <th>Matric No</th>
+                    <th>Score (%)</th>
+                    <th>Grade</th>
+                  </tr>
+                </thead>
+                <tbody id="broadsheetBody"></tbody>
+              </table>
+            </div>
+            <button class="btn-primary" style="margin-top:20px;width:100%;justify-content:center;" onclick="submitMasterBroadsheet()">Submit Verified Broadsheet &amp; Sync to Student Profiles</button>
+          </div>
+        </div>
+        
+        <div id="result-cards" class="modal-tab-panel">
+          <div class="acc-intro">Score cards feature coming soon. Use the Master Broadsheet to input scores.</div>
+        </div>
+        <div id="result-history" class="modal-tab-panel">
+          <div id="bsHistoryContainer"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TIMETABLE MODAL -->
+  <div class="modal-overlay" id="timetableModal" onclick="closeOnOutside(event, 'timetableModal')">
+    <div class="modal-sheet">
+      <div class="modal-top-stripe" style="background:linear-gradient(90deg,#3b82f6,#2563eb)"></div>
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <h3>Timetable Engine</h3>
+          <p>Class schedules and alerts</p>
+        </div>
+        <button class="modal-close" onclick="closeModal('timetableModal')"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-tabs">
+          <button class="modal-tab active-tab" onclick="switchViewMode('time','table')">Master Table</button>
+          <button class="modal-tab" onclick="switchViewMode('time','cards')">Day Cards</button>
+        </div>
+        <div id="time-table" class="modal-tab-panel active-panel">
+          <label class="checkbox-wrap">
+            <input type="checkbox" checked> Monday Alert Engine Active
+          </label>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr><th>Day</th><th>Time</th><th>Course Code</th><th>Course Title</th><th>Venue</th><th>Lecturer</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Mon</td><td>8:00–10:00 AM</td><td>MKT 401</td><td>Advanced Research</td><td>Hall B, Faculty Bldg</td><td>Prof. O. K. Balogun</td></tr>
+                <tr><td>Tue</td><td>11:00 AM–1:00 PM</td><td>MKT 403</td><td>Consumer Behavior</td><td>Auditorium 2</td><td>Dr. Mrs. A. N. Eze</td></tr>
+                <tr><td>Wed</td><td>2:00–4:00 PM</td><td>MKT 405</td><td>Brand Management</td><td>Lecture Theatre C</td><td>Dr. S. I. Ahmed</td></tr>
+                <tr><td>Thu</td><td>9:00–11:00 AM</td><td>MKT 407</td><td>International Marketing</td><td>Hall A, Faculty Bldg</td><td>Prof. C. E. Chukwu</td></tr>
+                <tr><td>Fri</td><td>10:00 AM–12:00 PM</td><td>MKT 409</td><td>Strategic Marketing</td><td>Hall D, Main Campus</td><td>Dr. K. T. Ogundipe</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div style="margin-top:20px;padding:16px;background:rgba(15,23,42,0.03);border-radius:16px;">
+            <h4 style="margin-bottom:12px;font-size:14px;">Add New Lecture Schedule</h4>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <input type="text" placeholder="Day" class="score-input" style="flex:1;width:auto;text-align:left;">
+              <input type="text" placeholder="Time" class="score-input" style="flex:1;width:auto;text-align:left;">
+              <input type="text" placeholder="Course Code" class="score-input" style="flex:1;width:auto;text-align:left;">
+              <input type="text" placeholder="Course Title" class="score-input" style="flex:1;width:auto;text-align:left;">
+              <input type="text" placeholder="Venue" class="score-input" style="flex:1;width:auto;text-align:left;">
+              <input type="text" placeholder="Lecturer in Charge" class="score-input" style="flex:1;width:auto;text-align:left;">
+              <button class="btn-primary" onclick="showToast('Added successfully!')"><i class="fas fa-plus"></i> Add</button>
+            </div>
+          </div>
+        </div>
+        <div id="time-cards" class="modal-tab-panel">
+          <div class="acc-intro">Day Cards view coming soon...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEE MANAGER MODAL -->
+  <div class="modal-overlay" id="feeModal" onclick="closeOnOutside(event, 'feeModal')">
+    <div class="modal-sheet">
+      <div class="modal-top-stripe" style="background:linear-gradient(90deg,#f59e0b,#d97706)"></div>
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <h3>Textbook &amp; Fee Manager</h3>
+          <p>Track student payments</p>
+        </div>
+        <button class="modal-close" onclick="closeModal('feeModal')"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-tabs">
+          <button class="modal-tab active-tab" onclick="switchViewMode('fee','create')">Create Fee Drive</button>
+          <button class="modal-tab" onclick="switchViewMode('fee','active')">Active Roster</button>
+          <button class="modal-tab" onclick="switchViewMode('fee','history');renderFeeHistory();">Fee History</button>
+        </div>
+
+        <div id="fee-create" class="modal-tab-panel active-panel">
+          <div style="display:flex;gap:16px;margin-bottom:20px;flex-wrap:wrap;">
+            <div class="input-group" style="flex:2;margin:0;">
+              <label>Fee Title</label>
+              <input type="text" id="feeTitle" value="Faculty Dues">
+            </div>
+            <div class="input-group" style="flex:1;margin:0;">
+              <label>Amount (₦)</label>
+              <input type="number" id="feeAmt" value="5000">
+            </div>
+            <div style="display:flex;align-items:flex-end;">
+              <button class="btn-primary" onclick="generateFeeDrive()">Generate Fee Roster</button>
+            </div>
+          </div>
+        </div>
+        
+        <div id="fee-active" class="modal-tab-panel">
+          <div class="toolbar" style="justify-content:flex-end;">
+            <button onclick="exportPaymentPDF()"><i class="fas fa-file-pdf"></i> Export PDF</button>
+            <button onclick="exportPaymentTXT()"><i class="fas fa-file-lines"></i> Export TXT</button>
+          </div>
+          <div id="feeTableWrap" style="display:none;">
+            <div class="toolbar">
+              <button onclick="markSelectedAsPaid()"><i class="fas fa-check-double"></i> Mark Selected as Paid</button>
+            </div>
+            <div class="table-responsive">
+              <table id="feeTable">
+                <thead>
+                  <tr>
+                    <th><input type="checkbox" id="feeCheckAll" onchange="toggleAllFeeChecks()"></th>
+                    <th>Student Name</th>
+                    <th>Matric No</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="feeBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        
+        <div id="fee-history" class="modal-tab-panel">
+          <div class="table-responsive">
+            <table>
+              <thead><tr><th>#</th><th>Title</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead>
+              <tbody id="feeHistoryTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLASS ROSTER MODAL -->
+  <div class="modal-overlay" id="rosterModal" onclick="closeOnOutside(event, 'rosterModal')">
+    <div class="modal-sheet">
+      <div class="modal-top-stripe" style="background:linear-gradient(90deg,#8b5cf6,#6d28d9)"></div>
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <h3>Class List &amp; Attendance</h3>
+          <p>16 Students Enrolled</p>
+        </div>
+        <button class="modal-close" onclick="closeModal('rosterModal')"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="roster-search-row">
+          <input type="text" id="rosterSearchInput" class="roster-search-input" placeholder="Search students by name or matric..." onkeyup="filterRoster()" />
+          <button class="roster-export-btn"><i class="fas fa-download"></i> Export</button>
+        </div>
+        <div class="modal-tabs">
+          <button class="modal-tab active-tab" onclick="switchViewMode('roster','grid')">Floating Grid</button>
+          <button class="modal-tab" onclick="switchViewMode('roster','list')">Fancy List</button>
+        </div>
+        <div id="roster-grid" class="modal-tab-panel active-panel">
+          <div class="student-grid" id="rosterGridContainer"></div>
+        </div>
+        <div id="roster-list" class="modal-tab-panel">
+          <div class="table-responsive">
+            <table id="rosterListTable">
+              <thead>
+                <tr><th>Avatar</th><th>Name</th><th>Matric</th><th>Track</th><th>Status</th></tr>
+              </thead>
+              <tbody id="rosterListBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STUDENT DETAIL MODAL -->
+  <div class="modal-overlay" id="studentDetailModal" style="z-index:6000;">
+    <div class="modal-sheet" style="max-width:400px;margin:auto;">
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <h3>Student Profile</h3>
+        </div>
+        <button class="modal-close" onclick="closeStudentDetailModal()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body" style="text-align:center;">
+        <img id="sdAvatar" src="" style="width:100px;height:100px;border-radius:50%;object-fit:cover;margin:0 auto 16px;">
+        <h3 id="sdName" style="font-size:20px;font-weight:900;">Name</h3>
+        <p id="sdMatric" style="color:var(--muted);font-size:14px;margin-bottom:16px;">Matric</p>
+        <div style="text-align:left;background:rgba(15,23,42,0.03);padding:16px;border-radius:12px;display:flex;flex-direction:column;gap:10px;">
+          <div><strong>Track:</strong> <span id="sdTrack"></span></div>
+          <div><strong>Attendance:</strong> <span id="sdAtt"></span></div>
+          <div><strong>Dues:</strong> <span id="sdDues" class="badge"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- FULL PROFILE MODAL -->
+  <div class="modal-overlay" id="fullProfileModal" onclick="closeOnOutside(event, 'fullProfileModal')">
+    <div class="modal-sheet" style="max-width:500px;">
+      <div class="modal-top-stripe"></div>
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <h3>Full Representative Profile</h3>
+          <p>Official course rep ID</p>
+        </div>
+        <button class="modal-close" onclick="closeModal('fullProfileModal')"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body" style="text-align:center;">
+        <img src="images/student_02.jpg" onerror="this.src='https://ui-avatars.com/api/?name=Adaeze+Okafor&size=200&background=10b981&color=fff&bold=true'" style="width:120px;height:120px;border-radius:50%;object-fit:cover;margin:0 auto 16px;border:4px solid rgba(16,185,129,0.2);box-shadow:0 10px 20px rgba(0,0,0,0.1);">
+        <h3 style="font-family:'Outfit',sans-serif;font-size:24px;font-weight:900;margin-bottom:2px;">Adaeze Okafor</h3>
+        <p style="color:var(--accent);font-weight:700;font-size:14px;margin-bottom:4px;">Course Representative</p>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:16px;font-weight:600;">2026/MKT/0472</p>
+        
+        <div style="background:rgba(15,23,42,0.03);border-radius:16px;padding:16px;margin-bottom:16px;text-align:left;font-size:13px;">
+          <div style="margin-bottom:8px;"><strong>Department:</strong> Department of Marketing, Faculty of Management Sciences</div>
+          <div style="margin-bottom:8px;"><strong>Level:</strong> 400L</div>
+          <div><strong>Session:</strong> 2025/2026</div>
+        </div>
+        
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
+          <div style="background:rgba(16,185,129,0.08);padding:12px;border-radius:12px;border:1px solid rgba(16,185,129,0.2);">
+            <div style="font-size:20px;font-weight:900;color:#10b981;">16</div>
+            <div style="font-size:11px;font-weight:700;color:var(--muted);">Students Enrolled</div>
+          </div>
+          <div style="background:rgba(16,185,129,0.08);padding:12px;border-radius:12px;border:1px solid rgba(16,185,129,0.2);">
+            <div style="font-size:20px;font-weight:900;color:#10b981;">93%</div>
+            <div style="font-size:11px;font-weight:700;color:var(--muted);">Avg Attendance</div>
+          </div>
+          <div style="background:rgba(245,158,11,0.08);padding:12px;border-radius:12px;border:1px solid rgba(245,158,11,0.2);">
+            <div style="font-size:20px;font-weight:900;color:#f59e0b;">2</div>
+            <div style="font-size:11px;font-weight:700;color:var(--muted);">Active Fee Drives</div>
+          </div>
+          <div style="background:rgba(59,130,246,0.08);padding:12px;border-radius:12px;border:1px solid rgba(59,130,246,0.2);">
+            <div style="font-size:20px;font-weight:900;color:#3b82f6;">5</div>
+            <div style="font-size:11px;font-weight:700;color:var(--muted);">Broadsheets Submitted</div>
+          </div>
+        </div>
+        
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;text-align:left;margin-bottom:16px;">
+          <h4 style="font-size:14px;margin-bottom:8px;">Timetable Summary</h4>
+          <p style="font-size:13px;color:var(--muted);">Managing 5 core lecture schedules this week.</p>
+        </div>
+        
+        <p style="font-size:11px;color:var(--muted);font-style:italic;">Note: Full profile view for official course rep ID card purposes.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast"><i class="fas fa-info-circle"></i> <span>Message</span></div>
+
+  <script>
+    // ─── DATA ───
+    // Hardcoded fallback (Marketing 400L)
+    const _classListFallback = [
+      { id: 1, name: "Emmanuel Chukwuemeka", matric: "2026/MKT/0472", avatar: "images/student_01.jpg", track: "Digital Marketing", cgpa: "4.82", attendance: "100%", dues: "PAID", advisor: "Prof. O. K. Balogun" },
+      { id: 2, name: "Adaora Okonkwo", matric: "2026/MKT/0473", avatar: "images/student_02.jpg", track: "Brand Strategy", cgpa: "4.65", attendance: "95%", dues: "UNPAID", advisor: "Dr. Mrs. A. N. Eze" },
+      { id: 3, name: "Chidi Nwachukwu", matric: "2026/MKT/0474", avatar: "images/student_03.jpg", track: "Market Analytics", cgpa: "4.40", attendance: "88%", dues: "UNPAID", advisor: "Dr. S. I. Ahmed" },
+      { id: 4, name: "Blessing Adebayo", matric: "2026/MKT/0475", avatar: "images/student_04.jpg", track: "International Trade", cgpa: "4.75", attendance: "92%", dues: "PAID", advisor: "Prof. C. E. Chukwu" },
+      { id: 5, name: "Olumide Fashola", matric: "2026/MKT/0476", avatar: "images/student_01.jpg", track: "Advertising Strategy", cgpa: "4.55", attendance: "96%", dues: "PAID", advisor: "Prof. O. K. Balogun" },
+      { id: 6, name: "Chioma Ezenwa", matric: "2026/MKT/0477", avatar: "images/student_02.jpg", track: "Consumer Psychology", cgpa: "4.90", attendance: "98%", dues: "PAID", advisor: "Dr. Mrs. A. N. Eze" },
+      { id: 7, name: "Babatunde Danjuma", matric: "2026/MKT/0478", avatar: "images/student_03.jpg", track: "Supply Chain", cgpa: "4.30", attendance: "85%", dues: "PAID", advisor: "Dr. S. I. Ahmed" },
+      { id: 8, name: "Ngozi Umeh", matric: "2026/MKT/0479", avatar: "images/student_04.jpg", track: "Corporate PR", cgpa: "4.60", attendance: "94%", dues: "PAID", advisor: "Prof. C. E. Chukwu" },
+      { id: 9, name: "Farouk Bello", matric: "2026/MKT/0480", avatar: "images/student_01.jpg", track: "Sales Management", cgpa: "4.45", attendance: "90%", dues: "PAID", advisor: "Prof. O. K. Balogun" },
+      { id: 10, name: "Ifeoma Anene", matric: "2026/MKT/0481", avatar: "images/student_02.jpg", track: "Retail Marketing", cgpa: "4.88", attendance: "100%", dues: "PAID", advisor: "Dr. Mrs. A. N. Eze" },
+      { id: 11, name: "Tunde Bakare", matric: "2026/MKT/0482", avatar: "images/student_03.jpg", track: "Product Dev", cgpa: "4.35", attendance: "87%", dues: "PAID", advisor: "Dr. S. I. Ahmed" },
+      { id: 12, name: "Amaka Nnamdi", matric: "2026/MKT/0483", avatar: "images/student_04.jpg", track: "Services Marketing", cgpa: "4.50", attendance: "93%", dues: "PAID", advisor: "Prof. C. E. Chukwu" },
+      { id: 13, name: "Kehinde Ogundipe", matric: "2026/MKT/0484", avatar: "images/student_01.jpg", track: "E-Commerce", cgpa: "4.52", attendance: "91%", dues: "PAID", advisor: "Prof. O. K. Balogun" },
+      { id: 14, name: "Zainab Aliyu", matric: "2026/MKT/0485", avatar: "images/student_02.jpg", track: "Digital Comms", cgpa: "4.80", attendance: "99%", dues: "PAID", advisor: "Dr. Mrs. A. N. Eze" },
+      { id: 15, name: "Chukwudi Opara", matric: "2026/MKT/0486", avatar: "images/student_03.jpg", track: "Media Relations", cgpa: "4.38", attendance: "89%", dues: "PAID", advisor: "Dr. S. I. Ahmed" },
+      { id: 16, name: "Yetunde Sowore", matric: "2026/MKT/0487", avatar: "images/student_04.jpg", track: "Strategic Mkt", cgpa: "4.70", attendance: "97%", dues: "PAID", advisor: "Prof. C. E. Chukwu" }
+    ];
+    let classListStudents = typeof ICEP_STUDENTS !== 'undefined'
+      ? ICEP_STUDENTS.filter(s => s.department === 'Marketing' && s.level === 400)
+      : _classListFallback;
+    if (!classListStudents || classListStudents.length === 0) classListStudents = _classListFallback;
+    const DEFAULT_BROADSHEET_SCORES = [96, 89, 78, 92, 85, 74, 68, 91, 82, 95, 63, 88, 79, 97, 71, 90];
+
+    // ─── UI CONTROLS ───
+    function toggleAcc(id){
+      const el = document.getElementById(id);
+      el.classList.toggle('acc-open');
+    }
+    function openModal(id){
+      document.getElementById(id).classList.add('modal-open');
+      if(id === 'rosterModal') {
+        const container = document.getElementById('rosterGridContainer');
+        if (!container || container.innerHTML.trim() === '') renderRosterGrid();
+      }
+    }
+    function closeModal(id){ document.getElementById(id).classList.remove('modal-open'); }
+    function closeOnOutside(e, id){
+      if(e.target.id === id) closeModal(id);
+    }
+
+    function toggleMenu(id){
+      const el = document.getElementById(id);
+      el.classList.toggle(id.includes('portal') ? 'portal-open' : 'notif-open');
+    }
+    document.addEventListener('click', (e)=>{
+      if(!e.target.closest('.portal-switcher')) document.getElementById('portalMenu').classList.remove('portal-open');
+      if(!e.target.closest('.nav-bell') && !e.target.closest('.notif-panel')) document.getElementById('notifPanel').classList.remove('notif-open');
+    });
+
+    function toggleMobileMenu(){
+      document.getElementById('mobileMenu').classList.add('open');
+      document.getElementById('mobileBackdrop').classList.add('open');
+    }
+    function closeMobileMenu(){
+      document.getElementById('mobileMenu').classList.remove('open');
+      document.getElementById('mobileBackdrop').classList.remove('open');
+    }
+
+    function switchViewMode(module, mode){
+      const tabs = document.querySelectorAll(`#${module}Modal .modal-tab`);
+      tabs.forEach(t => t.classList.remove('active-tab'));
+      if(event && event.target) event.target.classList.add('active-tab');
+      
+      document.querySelectorAll(`#${module}Modal .modal-tab-panel`).forEach(p => p.classList.remove('active-panel'));
+      let p = document.getElementById(`${module}-${mode}`);
+      if(p) p.classList.add('active-panel');
+
+      if(module === 'roster') {
+        if(mode === 'grid') renderRosterGrid();
+        else renderRosterList();
+      }
+    }
+
+    function showToast(msg, isError=false){
+      const t = document.getElementById('toast');
+      t.querySelector('span').innerText = msg;
+      t.className = isError ? 'error show' : 'show';
+      setTimeout(()=>t.classList.remove('show'), 3000);
+    }
+
+    // ─── DARK MODE ───
+    function toggleDarkMode(){
+      const html = document.documentElement;
+      if(html.getAttribute('data-theme') === 'dark'){
+        html.removeAttribute('data-theme');
+        localStorage.setItem('icep_modern_theme','light');
+        document.getElementById('themeIcon').className = 'fas fa-moon';
+      } else {
+        html.setAttribute('data-theme','dark');
+        localStorage.setItem('icep_modern_theme','dark');
+        document.getElementById('themeIcon').className = 'fas fa-sun';
+      }
+    }
+
+    // ─── SEMESTER-AWARE COURSE SELECTOR ───
+    // Courses for MKT 400L by semester (pulled from dataset if available, else fallback)
+    const MKT400_COURSES = {
+      1: [
+        { code:'MKT 401', title:'Advanced Marketing Research', units:3, lecturer:'Prof. O. K. Balogun' },
+        { code:'MKT 403', title:'Consumer Behavior', units:3, lecturer:'Dr. Mrs. A. N. Eze' },
+        { code:'MKT 405', title:'Brand Management', units:2, lecturer:'Dr. S. I. Ahmed' },
+        { code:'MKT 407', title:'International Marketing', units:3, lecturer:'Prof. C. E. Chukwu' },
+        { code:'MKT 409', title:'Strategic Marketing', units:3, lecturer:'Dr. K. T. Ogundipe' },
+        { code:'GST 401', title:'Entrepreneurship Studies', units:2, lecturer:'Dr. O. Ayo' }
+      ],
+      2: [
+        { code:'MKT 402', title:'Marketing of Services', units:3, lecturer:'Prof. O. K. Balogun' },
+        { code:'MKT 404', title:'Distribution Management', units:3, lecturer:'Dr. Mrs. A. N. Eze' },
+        { code:'MKT 406', title:'Advertising Management', units:2, lecturer:'Dr. S. I. Ahmed' },
+        { code:'MKT 408', title:'Marketing Research Methods', units:3, lecturer:'Prof. C. E. Chukwu' },
+        { code:'MKT 410', title:'Sales Management', units:3, lecturer:'Dr. K. T. Ogundipe' },
+        { code:'GST 402', title:'Peace Studies & Conflict Resolution', units:2, lecturer:'Dr. F. Lawal' }
+      ]
+    };
+
+    function updateCoursesBySelectedSem() {
+      const sem = parseInt(document.getElementById('bSem').value) || 1;
+      const codeSel = document.getElementById('bCode');
+      if (!codeSel) return;
+
+      // Try to get courses from the live dataset first
+      let courses = null;
+      if (typeof ICEP_DEPARTMENTS !== 'undefined') {
+        const dept = ICEP_DEPARTMENTS.find(d => d.name === 'Marketing');
+        if (dept && dept.courses) {
+          courses = dept.courses.filter(c => c.semester === sem && c.level === 400);
+        }
+      }
+      // Fallback to hardcoded
+      if (!courses || courses.length === 0) courses = MKT400_COURSES[sem] || MKT400_COURSES[1];
+
+      codeSel.innerHTML = courses.map(c => `<option value="${c.code}" data-title="${c.title}" data-lec="${c.lecturer || ''}">${
+        c.code} — ${c.title} (${c.units || '?'}u)</option>`).join('');
+
+      // Auto-sync title and lecturer
+      syncCourseTitleFromCode();
+    }
+
+    function syncCourseTitleFromCode() {
+      const codeSel = document.getElementById('bCode');
+      if (!codeSel) return;
+      const sel = codeSel.options[codeSel.selectedIndex];
+      if (!sel) return;
+      const titleInp = document.getElementById('bTitle');
+      const lecInp = document.getElementById('bLec');
+      if (titleInp && sel.dataset.title) titleInp.value = sel.dataset.title;
+      if (lecInp && sel.dataset.lec) lecInp.value = sel.dataset.lec;
+    }
+
+    window.onload = function(){
+      if(localStorage.getItem('icep_modern_theme') === 'dark'){
+        document.getElementById('themeIcon').className = 'fas fa-sun';
+      }
+      renderNotifs();
+      // Init semester-based course selector
+      updateCoursesBySelectedSem();
+      // Sync student count chip
+      if (classListStudents) {
+        document.querySelectorAll('[data-stat="students"]').forEach(el => {
+          el.textContent = classListStudents.length;
+        });
+      }
+    }
+
+    // ─── NOTIFICATIONS ───
+    const NOW_CR = Date.now();
+    const NOTIFS_CR = [
+      { id:1, icon:'📋', text:'MKT 401 broadsheet has been submitted and synced.', time:'5 min ago', read:false, target:'resultModal', addedAt: NOW_CR - 5*60*1000 },
+      { id:2, icon:'📅', text:'Monday lecture reminder: MKT 401 at 8:00 AM in Hall B.', time:'1 hr ago', read:false, target:'timetableModal', addedAt: NOW_CR - 60*60*1000 },
+      { id:3, icon:'💰', text:'2 students have not yet paid MKT 201 Textbook Dues.', time:'2 hrs ago', read:false, target:'feeModal', addedAt: NOW_CR - 2*60*60*1000 },
+      { id:4, icon:'👥', text:'Class list updated: 16 students now enrolled.', time:'Yesterday', read:false, target:'rosterModal', addedAt: NOW_CR - 26*60*60*1000 },
+    ];
+    function isNew(addedAt) { return (Date.now() - addedAt) < 86400000; }
+    function routeToTarget(target) {
+      document.querySelectorAll('.notif-panel-open, #notifPanel').forEach(p => p.classList.remove('notif-open', 'notif-panel-open'));
+      if (!target) return;
+      const el = document.getElementById(target);
+      if (el && el.classList.contains('modal-overlay')) openModal(target);
+    }
+    function handleNotifClick(e, id) {
+      if (e.target.closest('.notif-dismiss')) return;
+      const n = NOTIFS_CR.find(x => x.id === id);
+      if (!n) return;
+      n.read = true; renderNotifs();
+      if (n.target) routeToTarget(n.target);
+    }
+    function dismissNotif(id){
+      let n = NOTIFS_CR.find(x=>x.id===id);
+      if(n) n.read = true;
+      renderNotifs();
+    }
+    function renderNotifs(){
+      const list = document.getElementById('notifList');
+      const count = document.getElementById('notifCount');
+      list.innerHTML = '';
+      let unread = 0;
+      NOTIFS_CR.forEach(n => {
+        if(!n.read) unread++;
+        let newHtml = (isNew(n.addedAt) && !n.read) ? '<span class="new-badge">NEW</span>' : '';
+        list.innerHTML += `
+          <div class="notif-item ${n.read?'notif-read':''}" onclick="handleNotifClick(event, ${n.id})">
+            <div style="font-size:18px;">${n.icon}</div>
+            <div class="notif-text">
+              <p>${n.text} ${newHtml}</p>
+              <span>${n.time}</span>
+            </div>
+            <button class="notif-dismiss" onclick="dismissNotif(${n.id})" style="border:none;background:none;color:var(--muted);cursor:pointer;padding:4px;"><i class="fas fa-times"></i></button>
+          </div>
+        `;
+      });
+      if(unread > 0){
+        count.style.display = 'flex';
+        count.innerText = unread > 9 ? '9+' : unread;
+      } else {
+        count.style.display = 'none';
+        list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted)">No new notifications</div>';
+      }
+    }
+    function markAllRead(){
+      NOTIFS_CR.forEach(n=>n.read=true);
+      renderNotifs();
+    }
+
+    // ─── BROADSHEET LOGIC ───
+
+    function saveBroadsheetToHistory(code, level, semester, scores) {
+      const history = JSON.parse(localStorage.getItem('icep_broadsheet_history') || '[]');
+      const carryovers = scores.filter(s => s.score !== null && s.score < 45);
+      const validScores = scores.filter(s=>s.score!==null);
+      let avg = 0;
+      if (validScores.length > 0) avg = Math.round(validScores.reduce((a,b)=>a+b.score,0) / validScores.length);
+      history.unshift({
+        code, level, semester,
+        date: new Date().toLocaleDateString(),
+        scores,
+        carryovers: carryovers.length,
+        avg: avg
+      });
+      localStorage.setItem('icep_broadsheet_history', JSON.stringify(history.slice(0,50)));
+    }
+    function renderBroadsheetHistory() {
+      const history = JSON.parse(localStorage.getItem('icep_broadsheet_history') || '[]');
+      const container = document.getElementById('bsHistoryContainer');
+      if (!container) return;
+      if (history.length === 0) { container.innerHTML = '<p style="text-align:center;color:var(--muted);padding:30px">No broadsheets submitted yet.</p>'; return; }
+      
+      let sortVal = 'date';
+      let selectEl = document.getElementById('bsSortSelect');
+      if(selectEl) sortVal = selectEl.value;
+      
+      let sorted = [...history];
+      if(sortVal === 'code') sorted.sort((a,b) => a.code.localeCompare(b.code));
+      if(sortVal === 'avg') sorted.sort((a,b) => b.avg - a.avg);
+
+      container.innerHTML = `
+        <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+          <select id="bsSortSelect" onchange="renderBroadsheetHistory()" style="padding:8px 14px;border-radius:14px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-size:13px;font-weight:600">
+            <option value="date" ${sortVal==='date'?'selected':''}>Sort by Date</option>
+            <option value="code" ${sortVal==='code'?'selected':''}>Sort by Code</option>
+            <option value="avg" ${sortVal==='avg'?'selected':''}>Sort by Avg Score</option>
+          </select>
+          <button onclick="exportBsHistoryTXT()" style="padding:8px 16px;border-radius:14px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-size:12.5px;font-weight:700;cursor:pointer"><i class="fas fa-file-lines"></i> Export TXT</button>
+        </div>
+        <table class="result-table" style="width:100%">
+          <thead><tr><th>#</th><th>Course</th><th>Level</th><th>Semester</th><th>Date</th><th>Avg</th><th>Carryovers</th></tr></thead>
+          <tbody>${sorted.map((h,i) => `
+            <tr>
+              <td>${i+1}</td>
+              <td style="font-weight:700">${h.code}</td>
+              <td>${h.level}</td><td>${h.semester}</td><td>${h.date}</td>
+              <td style="color:#10b981;font-weight:800">${h.avg}%</td>
+              <td><span style="padding:4px 10px;border-radius:10px;font-size:12px;font-weight:800;background:${h.carryovers>0?'rgba(217,83,79,0.15)':'rgba(16,185,129,0.15)'};color:${h.carryovers>0?'#D9534F':'#10b981'}">${h.carryovers} ${h.carryovers===1?'carryover':'carryovers'}</span></td>
+            </tr>`).join('')}
+          </tbody>
+        </table>`;
+    }
+    function exportBsHistoryTXT() {
+      const history = JSON.parse(localStorage.getItem('icep_broadsheet_history') || '[]');
+      const lines = ['ICEP BROADSHEET SUBMISSION HISTORY','='.repeat(60),''];
+      history.forEach((h,i) => { lines.push(`${i+1}. ${h.code} | ${h.level} | ${h.semester} | ${h.date} | Avg: ${h.avg}% | Carryovers: ${h.carryovers}`); });
+      const blob = new Blob([lines.join('\n')],{type:'text/plain'});
+      const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='ICEP_BroadsheetHistory.txt';a.click();
+    }
+
+    function generateMasterBroadsheet(){
+      const skip = document.getElementById('bSkip').checked;
+      const file = document.getElementById('bFile').value;
+      if(!skip && !file){
+        showToast('Please upload an image proof or check "Skip".', true);
+        return;
+      }
+      document.getElementById('broadsheetTableWrap').style.display = 'block';
+      const body = document.getElementById('broadsheetBody');
+      body.innerHTML = '';
+      classListStudents.forEach((s, i) => {
+        body.innerHTML += `
+          <tr>
+            <td>${i+1}</td>
+            <td><strong>${s.name}</strong></td>
+            <td>${s.matric}</td>
+            <td><input type="number" class="score-input" id="score_${s.id}" min="0" max="100" onchange="updateAutoGrade(${s.id}, this.value)"></td>
+            <td><span class="badge" id="grade_${s.id}">-</span></td>
+          </tr>
+        `;
+      });
+    }
+    function updateAutoGrade(id, val){
+      const badge = document.getElementById(`grade_${id}`);
+      if(!val || val===''){ badge.innerText = '-'; badge.className = 'badge'; return; }
+      let v = parseInt(val);
+      if(v>=70){ badge.innerText = 'A'; badge.className = 'badge badge-paid'; }
+      else if(v>=60){ badge.innerText = 'B'; badge.className = 'badge'; badge.style.background='rgba(99,102,241,0.1)'; badge.style.color='#6366f1'; }
+      else if(v>=50){ badge.innerText = 'C'; badge.className = 'badge'; badge.style.background='var(--warn-bg)'; badge.style.color='var(--warn)'; }
+      else if(v>=45){ badge.innerText = 'D'; badge.className = 'badge'; badge.style.background='rgba(245,158,11,0.1)'; badge.style.color='#f59e0b'; }
+      else { badge.innerText = 'F'; badge.className = 'badge badge-unpaid'; }
+    }
+    function quickFillScores(type){
+      classListStudents.forEach((s, i) => {
+        const inp = document.getElementById(`score_${s.id}`);
+        if(!inp) return;
+        if(type==='high') inp.value = Math.floor(Math.random()*(100-70+1))+70;
+        else if(type==='varied') inp.value = DEFAULT_BROADSHEET_SCORES[i];
+        else inp.value = '';
+        updateAutoGrade(s.id, inp.value);
+      });
+    }
+    function submitMasterBroadsheet(){
+      let scores = [];
+      let carryovers = 0;
+      classListStudents.forEach((s) => {
+        let inp = document.getElementById(`score_${s.id}`);
+        let val = inp && inp.value !== '' ? parseInt(inp.value) : null;
+        scores.push({id: s.id, score: val});
+        if(val !== null && val < 45) carryovers++;
+      });
+      let code = document.getElementById('bCode').value || 'Unknown';
+      let level = document.getElementById('bLevel').value || 'Unknown';
+      let sem = document.getElementById('bSem').value || 'Unknown';
+      saveBroadsheetToHistory(code, level, sem, scores);
+      showToast(`Broadsheet submitted! ${carryovers} carryovers flagged.`);
+      setTimeout(()=>closeModal('resultModal'), 1000);
+    }
+
+    // ─── FEE MANAGER ───
+
+    function saveFeeToHistory(title, amount) {
+      const history = JSON.parse(localStorage.getItem('icep_fee_history') || '[]');
+      history.unshift({ title, amount, date: new Date().toLocaleDateString(), paid: classListStudents.filter(s=>s.dues==='PAID').length, total: classListStudents.length });
+      localStorage.setItem('icep_fee_history', JSON.stringify(history.slice(0,50)));
+    }
+    function renderFeeHistory() {
+      const history = JSON.parse(localStorage.getItem('icep_fee_history') || '[]');
+      const tbody = document.getElementById('feeHistoryTbody');
+      if (!tbody) return;
+      if (history.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:30px">No fee drives created yet.</td></tr>'; return; }
+      tbody.innerHTML = history.map((f,i) => `
+        <tr>
+          <td>${i+1}</td><td style="font-weight:700">${f.title}</td>
+          <td>₦${parseInt(f.amount).toLocaleString()}</td>
+          <td>${f.date}</td>
+          <td><span style="background:rgba(16,185,129,0.15);color:#10b981;padding:4px 10px;border-radius:10px;font-size:12px;font-weight:800">${f.paid}/${f.total} Paid</span></td>
+        </tr>`).join('');
+    }
+
+    function generateFeeDrive(){
+      document.getElementById('feeTableWrap').style.display = 'block'; saveFeeToHistory(document.getElementById('feeTitle').value, document.getElementById('feeAmt').value); switchViewMode('fee','active');
+      const body = document.getElementById('feeBody');
+      body.innerHTML = '';
+      classListStudents.forEach(s => {
+        let isPaid = s.dues === 'PAID';
+        body.innerHTML += `
+          <tr>
+            <td><input type="checkbox" class="fee-chk" value="${s.id}" ${isPaid?'disabled':''}></td>
+            <td><strong>${s.name}</strong></td>
+            <td>${s.matric}</td>
+            <td id="feeStatus_${s.id}">
+              <span class="badge ${isPaid?'badge-paid':'badge-unpaid'}">${s.dues}</span>
+            </td>
+            <td>
+              ${!isPaid ? `<button class="btn-primary" style="padding:4px 10px;font-size:11px;" onclick="promptPaymentModal(${s.id})">Mark Paid</button>` : `<span style="color:var(--success);font-size:12px;"><i class="fas fa-check"></i> Cleared</span>`}
+            </td>
+          </tr>
+        `;
+      });
+    }
+    function toggleAllFeeChecks(){
+      const master = document.getElementById('feeCheckAll').checked;
+      document.querySelectorAll('.fee-chk:not([disabled])').forEach(c => c.checked = master);
+    }
+    function markSelectedAsPaid(){
+      const checks = document.querySelectorAll('.fee-chk:checked:not([disabled])');
+      if(checks.length === 0){ showToast('No pending students selected.', true); return; }
+      if(confirm(`Mark ${checks.length} students as PAID?`)){
+        checks.forEach(c => approvePayment(parseInt(c.value)));
+        showToast('Payments updated!');
+      }
+    }
+    function promptPaymentModal(id){
+      if(confirm('Confirm payment received for this student?')){
+        approvePayment(id);
+        showToast('Payment verified.');
+      }
+    }
+    function approvePayment(id){
+      let s = classListStudents.find(x=>x.id===id);
+      if(s) s.dues = 'PAID';
+      generateFeeDrive();
+    }
+    function exportPaymentPDF(){ showToast('Generating PDF Report...'); }
+    function exportPaymentTXT(){ showToast('Downloading TXT file...'); }
+
+    // ─── CLASS ROSTER ───
+
+    let rosterFilter = '';
+    function filterRoster() {
+      rosterFilter = document.getElementById('rosterSearchInput').value.toLowerCase();
+      const currentView = document.getElementById('roster-grid').classList.contains('active-panel') ? 'grid' : 'list';
+      if (currentView === 'grid') renderRosterGrid();
+      else renderRosterList();
+    }
+    function renderRosterGrid() {
+      const container = document.getElementById('rosterGridContainer');
+      const noMsg = document.getElementById('rosterNoResults');
+      if(!container) return;
+      const filtered = classListStudents.filter(s => s.name.toLowerCase().includes(rosterFilter) || s.matric.toLowerCase().includes(rosterFilter));
+      if (filtered.length === 0) { container.innerHTML = ''; noMsg.style.display = 'block'; return; }
+      noMsg.style.display = 'none';
+      container.innerHTML = filtered.map(s => `
+        <div class="neu-student-card" onclick="showStudentDetail('${s.name}','${s.matric}','${s.avatar}','${s.track}','${s.attendance}','${s.dues}')">
+          <img src="${s.avatar}" class="neu-card-img" alt="${s.name}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}&background=10b981&color=fff&bold=true&size=200'">
+          <span class="neu-card-dues ${s.dues==='PAID'?'dues-paid':'dues-unpaid'}">${s.dues}</span>
+          <div class="neu-card-body">
+            <div class="neu-card-name">${s.name}</div>
+            <div class="neu-card-matric">${s.matric}</div>
+            <span class="neu-card-track">${s.track}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+    function renderRosterList() {
+      const table = document.getElementById('rosterListTable');
+      const noMsg = document.getElementById('rosterNoResults');
+      if(!table) return;
+      const filtered = classListStudents.filter(s => s.name.toLowerCase().includes(rosterFilter) || s.matric.toLowerCase().includes(rosterFilter));
+      if (filtered.length === 0) { table.innerHTML = ''; noMsg.style.display = 'block'; return; }
+      noMsg.style.display = 'none';
+      table.innerHTML = `
+        <thead><tr><th>#</th><th>Name</th><th>Matric</th><th>Track</th><th>Attendance</th><th>Dues</th><th>Detail</th></tr></thead>
+        <tbody>${filtered.map((s,i) => `
+          <tr>
+            <td>${i+1}</td>
+            <td style="font-weight:700">${s.name}</td>
+            <td style="color:#10b981;font-weight:700">${s.matric}</td>
+            <td>${s.track}</td>
+            <td>${s.attendance}</td>
+            <td><span style="padding:4px 10px;border-radius:10px;font-size:12px;font-weight:800;background:${s.dues==='PAID'?'rgba(16,185,129,0.15)':'rgba(239,68,68,0.15)'};color:${s.dues==='PAID'?'#10b981':'#ef4444'}">${s.dues}</span></td>
+            <td><button onclick="showStudentDetail('${s.name}','${s.matric}','${s.avatar}','${s.track}','${s.attendance}','${s.dues}')" style="background:rgba(16,185,129,0.15);border:none;color:#10b981;padding:6px 14px;border-radius:10px;font-weight:700;cursor:pointer">View</button></td>
+          </tr>`).join('')}
+        </tbody>`;
+    }
+    function exportRosterPDF() {
+      const pw = window.open('','_blank','width=850,height=1100');
+      if(!pw){showToast('Please allow popups to export PDF',true);return;}
+      const rows = classListStudents.map((s,i) => `<tr><td>${i+1}</td><td>${s.name}</td><td>${s.matric}</td><td>${s.track}</td><td>${s.attendance}</td><td>${s.dues}</td></tr>`).join('');
+      pw.document.write(`<!DOCTYPE html><html><head><title>Class Roster - MKT 400L</title><style>body{font-family:Arial,sans-serif;padding:40px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:8px;text-align:left}th{background:#10b981;color:#fff}h1{color:#10b981}</style></head><body><h1>ICEP — Class Roster</h1><p>Department of Marketing | 400 Level | 2025/2026</p><table><thead><tr><th>#</th><th>Name</th><th>Matric</th><th>Track</th><th>Attendance</th><th>Dues</th></tr></thead><tbody>${rows}</tbody></table></body></html>`);
+      pw.document.close();pw.print();
+    }
+    function exportRosterTXT() {
+      const lines = ['ICEP CLASS ROSTER — Marketing 400L 2025/2026','='.repeat(60),''];
+      classListStudents.forEach((s,i) => lines.push(`${String(i+1).padStart(2,'0')}. ${s.name.padEnd(30)} ${s.matric.padEnd(18)} ${s.track.padEnd(22)} ${s.attendance.padEnd(6)} ${s.dues}`));
+      const blob = new Blob([lines.join('\n')],{type:'text/plain'});
+      const a = document.createElement('a');
+      a.href=URL.createObjectURL(blob);a.download='ICEP_ClassRoster_MKT400L.txt';a.click();
+    }
+
+    function showStudentDetail(name, matric, avatar, track, att, dues, fallback){
+      document.getElementById('sdName').innerText = name;
+      document.getElementById('sdMatric').innerText = matric;
+      let img = document.getElementById('sdAvatar');
+      img.src = avatar;
+      img.onerror = () => { img.src = fallback; };
+      document.getElementById('sdTrack').innerText = track;
+      document.getElementById('sdAtt').innerText = att;
+      let d = document.getElementById('sdDues');
+      d.innerText = dues;
+      d.className = dues==='PAID'?'badge badge-paid':'badge badge-unpaid';
+      document.getElementById('studentDetailModal').classList.add('modal-open');
+    }
+    function closeStudentDetailModal(){
+      document.getElementById('studentDetailModal').classList.remove('modal-open');
+    }
+  </script>
+</body>
+</html>
