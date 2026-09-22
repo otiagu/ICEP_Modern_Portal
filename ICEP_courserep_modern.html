@@ -34,6 +34,15 @@
       --success-bg:    rgba(16,185,129,0.10);
       --warn:          #f59e0b;
       --warn-bg:       rgba(245,158,11,0.10);
+      --bg-primary: #0a0f1d;
+      --surface-card: rgba(18, 26, 47, 0.75);
+      --surface-glass-border: rgba(255, 255, 255, 0.08);
+      --neo-shadow-drop: 6px 6px 16px rgba(0, 0, 0, 0.5), -4px -4px 12px rgba(255, 255, 255, 0.02);
+      --accent-cyan: #06b6d4;
+      --accent-emerald: #10b981;
+      --accent-rose: #f43f5e;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
     }
     *{box-sizing:border-box;margin:0;padding:0;}
     html{scroll-behavior:smooth;}
@@ -219,7 +228,7 @@
     .badge-unpaid{background:var(--accent-light);color:#ef4444;}
     
     /* STUDENT FLOATING GRID */
-    .student-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;}
+    .student-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:18px;}
     .student-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;display:flex;flex-direction:column;align-items:center;text-align:center;cursor:pointer;transition:transform .2s,box-shadow .2s;}
     .student-card:hover{transform:translateY(-4px);box-shadow:0 12px 24px rgba(0,0,0,0.08);border-color:var(--accent);}
     .s-card-img{width:60px;height:60px;border-radius:50%;object-fit:cover;margin-bottom:12px;box-shadow:0 4px 10px rgba(0,0,0,0.1);}
@@ -316,64 +325,7 @@
       --neu-shadow-dark: rgba(0,0,0,0.5);
       --neu-shadow-light: rgba(255,255,255,0.04);
     }
-    .neu-student-card {
-      background: var(--neu-bg);
-      border-radius: 20px;
-      box-shadow: 8px 8px 16px var(--neu-shadow-dark), -8px -8px 16px var(--neu-shadow-light);
-      overflow: hidden;
-      cursor: pointer;
-      transition: transform 0.25s, box-shadow 0.25s;
-      position: relative;
-    }
-    .neu-student-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 12px 12px 24px var(--neu-shadow-dark), -12px -12px 24px var(--neu-shadow-light);
-    }
-    .neu-card-img {
-      width: 100%;
-      height: 160px;
-      object-fit: cover;
-      object-position: center 10%;
-      display: block;
-    }
-    .neu-card-body {
-      padding: 14px 16px 16px;
-    }
-    .neu-card-name {
-      font-size: 14px;
-      font-weight: 800;
-      color: var(--text);
-      margin-bottom: 3px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .neu-card-matric {
-      font-size: 11.5px;
-      font-weight: 700;
-      color: var(--muted);
-      margin-bottom: 8px;
-    }
-    .neu-card-track {
-      display: inline-block;
-      font-size: 10.5px;
-      font-weight: 700;
-      padding: 3px 10px;
-      border-radius: 10px;
-      background: rgba(16,185,129,0.12);
-      color: #10b981;
-    }
-    .neu-card-dues {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      font-size: 9px;
-      font-weight: 900;
-      padding: 3px 8px;
-      border-radius: 10px;
-    }
-    .dues-paid { background: rgba(16,185,129,0.9); color: #fff; }
-    .dues-unpaid { background: rgba(239,68,68,0.9); color: #fff; }
+    /* neu-student-card — defined below after day-card CSS block */
     .roster-search-row {
       display: flex;
       gap: 10px;
@@ -459,6 +411,159 @@
       .stat-chips { grid-template-columns: 1fr; }
       .roster-grid { grid-template-columns: 1fr; }
     }
+    .day-card {
+      background: rgba(18,26,47,0.85);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 18px;
+      padding: 16px;
+      min-width: 220px;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 6px 6px 16px rgba(0,0,0,0.5), -4px -4px 12px rgba(255,255,255,0.02);
+    }
+    .day-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid rgba(6,182,212,0.3);
+    }
+    .day-card-title {
+      font-size: 13px;
+      font-weight: 900;
+      color: #06b6d4;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+    .day-lecture-pill {
+      font-size: 10px;
+      font-weight: 700;
+      background: rgba(6,182,212,0.15);
+      color: #06b6d4;
+      border: 1px solid rgba(6,182,212,0.3);
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+    .timetable-slot {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 8px;
+      transition: border-color 0.2s;
+    }
+    .timetable-slot:hover { border-color: rgba(6,182,212,0.3); }
+    .slot-time {
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      color: #94a3b8;
+      margin-bottom: 5px;
+    }
+    .slot-course-code {
+      font-size: 13px;
+      font-weight: 900;
+      color: #f8fafc;
+      margin-bottom: 2px;
+    }
+    .slot-course-title {
+      font-size: 11.5px;
+      color: #94a3b8;
+      margin-bottom: 6px;
+    }
+    .slot-badges { display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
+    .venue-badge {
+      font-size: 10px;
+      font-weight: 700;
+      background: rgba(245,158,11,0.15);
+      color: #f59e0b;
+      border: 1px solid rgba(245,158,11,0.3);
+      padding: 2px 8px;
+      border-radius: 8px;
+    }
+    .status-badge-upcoming { font-size: 10px; font-weight: 700; background: rgba(6,182,212,0.12); color: #06b6d4; border: 1px solid rgba(6,182,212,0.3); padding: 2px 8px; border-radius: 8px; }
+    .status-badge-session { font-size: 10px; font-weight: 700; background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.4); padding: 2px 8px; border-radius: 8px; animation: pulse-session 1.5s infinite; }
+    .status-badge-done { font-size: 10px; font-weight: 700; background: rgba(244,63,94,0.12); color: #f43f5e; border: 1px solid rgba(244,63,94,0.3); padding: 2px 8px; border-radius: 8px; }
+    @keyframes pulse-session { 0%,100%{opacity:1} 50%{opacity:0.6}    }
+    #roster-grid { background: #0a0f1d; border-radius: 16px; padding: 16px; }
+    .neu-student-card {
+      position: relative;
+      background: rgba(18, 26, 47, 0.80);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 20px;
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+      box-shadow: 6px 6px 16px rgba(0,0,0,0.5), -4px -4px 12px rgba(255,255,255,0.02);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      overflow: hidden;
+    }
+    .neu-student-card:hover {
+      transform: translateY(-4px) scale(1.02);
+      border-color: rgba(6,182,212,0.4);
+      box-shadow: 0 12px 36px rgba(6,182,212,0.18), 6px 6px 16px rgba(0,0,0,0.5);
+    }
+    .neu-card-avatar-frame {
+      width: 100px;
+      height: 100px;
+      border-radius: 16px;
+      padding: 3px;
+      background: linear-gradient(135deg, rgba(6,182,212,0.4), rgba(37,99,235,0.2));
+      border: 1px solid rgba(255,255,255,0.12);
+      margin-bottom: 14px;
+      flex-shrink: 0;
+    }
+    .neu-card-avatar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 13px;
+    }
+    .neu-card-name {
+      font-size: 15px;
+      font-weight: 800;
+      color: #f8fafc;
+      margin-bottom: 6px;
+      letter-spacing: -0.3px;
+      line-height: 1.3;
+    }
+    .neu-card-matric {
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      color: #06b6d4;
+      background: rgba(6,182,212,0.1);
+      border: 1px solid rgba(6,182,212,0.25);
+      padding: 3px 10px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      letter-spacing: 0.5px;
+    }
+    .neu-card-badges { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+    .neu-badge-level {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: rgba(100,116,139,0.2);
+      border: 1px solid rgba(100,116,139,0.3);
+      color: #94a3b8;
+    }
+    .neu-badge-dues {
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+    }
+    .dues-paid { background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: #10b981; }
+    .dues-unpaid { background: rgba(244,63,94,0.15); border: 1px solid rgba(244,63,94,0.3); color: #f43f5e; }
   </style>
   <script src="data/icep_dataset.js"></script>
 </head>
@@ -483,13 +588,13 @@
     <a href="#" class="mobile-nav-link"><span><i class="fas fa-wallet" style="margin-right:10px"></i>Payments</span></a>
     
     <div class="mobile-menu-divider"></div>
-    <a href="ICEP_login_modern.html" class="mobile-nav-link"><span><i class="fas fa-right-to-bracket" style="margin-right:10px;color:#6366f1"></i>Login Page</span></a>
-    <a href="ICEP_student_profile_modern.html" class="mobile-nav-link"><span><i class="fas fa-user-graduate" style="margin-right:10px;color:var(--accent)"></i>Student Profile</span></a>
-    <a href="ICEP_coordinator_modern.html" class="mobile-nav-link"><span><i class="fas fa-chalkboard-user" style="margin-right:10px;color:#f59e0b"></i>Coordinator Portal</span></a>
-    
+    <a href="ICEP_login_modern.html" class="mobile-nav-link"><span><i class="fas fa-right-to-bracket" style="margin-right:10px;color:#6366f1"></i>Login Page</span><i class="fas fa-chevron-right"></i></a>
+    <a href="ICEP_student_profile_modern.html" class="mobile-nav-link"><span><i class="fas fa-user-graduate" style="margin-right:10px;color:var(--accent)"></i>Student Profile</span><i class="fas fa-chevron-right"></i></a>
+    <a href="ICEP_coordinator_modern.html" class="mobile-nav-link"><span><i class="fas fa-chalkboard-user" style="margin-right:10px;color:#f59e0b"></i>Coordinator Portal</span><i class="fas fa-chevron-right"></i></a>
+    <a href="ICEP_master_dashboard.html" class="mobile-nav-link"><span><i class="fas fa-shield-halved" style="margin-right:10px;color:#f43f5e"></i>Master Dashboard</span><i class="fas fa-chevron-right"></i></a>
     <div class="mobile-menu-divider"></div>
     <button class="mobile-nav-link" onclick="toggleDarkMode();closeMobileMenu()" style="background:none;border:none;width:100%;text-align:left;cursor:pointer;">
-      <span><i class="fas fa-moon" style="margin-right:10px;color:var(--accent)" id="mobileThemeIcon"></i><span id="mobileThemeLabel">Dark Mode</span></span>
+      <span><i class="fas fa-moon" style="margin-right:10px;color:var(--accent)" id="mobileThemeIcon"></i><span id="mobileThemeLabel">Dark Mode</span></span><i class="fas fa-chevron-right"></i>
     </button>
   </div>
 
@@ -788,7 +893,7 @@
       <div class="modal-body">
         <div class="modal-tabs">
           <button class="modal-tab active-tab" onclick="switchViewMode('time','table')">Master Table</button>
-          <button class="modal-tab" onclick="switchViewMode('time','cards')">Day Cards</button>
+          <button class="modal-tab" onclick="switchViewMode('time','cards');renderTimetableDayCards()">Day Cards</button>
         </div>
         <div id="time-table" class="modal-tab-panel active-panel">
           <label class="checkbox-wrap">
@@ -822,7 +927,7 @@
           </div>
         </div>
         <div id="time-cards" class="modal-tab-panel">
-          <div class="acc-intro">Day Cards view coming soon...</div>
+          <div id="timetableDayCardsRoot" style="overflow-x:auto;padding-bottom:8px;"></div>
         </div>
       </div>
     </div>
@@ -1443,17 +1548,21 @@
       const container = document.getElementById('rosterGridContainer');
       const noMsg = document.getElementById('rosterNoResults');
       if(!container) return;
-      const filtered = classListStudents.filter(s => s.name.toLowerCase().includes(rosterFilter) || s.matric.toLowerCase().includes(rosterFilter));
+      const filtered = window.icepSearch && window.icepSearch.filterStudents ? window.icepSearch.filterStudents(classListStudents, rosterFilter) : classListStudents.filter(s => s.name.toLowerCase().includes(rosterFilter) || s.matric.toLowerCase().includes(rosterFilter));
       if (filtered.length === 0) { container.innerHTML = ''; noMsg.style.display = 'block'; return; }
       noMsg.style.display = 'none';
       container.innerHTML = filtered.map(s => `
-        <div class="neu-student-card" onclick="showStudentDetail('${s.name}','${s.matric}','${s.avatar}','${s.track}','${s.attendance}','${s.dues}')">
-          <img src="${s.avatar}" class="neu-card-img" alt="${s.name}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}&background=10b981&color=fff&bold=true&size=200'">
-          <span class="neu-card-dues ${s.dues==='PAID'?'dues-paid':'dues-unpaid'}">${s.dues}</span>
+        <div class="neu-student-card" onclick="showStudentDetail('${s.name}','${s.matric}','${s.avatar || s.image || ''}','${s.track || ''}','${s.attendance || ''}','${s.dues}')">
+          <div class="neu-card-avatar-frame">
+            <img src="${s.avatar || s.image || ''}" class="neu-card-avatar-img" alt="${s.name}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}&background=0d9488&color=fff&bold=true&size=200'">
+          </div>
           <div class="neu-card-body">
-            <div class="neu-card-name">${s.name}</div>
-            <div class="neu-card-matric">${s.matric}</div>
-            <span class="neu-card-track">${s.track}</span>
+            <h3 class="neu-card-name">${s.name}</h3>
+            <p class="neu-card-matric">${s.matric}</p>
+            <div class="neu-card-badges">
+              <span class="neu-badge-level">${s.level || '400L'}</span>
+              <span class="neu-badge-dues ${s.dues === 'PAID' ? 'dues-paid' : 'dues-unpaid'}">${s.dues || 'UNPAID'}</span>
+            </div>
           </div>
         </div>
       `).join('');
@@ -1510,6 +1619,76 @@
     function closeStudentDetailModal(){
       document.getElementById('studentDetailModal').classList.remove('modal-open');
     }
+    function renderTimetableDayCards() {
+      const root = document.getElementById('timetableDayCardsRoot');
+      if (!root) return;
+
+      const fallbackData = [
+        { day: "Monday", slots: [{code: "MKT 401", title: "Advanced Research", time: "08:00-10:00", venue: "Hall B"}, {code: "MKT 409", title: "Strategic Marketing", time: "14:00-16:00", venue: "Hall D"}] },
+        { day: "Tuesday", slots: [{code: "MKT 403", title: "Consumer Behavior", time: "11:00-13:00", venue: "Auditorium 2"}, {code: "GST 401", title: "General Studies", time: "15:00-17:00", venue: "Lecture Hall 1"}] },
+        { day: "Wednesday", slots: [{code: "MKT 405", title: "Brand Management", time: "08:00-10:00", venue: "Lecture Theatre C"}, {code: "MKT 407", title: "International Marketing", time: "13:00-15:00", venue: "Hall A"}] },
+        { day: "Thursday", slots: [{code: "MKT 407", title: "Int'l Marketing", time: "09:00-11:00", venue: "Hall A"}, {code: "MKT 401", title: "Advanced Research", time: "14:00-16:00", venue: "Hall B"}] },
+        { day: "Friday", slots: [{code: "MKT 409", title: "Strategic Marketing", time: "10:00-12:00", venue: "Hall D"}, {code: "GST 402", title: "General Studies II", time: "13:00-15:00", venue: "Lecture Hall 2"}] }
+      ];
+
+      const data = (window.ICEP_TIMETABLE && window.ICEP_TIMETABLE.length > 0) ? window.ICEP_TIMETABLE : fallbackData;
+
+      const now = new Date();
+      const currentHours = now.getHours();
+      const currentMinutes = now.getMinutes();
+      const currentTotalMins = currentHours * 60 + currentMinutes;
+
+      root.style.display = "grid";
+      root.style.gridTemplateColumns = "repeat(5, minmax(220px, 1fr))";
+      root.style.gap = "14px";
+      root.style.minWidth = "1100px";
+
+      let html = "";
+      data.forEach(dayItem => {
+        html += `<div class="day-card">
+          <div class="day-card-header">
+            <div class="day-card-title">${dayItem.day}</div>
+            <div class="day-lecture-pill">${dayItem.slots.length} Lectures</div>
+          </div>`;
+        
+        dayItem.slots.forEach(slot => {
+          const times = slot.time.split('-');
+          let statusClass = "status-badge-upcoming";
+          let statusText = "Upcoming";
+
+          if (times.length === 2) {
+            const startParts = times[0].trim().split(':');
+            const endParts = times[1].trim().split(':');
+            if (startParts.length === 2 && endParts.length === 2) {
+              const startMins = parseInt(startParts[0])*60 + parseInt(startParts[1]);
+              const endMins = parseInt(endParts[0])*60 + parseInt(endParts[1]);
+              if (currentTotalMins > endMins) {
+                statusClass = "status-badge-done";
+                statusText = "Completed";
+              } else if (currentTotalMins >= startMins && currentTotalMins <= endMins) {
+                statusClass = "status-badge-session";
+                statusText = "In Session";
+              }
+            }
+          }
+          
+          html += `
+          <div class="timetable-slot">
+            <div class="slot-time">${slot.time}</div>
+            <div class="slot-course-code">${slot.code}</div>
+            <div class="slot-course-title">${slot.title}</div>
+            <div class="slot-badges">
+              <div class="venue-badge"><i class="fas fa-map-marker-alt"></i> ${slot.venue}</div>
+              <div class="${statusClass}">${statusText}</div>
+            </div>
+          </div>`;
+        });
+        html += `</div>`;
+      });
+
+      root.innerHTML = html;
+    }
   </script>
+  <script src="data/icep_search.js"></script>
 </body>
 </html>

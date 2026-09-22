@@ -34116,3 +34116,29 @@ function filterStudents({ faculty, department, level, role, text } = {}) {
   else if (text) pool = pool.filter(p => p.name.toLowerCase().includes(text) || p.matric.toLowerCase().includes(text));
   return pool;
 }
+const ICEP_TIMETABLE = [
+  { id: 'T1', day: 'Monday', startTime: '08:00', endTime: '10:00', courseCode: 'MAR 401', courseTitle: 'Marketing Management', venue: 'Hall A', lecturer: 'Dr. A. Oluwole', semester: 1 },
+  { id: 'T2', day: 'Monday', startTime: '10:00', endTime: '12:00', courseCode: 'MAR 403', courseTitle: 'Consumer Behavior', venue: 'Hall B', lecturer: 'Prof. S. O. Yusuf', semester: 1 },
+  { id: 'T3', day: 'Tuesday', startTime: '08:00', endTime: '10:00', courseCode: 'MAR 405', courseTitle: 'International Marketing', venue: 'Hall A', lecturer: 'Dr. B. Kalu', semester: 1 },
+  { id: 'T4', day: 'Tuesday', startTime: '12:00', endTime: '14:00', courseCode: 'MAR 407', courseTitle: 'Marketing Research', venue: 'Hall C', lecturer: 'Dr. C. Nwosu', semester: 1 },
+  { id: 'T5', day: 'Wednesday', startTime: '09:00', endTime: '11:00', courseCode: 'MAR 409', courseTitle: 'Sales Management', venue: 'Hall A', lecturer: 'Dr. A. Oluwole', semester: 1 },
+  { id: 'T6', day: 'Wednesday', startTime: '14:00', endTime: '16:00', courseCode: 'MAR 411', courseTitle: 'Digital Marketing', venue: 'Lab 1', lecturer: 'Prof. S. O. Yusuf', semester: 1 },
+  { id: 'T7', day: 'Thursday', startTime: '08:00', endTime: '10:00', courseCode: 'MAR 402', courseTitle: 'Strategic Marketing', venue: 'Hall B', lecturer: 'Dr. B. Kalu', semester: 2 },
+  { id: 'T8', day: 'Thursday', startTime: '10:00', endTime: '12:00', courseCode: 'MAR 404', courseTitle: 'Brand Management', venue: 'Hall A', lecturer: 'Dr. C. Nwosu', semester: 2 },
+  { id: 'T9', day: 'Friday', startTime: '08:00', endTime: '10:00', courseCode: 'MAR 406', courseTitle: 'Retail Management', venue: 'Hall C', lecturer: 'Dr. A. Oluwole', semester: 2 },
+  { id: 'T10', day: 'Friday', startTime: '10:00', endTime: '12:00', courseCode: 'MAR 408', courseTitle: 'Services Marketing', venue: 'Hall B', lecturer: 'Prof. S. O. Yusuf', semester: 2 }
+];
+
+const ICEP_LECTURERS = [
+  { id: 'L1', name: 'Dr. A. Oluwole', title: 'Dr.', department: 'Marketing', courses: ['MAR 401', 'MAR 409', 'MAR 406'] },
+  { id: 'L2', name: 'Prof. S. O. Yusuf', title: 'Prof.', department: 'Marketing', courses: ['MAR 403', 'MAR 411', 'MAR 408'] },
+  { id: 'L3', name: 'Dr. B. Kalu', title: 'Dr.', department: 'Marketing', courses: ['MAR 405', 'MAR 402'] },
+  { id: 'L4', name: 'Dr. C. Nwosu', title: 'Dr.', department: 'Marketing', courses: ['MAR 407', 'MAR 404'] },
+  { id: 'L5', name: 'Prof. C. N. Obi', title: 'Prof.', department: 'Accountancy', courses: ['ACC 101'] },
+  { id: 'L6', name: 'Prof. O. K. Balogun', title: 'Prof.', department: 'Management', courses: ['MAN 101'] },
+  { id: 'L7', name: 'Dr. E. Okafor', title: 'Dr.', department: 'Economics', courses: ['ECO 101'] },
+  { id: 'L8', name: 'Dr. F. Eze', title: 'Dr.', department: 'Sociology', courses: ['SOC 101'] }
+];
+
+const ALLOW_CROSS_TENANT_TESTING = false;
+
