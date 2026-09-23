@@ -1126,15 +1126,15 @@
         <button class="modal-close" onclick="closeModal('fullProfileModal')"><i class="fas fa-times"></i></button>
       </div>
       <div class="modal-body" style="text-align:center;">
-        <img src="images/student_02.jpg" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=Adaeze+Okafor&size=200&background=10b981&color=fff&bold=true'" style="width:120px;height:120px;border-radius:50%;object-fit:cover;margin:0 auto 16px;border:4px solid rgba(16,185,129,0.2);box-shadow:0 10px 20px rgba(0,0,0,0.1);">
-        <h3 style="font-family:'Outfit',sans-serif;font-size:24px;font-weight:900;margin-bottom:2px;">Adaeze Okafor</h3>
-        <p style="color:var(--accent);font-weight:700;font-size:14px;margin-bottom:4px;">Course Representative</p>
-        <p style="color:var(--muted);font-size:13px;margin-bottom:16px;font-weight:600;">2026/MKT/0472</p>
+        <img id="fpAvatar" src="images/student_02.jpg" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=Student&size=200&background=10b981&color=fff&bold=true'" style="width:120px;height:120px;border-radius:50%;object-fit:cover;margin:0 auto 16px;border:4px solid rgba(16,185,129,0.2);box-shadow:0 10px 20px rgba(0,0,0,0.1);">
+        <h3 id="fpName" style="font-family:'Outfit',sans-serif;font-size:24px;font-weight:900;margin-bottom:2px;">Adaeze Okafor</h3>
+        <p style="color:var(--accent);font-weight:700;font-size:14px;margin-bottom:4px;">Student Record</p>
+        <p id="fpMatric" style="color:var(--muted);font-size:13px;margin-bottom:16px;font-weight:600;">2026/MKT/0472</p>
         
         <div style="background:rgba(15,23,42,0.03);border-radius:16px;padding:16px;margin-bottom:16px;text-align:left;font-size:13px;">
-          <div style="margin-bottom:8px;"><strong>Department:</strong> Department of Marketing, Faculty of Management Sciences</div>
-          <div style="margin-bottom:8px;"><strong>Level:</strong> 400L</div>
-          <div><strong>Session:</strong> 2025/2026</div>
+          <div style="margin-bottom:8px;"><strong>Track:</strong> <span id="fpTrack">General</span></div>
+          <div style="margin-bottom:8px;"><strong>Attendance:</strong> <span id="fpAtt">100%</span></div>
+          <div><strong>Dues:</strong> <span id="fpDues">PAID</span></div>
         </div>
         
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
@@ -1227,7 +1227,6 @@
       { id: 16, name: "Yetunde Sowore", matric: "2026/MKT/0487", avatar: "images/student_04.jpg", track: "Strategic Mkt", cgpa: "4.70", attendance: "97%", dues: "PAID", advisor: "Prof. C. E. Chukwu" }
     ];
     let classListStudents = [];
-    let _classListFallback = [];
 
     const DEFAULT_BROADSHEET_SCORES = [96, 89, 78, 92, 85, 74, 68, 91, 82, 95, 63, 88, 79, 97, 71, 90];
 
@@ -1730,8 +1729,8 @@
       const noMsg = document.getElementById('rosterNoResults');
       if(!container) return;
       const filtered = window.icepSearch && window.icepSearch.filterStudents ? window.icepSearch.filterStudents(classListStudents, rosterFilter) : classListStudents.filter(s => s.name.toLowerCase().includes(rosterFilter) || s.matric.toLowerCase().includes(rosterFilter));
-      if (filtered.length === 0) { container.innerHTML = ''; noMsg.style.display = 'block'; return; }
-      noMsg.style.display = 'none';
+      if (filtered.length === 0) { container.innerHTML = ''; if (noMsg) noMsg.style.display = 'block'; return; }
+      if (noMsg) noMsg.style.display = 'none';
       container.innerHTML = filtered.map(s => `
         <div class="neu-student-card" onclick="showStudentDetail('${s.name}','${s.matric}','${s.avatar || s.image || ''}','${s.track || ''}','${s.attendance || ''}','${s.dues}')">
           <div class="neu-card-avatar-frame">
@@ -1771,8 +1770,8 @@
       const noMsg = document.getElementById('rosterNoResults');
       if(!table) return;
       const filtered = classListStudents.filter(s => s.name.toLowerCase().includes(rosterFilter) || s.matric.toLowerCase().includes(rosterFilter));
-      if (filtered.length === 0) { table.innerHTML = ''; noMsg.style.display = 'block'; return; }
-      noMsg.style.display = 'none';
+      if (filtered.length === 0) { table.innerHTML = ''; if (noMsg) noMsg.style.display = 'block'; return; }
+      if (noMsg) noMsg.style.display = 'none';
       table.innerHTML = `
         <thead><tr><th>#</th><th>Name</th><th>Matric</th><th>Track</th><th>Attendance</th><th>Dues</th><th>Detail</th></tr></thead>
         <tbody>${filtered.map((s,i) => `

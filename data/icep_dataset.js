@@ -48821,3 +48821,9 @@ try {
 } catch(e) {
     console.error("Failed to load local storage data", e);
 }
+
+window.ICEP_FACULTIES = ICEP_FACULTIES;
+window.ICEP_COURSE_REPS = ICEP_COURSE_REPS;
+window.ICEP_LECTURERS = ICEP_LECTURERS;
+window.ICEP_STUDENTS = ICEP_STUDENTS;
+window.ICEP_TIMETABLE = ICEP_TIMETABLE;

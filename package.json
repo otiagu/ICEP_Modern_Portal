@@ -1,0 +1,25 @@
+{
+  "name": "icep_modern",
+  "version": "1.0.0",
+  "description": "",
+  "main": "temp.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/otiagu/ICEP_Modern_Portal.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/otiagu/ICEP_Modern_Portal/issues"
+  },
+  "homepage": "https://github.com/otiagu/ICEP_Modern_Portal#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "playwright": "^1.63.0"
+  }
+}
