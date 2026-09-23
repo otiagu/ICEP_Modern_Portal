@@ -496,6 +496,9 @@
       .modal-body{padding:16px;}
       input,select{font-size:16px;min-height:44px;}
     }
+    @media(max-width:768px){
+      .desktop-only { display: none !important; }
+    }
   </style>
 </head>
 <body>
@@ -556,7 +559,9 @@
         </div>
       </div>
       <!-- DARK MODE TOGGLE -->
-      <button class="btn-theme" id="btnTheme" onclick="toggleDarkMode()" title="Toggle dark mode"><i class="fas fa-moon" id="themeIcon"></i></button>
+      <div class="desktop-only" style="display:flex; align-items:center; gap:10px;">
+        <button class="btn-theme" id="btnTheme" onclick="toggleDarkMode()" title="Toggle dark mode"><i class="fas fa-moon" id="themeIcon"></i></button>
+      </div>
       <!-- NOTIFICATION BELL -->
       <div class="notif-wrap">
         <div class="nav-bell" id="notifBell" onclick="toggleNotifPanel(event)" title="Notifications">
@@ -571,7 +576,9 @@
           <div class="notif-list" id="notifList"></div>
         </div>
       </div>
-      <button class="btn-signout" onclick="window.location.href='ICEP_login_modern.html'"><i class="fas fa-right-from-bracket"></i> Sign Out</button>
+      <div class="desktop-only" style="display:flex; align-items:center;">
+        <button class="btn-signout" onclick="window.location.href='ICEP_login_modern.html'"><i class="fas fa-right-from-bracket"></i> Sign Out</button>
+      </div>
       <div class="hamburger" id="hamburger" onclick="toggleMobileMenu()">
         <span></span><span></span><span></span>
       </div>

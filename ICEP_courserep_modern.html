@@ -411,6 +411,9 @@
       .stat-chips { grid-template-columns: 1fr; }
       .roster-grid { grid-template-columns: 1fr; }
     }
+    @media (max-width: 768px) {
+      .desktop-only { display: none !important; }
+    }
     .day-card {
       background: rgba(18,26,47,0.85);
       border: 1px solid rgba(255,255,255,0.09);
@@ -588,6 +591,12 @@
     <a href="#" class="mobile-nav-link"><span><i class="fas fa-wallet" style="margin-right:10px"></i>Payments</span></a>
     
     <div class="mobile-menu-divider"></div>
+    <div style="padding:6px 16px;font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;">Quick Actions</div>
+    <button class="mobile-nav-link" onclick="openModal('switchDeptModal');closeMobileMenu()" style="background:none;border:none;width:100%;text-align:left;cursor:pointer;">
+      <span><i class="fas fa-random" style="margin-right:10px;color:#10b981"></i>Switch Department</span><i class="fas fa-chevron-right"></i>
+    </button>
+    <div class="mobile-menu-divider"></div>
+    <div style="padding:6px 16px;font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;">Other Portals</div>
     <a href="ICEP_login_modern.html" class="mobile-nav-link"><span><i class="fas fa-right-to-bracket" style="margin-right:10px;color:#6366f1"></i>Login Page</span><i class="fas fa-chevron-right"></i></a>
     <a href="ICEP_student_profile_modern.html" class="mobile-nav-link"><span><i class="fas fa-user-graduate" style="margin-right:10px;color:var(--accent)"></i>Student Profile</span><i class="fas fa-chevron-right"></i></a>
     <a href="ICEP_coordinator_modern.html" class="mobile-nav-link"><span><i class="fas fa-chalkboard-user" style="margin-right:10px;color:#f59e0b"></i>Coordinator Portal</span><i class="fas fa-chevron-right"></i></a>
@@ -621,7 +630,9 @@
         </div>
       </div>
       
-      <button class="btn-theme" onclick="toggleDarkMode()"><i class="fas fa-moon" id="themeIcon"></i></button>
+      <div class="desktop-only" style="display:flex; align-items:center; gap:10px;">
+        <button class="btn-theme" onclick="toggleDarkMode()"><i class="fas fa-moon" id="themeIcon"></i></button>
+      </div>
       
       <div style="position:relative;">
         <div class="nav-bell" onclick="toggleMenu('notifPanel')">
@@ -637,7 +648,9 @@
         </div>
       </div>
       
-      <button class="btn-signout" onclick="window.location.href='ICEP_login_modern.html'"><i class="fas fa-right-from-bracket"></i> Sign Out</button>
+      <div class="desktop-only" style="display:flex; align-items:center;">
+        <button class="btn-signout" onclick="window.location.href='ICEP_login_modern.html'"><i class="fas fa-right-from-bracket"></i> Sign Out</button>
+      </div>
       <div class="hamburger" onclick="toggleMobileMenu()">
         <span></span><span></span><span></span>
       </div>
@@ -1117,6 +1130,42 @@
     </div>
   </div>
 
+  <!-- SWITCH DEPARTMENT MODAL -->
+  <div class="modal-overlay" id="switchDeptModal" onclick="if(event.target===this) closeModal('switchDeptModal')">
+    <div class="modal-sheet" style="max-width:400px;margin:auto;">
+      <div class="modal-header">
+        <h2 style="font-size:20px"><i class="fas fa-random" style="color:#10b981;margin-right:8px"></i>Switch Department</h2>
+        <button class="modal-close" onclick="closeModal('switchDeptModal')"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Select Faculty</label>
+          <select id="switch-faculty" class="form-control">
+            <option value="Management Sciences">Management Sciences</option>
+            <option value="Social Sciences">Social Sciences</option>
+            <option value="Physical Science">Physical Science</option>
+            <option value="Humanities">Humanities</option>
+            <option value="Education">Education</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Select Department</label>
+          <input type="text" id="switch-dept" class="form-control" placeholder="e.g. Marketing, Computer Science, Economics...">
+        </div>
+        <div class="form-group">
+          <label>Select Level</label>
+          <select id="switch-level" class="form-control">
+            <option value="100">100L</option>
+            <option value="200">200L</option>
+            <option value="300">300L</option>
+            <option value="400">400L</option>
+          </select>
+        </div>
+        <button class="btn-primary" style="width:100%;margin-top:10px" onclick="executeSwitchDept()"><i class="fas fa-check"></i> Switch</button>
+      </div>
+    </div>
+  </div>
+
   <!-- TOAST NOTIFICATION -->
   <div id="toast"><i class="fas fa-info-circle"></i> <span>Message</span></div>
 
@@ -1146,8 +1195,9 @@
       const personaStr = localStorage.getItem('activePersona');
       if (!window.ALLOW_CROSS_TENANT_TESTING && personaStr) {
         const persona = JSON.parse(personaStr);
-        if (persona.department && persona.level) {
-          classListStudents = classListStudents.filter(s => s.department === persona.department && s.level === persona.level);
+        const activeDept = persona.dept || persona.department;
+        if (activeDept && persona.level) {
+          classListStudents = classListStudents.filter(s => s.department === activeDept && s.level === persona.level);
         }
       } else if (typeof ICEP_STUDENTS !== 'undefined') {
         classListStudents = classListStudents.filter(s => s.department === 'Marketing' && s.level === 400);
@@ -1652,11 +1702,18 @@
             const personaStr = localStorage.getItem('activePersona');
             if (!window.ALLOW_CROSS_TENANT_TESTING && personaStr) {
               const persona = JSON.parse(personaStr);
-              // A simple way to filter courses by department is to check if the lecturer is from the department, or courseCode matches dept prefix.
-              // Assuming ICEP_LECTURERS is available:
-              if (typeof window.ICEP_LECTURERS !== 'undefined' && persona.department) {
-                const deptLecturers = window.ICEP_LECTURERS.filter(l => l.department === persona.department).map(l => l.name);
-                rawTimetable = rawTimetable.filter(t => deptLecturers.includes(t.lecturer));
+              const pDept = persona.dept || persona.department;
+              
+              if (pDept) {
+                const prefix = pDept.substring(0, 3).toUpperCase();
+                // Filter by department prefix
+                rawTimetable = rawTimetable.filter(t => t.courseCode && t.courseCode.toUpperCase().startsWith(prefix));
+                
+                // Filter by level
+                if (persona.level) {
+                  const levelStr = String(persona.level).charAt(0);
+                  rawTimetable = rawTimetable.filter(t => t.courseCode && t.courseCode.includes(levelStr + '0'));
+                }
               }
             }
           } catch(e) {}
@@ -1727,6 +1784,18 @@
       });
 
       root.innerHTML = html;
+    }
+    function executeSwitchDept() {
+      const fac = document.getElementById('switch-faculty').value;
+      const dep = document.getElementById('switch-dept').value.trim();
+      const lev = parseInt(document.getElementById('switch-level').value);
+      if (!dep) {
+        showToast("Please enter a department.");
+        return;
+      }
+      const persona = { name: "Observer (Course Rep)", role: "Course Rep", faculty: fac, dept: dep, level: lev };
+      localStorage.setItem('activePersona', JSON.stringify(persona));
+      location.reload();
     }
   </script>
   <script src="data/icep_search.js"></script>
