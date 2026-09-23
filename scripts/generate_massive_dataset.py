@@ -55,20 +55,11 @@ def get_unique_pravatar_id():
 def download_images(prefix, count):
     paths = []
     for i in range(1, count + 1):
-        filename = f"{prefix}_{i:02d}.jpg"
-        filepath = os.path.join(IMG_DIR, filename)
-        paths.append(f"images/{filename}")
-        if not os.path.exists(filepath):
-            pid = get_unique_pravatar_id()
-            url = f"https://i.pravatar.cc/300?img={pid}"
-            try:
-                urllib.request.urlretrieve(url, filepath)
-                print(f"  -> Downloaded {filename}")
-                time.sleep(0.5) # Prevent rate limiting
-            except Exception as e:
-                print(f"  -> Failed to download {filename}: {e}")
-                # Fallback to ui-avatars
-                paths[-1] = f"https://ui-avatars.com/api/?name=Avatar+{i}&size=200&background=random&color=fff"
+        # Alternate between dicebear (Micah) and ui-avatars
+        if i % 2 == 0:
+            paths.append(f"https://api.dicebear.com/7.x/micah/svg?seed={prefix}_{i}&backgroundColor=transparent")
+        else:
+            paths.append(f"https://ui-avatars.com/api/?name={prefix}+{i}&size=200&background=random&color=fff")
     return paths
 
 student_imgs = download_images("synthetic_student", NUM_STUDENT_IMAGES)
@@ -116,14 +107,22 @@ for fac_name, depts in FACULTIES.items():
             "hod": "Dr. " + generate_name()
         })
         
-        # Generate 4 lecturers for this department
-        for l in range(4):
+        # Generate 14-18 lecturers for this department (Items 9 & 12)
+        num_staff = random.randint(14, 18)
+        for l in range(num_staff):
+            is_prof = (l < 2)
+            title = "Prof. " if is_prof else random.choice(["Dr. ", "Mr. ", "Mrs. "])
+            role = "Professor" if is_prof else random.choice(["Senior Lecturer", "Lecturer I", "Lecturer II"])
             lecturers_data.append({
                 "id": f"LEC-{fac_id_counter}-{dept_name[:3].upper()}-{l}",
-                "name": ("Prof. " if l==0 else "Dr. ") + generate_name(),
+                "name": title + generate_name(),
+                "title": title.strip(),
+                "role": role,
+                "status": random.choices(["Active", "On Leave"], weights=[90, 10])[0],
                 "department": dept_name,
                 "faculty": fac_name,
-                "avatar": random.choice(staff_imgs)
+                "avatar": random.choice(staff_imgs),
+                "assignedCourses": [f"{dept_name[:3].upper()} {random.randint(100, 499)}"]
             })
         
         # Generate Students
@@ -140,8 +139,11 @@ for fac_name, depts in FACULTIES.items():
             
             for i in range(num_students):
                 stu_name = generate_name()
-                matric = f"2026/{dept_name[:3].upper()}/{student_id_counter:04d}"
+                # Format: YYYY/DEPT/NUMBER
+                dept_code = dept_name[:3].upper()
+                matric = f"2026/{dept_code}/{student_id_counter:04d}"
                 is_paid = random.choice(["PAID", "PAID", "PAID", "UNPAID"])
+                blood_group = random.choice(["O+", "A+", "B+", "AB+", "O-", "A-", "B-", "AB-"])
                 stu = {
                     "id": student_id_counter,
                     "name": stu_name,
@@ -153,8 +155,11 @@ for fac_name, depts in FACULTIES.items():
                     "cgpa": f"{random.uniform(2.5, 4.9):.2f}",
                     "attendance": f"{random.randint(60, 100)}%",
                     "dues": is_paid,
+                    "bloodGroup": blood_group,
+                    "status": "Active",
                     "track": random.choice(["Core", "Specialized", "General"]),
-                    "advisor": random.choice(lecturers_data[-4:])["name"]
+                    "courses": [f"{dept_code} 101", f"{dept_code} 102", f"{dept_code} 201", f"{dept_code} 202"],
+                    "advisor": random.choice(lecturers_data[-num_staff:])["name"]
                 }
                 students_data.append(stu)
                 student_id_counter += 1

@@ -567,7 +567,43 @@
     }
     .dues-paid { background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: #10b981; }
     .dues-unpaid { background: rgba(244,63,94,0.15); border: 1px solid rgba(244,63,94,0.3); color: #f43f5e; }
+    /* Skeletons */
+    @keyframes shimmer {
+      0% { background-position: -200px 0; }
+      100% { background-position: calc(200px + 100%) 0; }
+    }
+    .neu-skeleton-card {
+      height: 120px;
+      border-radius: 20px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      box-shadow: 6px 6px 16px rgba(0,0,0,0.5), -4px -4px 12px rgba(255,255,255,0.02);
+    }
+    /* Broadsheet Neon Fail Border */
+    .neon-fail-border {
+      box-shadow: 0 0 8px rgba(239, 68, 68, 0.8), inset 0 0 4px rgba(239, 68, 68, 0.4) !important;
+      border: 1px solid #ef4444 !important;
+    }
+    .attendance-toggle {
+      display: inline-block;
+      width: 40px; height: 20px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      position: relative;
+      cursor: pointer;
+      vertical-align: middle;
+      transition: 0.3s;
+    }
+    .attendance-toggle.active { background: #10b981; }
+    .attendance-toggle::after {
+      content: ''; position: absolute; top: 2px; left: 2px;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: #fff; transition: 0.3s;
+    }
+    .attendance-toggle.active::after { left: 22px; }
   </style>
+  <script src="scripts/state_manager.js"></script>
   <script src="data/icep_dataset.js"></script>
 </head>
 <body>
@@ -664,7 +700,7 @@
       <div class="hero-inner">
         <div class="hero-bg-blob"></div>
         <div class="portrait-wrap">
-          <img src="images/student_02.jpg" onerror="this.src='https://ui-avatars.com/api/?name=Adaeze+Okafor&size=200&background=10b981&color=fff&bold=true'" alt="Course Rep" class="portrait-img" />
+          <img src="images/student_02.jpg" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=Adaeze+Okafor&size=200&background=10b981&color=fff&bold=true'" alt="Course Rep" class="portrait-img" />
           <div class="portrait-status"><i class="fas fa-star" style="font-size:10px"></i> Rep Dashboard</div>
         </div>
         <div class="hero-info">
@@ -1090,7 +1126,7 @@
         <button class="modal-close" onclick="closeModal('fullProfileModal')"><i class="fas fa-times"></i></button>
       </div>
       <div class="modal-body" style="text-align:center;">
-        <img src="images/student_02.jpg" onerror="this.src='https://ui-avatars.com/api/?name=Adaeze+Okafor&size=200&background=10b981&color=fff&bold=true'" style="width:120px;height:120px;border-radius:50%;object-fit:cover;margin:0 auto 16px;border:4px solid rgba(16,185,129,0.2);box-shadow:0 10px 20px rgba(0,0,0,0.1);">
+        <img src="images/student_02.jpg" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=Adaeze+Okafor&size=200&background=10b981&color=fff&bold=true'" style="width:120px;height:120px;border-radius:50%;object-fit:cover;margin:0 auto 16px;border:4px solid rgba(16,185,129,0.2);box-shadow:0 10px 20px rgba(0,0,0,0.1);">
         <h3 style="font-family:'Outfit',sans-serif;font-size:24px;font-weight:900;margin-bottom:2px;">Adaeze Okafor</h3>
         <p style="color:var(--accent);font-weight:700;font-size:14px;margin-bottom:4px;">Course Representative</p>
         <p style="color:var(--muted);font-size:13px;margin-bottom:16px;font-weight:600;">2026/MKT/0472</p>
@@ -1190,22 +1226,9 @@
       { id: 15, name: "Chukwudi Opara", matric: "2026/MKT/0486", avatar: "images/student_03.jpg", track: "Media Relations", cgpa: "4.38", attendance: "89%", dues: "PAID", advisor: "Dr. S. I. Ahmed" },
       { id: 16, name: "Yetunde Sowore", matric: "2026/MKT/0487", avatar: "images/student_04.jpg", track: "Strategic Mkt", cgpa: "4.70", attendance: "97%", dues: "PAID", advisor: "Prof. C. E. Chukwu" }
     ];
-    let classListStudents = typeof ICEP_STUDENTS !== 'undefined' ? [...ICEP_STUDENTS] : _classListFallback;
-    try {
-      const personaStr = localStorage.getItem('activePersona');
-      if (!window.ALLOW_CROSS_TENANT_TESTING && personaStr) {
-        const persona = JSON.parse(personaStr);
-        const activeDept = persona.dept || persona.department;
-        if (activeDept && persona.level) {
-          classListStudents = classListStudents.filter(s => s.department === activeDept && s.level === persona.level);
-        }
-      } else if (typeof ICEP_STUDENTS !== 'undefined') {
-        classListStudents = classListStudents.filter(s => s.department === 'Marketing' && s.level === 400);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-    if (!classListStudents || classListStudents.length === 0) classListStudents = _classListFallback;
+    let classListStudents = [];
+    let _classListFallback = [];
+
     const DEFAULT_BROADSHEET_SCORES = [96, 89, 78, 92, 85, 74, 68, 91, 82, 95, 63, 88, 79, 97, 71, 90];
 
     // ─── UI CONTROLS ───
@@ -1215,15 +1238,29 @@
     }
     function openModal(id){
       document.getElementById(id).classList.add('modal-open');
+      document.body.style.overflow = 'hidden';
       if(id === 'rosterModal') {
         const container = document.getElementById('rosterGridContainer');
         if (!container || container.innerHTML.trim() === '') renderRosterGrid();
       }
     }
-    function closeModal(id){ document.getElementById(id).classList.remove('modal-open'); }
+    function closeModal(id){ 
+      document.getElementById(id).classList.remove('modal-open');
+      document.body.style.overflow = '';
+    }
     function closeOnOutside(e, id){
       if(e.target.id === id) closeModal(id);
     }
+    
+    // Close modal on Escape key
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay.modal-open').forEach(modal => {
+          modal.classList.remove('modal-open');
+        });
+        document.body.style.overflow = '';
+      }
+    });
 
     function toggleMenu(id){
       const el = document.getElementById(id);
@@ -1334,10 +1371,33 @@
       if (lecInp && sel.dataset.lec) lecInp.value = sel.dataset.lec;
     }
 
-    window.onload = function(){
+    window.onload = async function(){
+      if (window.ICEPStateManager && window.ICEPStateManager.prunePortals) {
+        window.ICEPStateManager.prunePortals();
+      }
+      // Inject Skeleton
+      const gridContainer = document.getElementById('rosterGridContainer');
+      if (gridContainer) {
+        gridContainer.innerHTML = Array(8).fill('<div class="neu-skeleton-card"></div>').join('');
+      }
+
+      // Fetch Data asynchronously via ICEPStateManager
+      const studentsData = await ICEPStateManager.fetchMockData('ICEP_STUDENTS');
+      
+      const persona = ICEPStateManager.getActivePersona();
+      if (persona && persona.dept && persona.level) {
+        classListStudents = studentsData.filter(s => s.department === persona.dept && s.level === persona.level);
+      } else {
+        classListStudents = studentsData.filter(s => s.department === 'Marketing' && s.level === 400);
+      }
+
+      // Re-render
+      renderRosterGrid();
+
       if(localStorage.getItem('icep_modern_theme') === 'dark'){
         document.getElementById('themeIcon').className = 'fas fa-sun';
       }
+      generateDynamicNotifs();
       renderNotifs();
       // Init semester-based course selector
       updateCoursesBySelectedSem();
@@ -1351,12 +1411,22 @@
 
     // ─── NOTIFICATIONS ───
     const NOW_CR = Date.now();
-    const NOTIFS_CR = [
-      { id:1, icon:'📋', text:'MKT 401 broadsheet has been submitted and synced.', time:'5 min ago', read:false, target:'resultModal', addedAt: NOW_CR - 5*60*1000 },
-      { id:2, icon:'📅', text:'Monday lecture reminder: MKT 401 at 8:00 AM in Hall B.', time:'1 hr ago', read:false, target:'timetableModal', addedAt: NOW_CR - 60*60*1000 },
-      { id:3, icon:'💰', text:'2 students have not yet paid MKT 201 Textbook Dues.', time:'2 hrs ago', read:false, target:'feeModal', addedAt: NOW_CR - 2*60*60*1000 },
-      { id:4, icon:'👥', text:'Class list updated: 16 students now enrolled.', time:'Yesterday', read:false, target:'rosterModal', addedAt: NOW_CR - 26*60*60*1000 },
-    ];
+    let NOTIFS_CR = [];
+
+    function generateDynamicNotifs() {
+      const persona = window.ICEPStateManager ? ICEPStateManager.getActivePersona() : null;
+      let dept = persona && persona.dept ? persona.dept : 'Marketing';
+      let level = persona && persona.level ? persona.level : '400';
+      let deptShort = dept.substring(0, 3).toUpperCase();
+      
+      NOTIFS_CR = [
+        { id:1, icon:'📋', text:`${deptShort} ${level} broadsheet has been submitted and synced.`, time:'5 min ago', read:false, target:'resultModal', addedAt: NOW_CR - 5*60*1000 },
+        { id:2, icon:'📅', text:`Monday lecture reminder: ${deptShort} ${level} at 8:00 AM in Hall B.`, time:'1 hr ago', read:false, target:'timetableModal', addedAt: NOW_CR - 60*60*1000 },
+        { id:3, icon:'💰', text:`2 students have not yet paid ${deptShort} 201 Textbook Dues.`, time:'2 hrs ago', read:false, target:'feeModal', addedAt: NOW_CR - 2*60*60*1000 },
+        { id:4, icon:'👥', text:`Class list updated: ${classListStudents.length} students now enrolled.`, time:'Yesterday', read:false, target:'rosterModal', addedAt: NOW_CR - 26*60*60*1000 },
+      ];
+    }
+    
     function isNew(addedAt) { return (Date.now() - addedAt) < 86400000; }
     function routeToTarget(target) {
       document.querySelectorAll('.notif-panel-open, #notifPanel').forEach(p => p.classList.remove('notif-open', 'notif-panel-open'));
@@ -1485,47 +1555,97 @@
             <td>${i+1}</td>
             <td><strong>${s.name}</strong></td>
             <td>${s.matric}</td>
-            <td><input type="number" class="score-input" id="score_${s.id}" min="0" max="100" onchange="updateAutoGrade(${s.id}, this.value)"></td>
+            <td style="display:flex; gap: 8px;">
+              <input type="number" class="score-input" placeholder="CA" id="ca_${s.id}" min="0" max="30" oninput="updateAutoGrade(${s.id})">
+              <input type="number" class="score-input" placeholder="Exam" id="exam_${s.id}" min="0" max="70" oninput="updateAutoGrade(${s.id})">
+            </td>
+            <td><strong id="total_${s.id}">0</strong></td>
             <td><span class="badge" id="grade_${s.id}">-</span></td>
           </tr>
         `;
       });
     }
-    function updateAutoGrade(id, val){
+    function updateAutoGrade(id){
+      const caInp = document.getElementById(`ca_${id}`);
+      const examInp = document.getElementById(`exam_${id}`);
+      const totalEl = document.getElementById(`total_${id}`);
       const badge = document.getElementById(`grade_${id}`);
-      if(!val || val===''){ badge.innerText = '-'; badge.className = 'badge'; return; }
-      let v = parseInt(val);
-      if(v>=70){ badge.innerText = 'A'; badge.className = 'badge badge-paid'; }
-      else if(v>=60){ badge.innerText = 'B'; badge.className = 'badge'; badge.style.background='rgba(99,102,241,0.1)'; badge.style.color='#6366f1'; }
-      else if(v>=50){ badge.innerText = 'C'; badge.className = 'badge'; badge.style.background='var(--warn-bg)'; badge.style.color='var(--warn)'; }
-      else if(v>=45){ badge.innerText = 'D'; badge.className = 'badge'; badge.style.background='rgba(245,158,11,0.1)'; badge.style.color='#f59e0b'; }
+      
+      const ca = parseInt(caInp.value) || 0;
+      const exam = parseInt(examInp.value) || 0;
+      const total = ca + exam;
+      
+      totalEl.innerText = total;
+      
+      // Update Inputs with Neon Fail Border if total < 40
+      if (total < 40 && (caInp.value || examInp.value)) {
+        caInp.classList.add('neon-fail-border');
+        examInp.classList.add('neon-fail-border');
+      } else {
+        caInp.classList.remove('neon-fail-border');
+        examInp.classList.remove('neon-fail-border');
+      }
+      
+      // Push to temporary cache
+      const codeSel = document.getElementById('bCode');
+      const courseCode = codeSel ? codeSel.value : 'UNKNOWN';
+      if (window.ICEPStateManager) {
+        window.ICEPStateManager.pushBroadsheetScore(id, courseCode, ca, exam);
+      }
+
+      if(!caInp.value && !examInp.value){ badge.innerText = '-'; badge.className = 'badge'; return; }
+      
+      if(total>=70){ badge.innerText = 'A'; badge.className = 'badge badge-paid'; }
+      else if(total>=60){ badge.innerText = 'B'; badge.className = 'badge'; badge.style.background='rgba(99,102,241,0.1)'; badge.style.color='#6366f1'; }
+      else if(total>=50){ badge.innerText = 'C'; badge.className = 'badge'; badge.style.background='var(--warn-bg)'; badge.style.color='var(--warn)'; }
+      else if(total>=45){ badge.innerText = 'D'; badge.className = 'badge'; badge.style.background='rgba(245,158,11,0.1)'; badge.style.color='#f59e0b'; }
       else { badge.innerText = 'F'; badge.className = 'badge badge-unpaid'; }
     }
     function quickFillScores(type){
       classListStudents.forEach((s, i) => {
-        const inp = document.getElementById(`score_${s.id}`);
-        if(!inp) return;
-        if(type==='high') inp.value = Math.floor(Math.random()*(100-70+1))+70;
-        else if(type==='varied') inp.value = DEFAULT_BROADSHEET_SCORES[i];
-        else inp.value = '';
-        updateAutoGrade(s.id, inp.value);
+        const caInp = document.getElementById(`ca_${s.id}`);
+        const examInp = document.getElementById(`exam_${s.id}`);
+        if(!caInp || !examInp) return;
+        if(type==='high') {
+          caInp.value = Math.floor(Math.random()*10)+20; // 20-30
+          examInp.value = Math.floor(Math.random()*20)+50; // 50-70
+        } else if(type==='varied') {
+          const total = DEFAULT_BROADSHEET_SCORES[i];
+          caInp.value = Math.min(30, Math.floor(total * 0.3));
+          examInp.value = total - caInp.value;
+        } else {
+          caInp.value = ''; examInp.value = '';
+        }
+        updateAutoGrade(s.id);
       });
     }
     function submitMasterBroadsheet(){
       let scores = [];
       let carryovers = 0;
       classListStudents.forEach((s) => {
-        let inp = document.getElementById(`score_${s.id}`);
-        let val = inp && inp.value !== '' ? parseInt(inp.value) : null;
-        scores.push({id: s.id, score: val});
-        if(val !== null && val < 45) carryovers++;
+        const caInp = document.getElementById(`ca_${s.id}`);
+        const examInp = document.getElementById(`exam_${s.id}`);
+        if(!caInp || !examInp) return;
+        let c = parseInt(caInp.value)||0;
+        let e = parseInt(examInp.value)||0;
+        let score = c + e;
+        if (score > 0) {
+          scores.push({ id: s.id, name: s.name, matric: s.matric, score: score });
+          if(score < 45) carryovers++;
+        }
       });
+      if(scores.length === 0){ showToast('No scores to submit!', true); return; }
+      
       let code = document.getElementById('bCode').value || 'Unknown';
-      let level = document.getElementById('bLevel').value || 'Unknown';
+      let level = document.getElementById('bLevel') ? document.getElementById('bLevel').value : '400L';
       let sem = document.getElementById('bSem').value || 'Unknown';
       saveBroadsheetToHistory(code, level, sem, scores);
+      
+      if (window.ICEPStateManager) window.ICEPStateManager.commitBroadsheetCache();
+      
       showToast(`Broadsheet submitted! ${carryovers} carryovers flagged.`);
       setTimeout(()=>closeModal('resultModal'), 1000);
+      renderBroadsheetHistory();
     }
 
     // ─── FEE MANAGER ───
@@ -1615,9 +1735,12 @@
       container.innerHTML = filtered.map(s => `
         <div class="neu-student-card" onclick="showStudentDetail('${s.name}','${s.matric}','${s.avatar || s.image || ''}','${s.track || ''}','${s.attendance || ''}','${s.dues}')">
           <div class="neu-card-avatar-frame">
-            <img src="${s.avatar || s.image || ''}" class="neu-card-avatar-img" alt="${s.name}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}&background=0d9488&color=fff&bold=true&size=200'">
+            <img src="https://api.dicebear.com/7.x/micah/svg?seed=${encodeURIComponent(s.matric)}&backgroundColor=121a2f" class="neu-card-avatar-img" alt="${s.name}">
           </div>
-          <div class="neu-card-body">
+          <div class="neu-card-body" style="position:relative;">
+            <div style="position:absolute; right: 0; top: 0; z-index:10;">
+              <div class="attendance-toggle ${isAttPresent(s.id) ? 'active' : ''}" onclick="toggleAttendance(event, '${s.id}')" title="Mark Attendance"></div>
+            </div>
             <h3 class="neu-card-name">${s.name}</h3>
             <p class="neu-card-matric">${s.matric}</p>
             <div class="neu-card-badges">
@@ -1627,6 +1750,21 @@
           </div>
         </div>
       `).join('');
+    }
+    
+    function isAttPresent(id) {
+      const cache = window.ICEPStateManager ? window.ICEPStateManager.getAttendanceCache() : {};
+      return cache[id] && cache[id].present;
+    }
+
+    function toggleAttendance(e, id) {
+      e.stopPropagation(); // Prevent opening modal
+      const toggle = e.currentTarget;
+      const isActive = toggle.classList.toggle('active');
+      if (window.ICEPStateManager) {
+        window.ICEPStateManager.pushAttendance(id, isActive);
+        showToast(isActive ? 'Marked Present' : 'Marked Absent');
+      }
     }
     function renderRosterList() {
       const table = document.getElementById('rosterListTable');
@@ -1645,7 +1783,7 @@
             <td>${s.track}</td>
             <td>${s.attendance}</td>
             <td><span style="padding:4px 10px;border-radius:10px;font-size:12px;font-weight:800;background:${s.dues==='PAID'?'rgba(16,185,129,0.15)':'rgba(239,68,68,0.15)'};color:${s.dues==='PAID'?'#10b981':'#ef4444'}">${s.dues}</span></td>
-            <td><button onclick="showStudentDetail('${s.name}','${s.matric}','${s.avatar}','${s.track}','${s.attendance}','${s.dues}')" style="background:rgba(16,185,129,0.15);border:none;color:#10b981;padding:6px 14px;border-radius:10px;font-weight:700;cursor:pointer">View</button></td>
+            <td><button onclick="showStudentDetail('${s.name}','${s.matric}','https://api.dicebear.com/7.x/micah/svg?seed=${encodeURIComponent(s.matric)}&backgroundColor=121a2f','${s.track}','${s.attendance}','${s.dues}')" style="background:rgba(16,185,129,0.15);border:none;color:#10b981;padding:6px 14px;border-radius:10px;font-weight:700;cursor:pointer">View</button></td>
           </tr>`).join('')}
         </tbody>`;
     }
@@ -1664,12 +1802,12 @@
       a.href=URL.createObjectURL(blob);a.download='ICEP_ClassRoster_MKT400L.txt';a.click();
     }
 
-    function showStudentDetail(name, matric, avatar, track, att, dues, fallback){
+    function showStudentDetail(name, matric, avatar, track, att, dues){
       document.getElementById('sdName').innerText = name;
       document.getElementById('sdMatric').innerText = matric;
       let img = document.getElementById('sdAvatar');
       img.src = avatar;
-      img.onerror = () => { img.src = fallback; };
+      img.onerror = () => { img.onerror = null; img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&size=200&background=10b981&color=fff&bold=true`; };
       document.getElementById('sdTrack').innerText = track;
       document.getElementById('sdAtt').innerText = att;
       let d = document.getElementById('sdDues');
@@ -1801,3 +1939,4 @@
   <script src="data/icep_search.js"></script>
 </body>
 </html>
+

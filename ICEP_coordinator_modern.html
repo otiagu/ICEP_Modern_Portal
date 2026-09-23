@@ -14,7 +14,45 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <style>
-        :root {
+        /* Skeletons */
+    @keyframes shimmer {
+      0% { background-position: -200px 0; }
+      100% { background-position: calc(200px + 100%) 0; }
+    }
+    .neu-skeleton-card {
+      height: 120px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      box-shadow: 6px 6px 16px rgba(0,0,0,0.5), -4px -4px 12px rgba(255,255,255,0.02);
+    }
+    
+    [data-theme="dark"] .neu-skeleton-card {
+      background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+    }
+    
+    /* Skeletons */
+    @keyframes shimmer {
+      0% { background-position: -200px 0; }
+      100% { background-position: calc(200px + 100%) 0; }
+    }
+    .neu-skeleton-card {
+      height: 120px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      box-shadow: 6px 6px 16px rgba(0,0,0,0.5), -4px -4px 12px rgba(255,255,255,0.02);
+    }
+    
+    [data-theme="dark"] .neu-skeleton-card {
+      background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+    }
+    
+    :root {
             --bg-color: #f8fafc;
             --text-color: #1e293b;
             --text-muted: #64748b;
@@ -1091,7 +1129,8 @@
           .dropdown-menu.notifications-menu{width:min(340px,92vw);right:-12px;}
         }
     </style>
-    <script src="data/icep_dataset.js"></script>
+    <script src="scripts/state_manager.js"></script>
+  <script src="data/icep_dataset.js"></script>
 </head>
 <body>
 
@@ -1167,72 +1206,7 @@
                         <h4>Notifications</h4>
                         <button class="mark-read-btn" onclick="markAllRead()">Mark all read</button>
                     </div>
-                    
-                    <div class="notification-item">
-                        <div class="notification-icon" style="background-color: rgba(239, 68, 68, 0.1); color: var(--red);">
-                            📋
-                        </div>
-                        <div class="notification-content">
-                            <p><strong>7 student petitions</strong> awaiting review — 2 are urgent.</p>
-                            <span class="notification-time">10 mins ago</span>
-                        </div>
-                        <button class="dismiss-btn" onclick="dismissNotif(this)"><i class="fa-solid fa-xmark"></i></button>
-                    </div>
-
-                    <div class="notification-item">
-                        <div class="notification-icon" style="background-color: rgba(59, 130, 246, 0.1); color: var(--blue);">
-                            📅
-                        </div>
-                        <div class="notification-content">
-                            <p><strong>Faculty board meeting:</strong> Thursday October 1, 10am.</p>
-                            <span class="notification-time">1 hour ago</span>
-                        </div>
-                        <button class="dismiss-btn" onclick="dismissNotif(this)"><i class="fa-solid fa-xmark"></i></button>
-                    </div>
-                    
-                    <div class="notification-item">
-                        <div class="notification-icon" style="background-color: rgba(34, 197, 94, 0.1); color: var(--green);">
-                            👨‍🏫
-                        </div>
-                        <div class="notification-content">
-                            <p><strong>Dr. Adunola Bello</strong> submitted a leave request for October.</p>
-                            <span class="notification-time">2 hours ago</span>
-                        </div>
-                        <button class="dismiss-btn" onclick="dismissNotif(this)"><i class="fa-solid fa-xmark"></i></button>
-                    </div>
-                    
-                    <div class="notification-item">
-                        <div class="notification-icon" style="background-color: rgba(245, 158, 11, 0.1); color: var(--amber);">
-                            📊
-                        </div>
-                        <div class="notification-content">
-                            <p><strong>End-of-semester</strong> grade submissions deadline in 10 days.</p>
-                            <span class="notification-time">Yesterday</span>
-                        </div>
-                        <button class="dismiss-btn" onclick="dismissNotif(this)"><i class="fa-solid fa-xmark"></i></button>
-                    </div>
-                    
-                    <div class="notification-item">
-                        <div class="notification-icon" style="background-color: rgba(139, 92, 246, 0.1); color: var(--coord-color);">
-                            🎓
-                        </div>
-                        <div class="notification-content">
-                            <p><strong>2 students flagged</strong> for academic probation review.</p>
-                            <span class="notification-time">Yesterday</span>
-                        </div>
-                        <button class="dismiss-btn" onclick="dismissNotif(this)"><i class="fa-solid fa-xmark"></i></button>
-                    </div>
-                    
-                    <div class="notification-item">
-                        <div class="notification-icon" style="background-color: rgba(99, 102, 241, 0.1); color: var(--indigo);">
-                            📢
-                        </div>
-                        <div class="notification-content">
-                            <p><strong>New directive</strong> from the Dean's office regarding exam protocols.</p>
-                            <span class="notification-time">2 days ago</span>
-                        </div>
-                        <button class="dismiss-btn" onclick="dismissNotif(this)"><i class="fa-solid fa-xmark"></i></button>
-                    </div>
+                    <div id="notifList"></div>
                 </div>
             </div>
 
@@ -1626,6 +1600,18 @@
                         </tr>
                     </tbody>
                 </table>
+                <hr style="border:none; border-top:1px solid var(--border-color); margin: 20px 0;">
+                <h4 style="margin-bottom:10px;">+ Add Exam Schedule</h4>
+                <form id="addExamForm" style="display:flex; gap:10px; flex-wrap:wrap;" onsubmit="handleAddExam(event)">
+                    <input type="text" id="examCourse" placeholder="Course Code (e.g. MKT401)" required class="search-input" style="flex:1;">
+                    <input type="datetime-local" id="examDate" required class="search-input" style="flex:1;">
+                    <input type="text" id="examVenue" placeholder="Venue" required class="search-input" style="flex:1;">
+                    <select id="examStatus" class="search-select" style="flex:1;">
+                        <option value="Confirmed">Confirmed</option>
+                        <option value="Pending Venue">Pending Venue</option>
+                    </select>
+                    <button type="submit" class="btn-primary" style="flex: 0 0 auto;">Add</button>
+                </form>
             </div>
         </div>
     </div>
@@ -1723,14 +1709,28 @@
             document.body.style.overflow = '';
         }
 
-        // Initialize Theme Icon
-        window.addEventListener('DOMContentLoaded', () => {
+        // Initialize App
+        window.addEventListener('DOMContentLoaded', async () => {
+            if (window.ICEPStateManager && window.ICEPStateManager.prunePortals) {
+                window.ICEPStateManager.prunePortals();
+            }
             const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
             const icon = document.getElementById('themeIcon');
             if (isDark) {
                 icon.classList.replace('fa-moon', 'fa-sun');
             }
+
+            // Inject Skeletons for search results grid
+            const gridContainer = document.getElementById('searchResultsGrid');
+            if (gridContainer) {
+                gridContainer.innerHTML = Array(6).fill('<div class="neu-skeleton-card"></div>').join('');
+            }
             
+            // Await dataset fetching
+            if(window.ICEPStateManager) {
+                await ICEPStateManager.fetchMockData('ICEP_STUDENTS');
+            }
+
             try {
               const personaStr = localStorage.getItem('activePersona');
               if (personaStr) {
@@ -1748,8 +1748,12 @@
               }
             } catch(e) {}
             
+            generateDynamicNotifs();
+            renderNotifs();
+            
             initSearchDropdowns();
             renderDeptOverview();
+            applyHierarchicalSearch();
         });
 
         // Dropdowns
@@ -1773,34 +1777,80 @@
         });
 
         // Notifications
-        let notifCount = 6;
-        function dismissNotif(btn) {
-            const item = btn.closest('.notification-item');
-            item.style.opacity = '0';
-            setTimeout(() => {
-                item.remove();
-                notifCount--;
-                updateBadge();
-            }, 300);
+        let NOTIFS_CR = [];
+
+        function generateDynamicNotifs() {
+            const persona = window.ICEPStateManager ? window.ICEPStateManager.getActivePersona() : null;
+            let dept = persona && persona.dept ? persona.dept : 'Business Admin';
+            
+            NOTIFS_CR = [
+                { id:1, icon:'📋', text:`<strong>7 student petitions</strong> awaiting review in ${dept}.`, time:'10 mins ago', read:false, target: 'petitionModal' },
+                { id:2, icon:'📅', text:`<strong>Faculty board meeting:</strong> Thursday October 1, 10am.`, time:'1 hour ago', read:false },
+                { id:3, icon:'✅', text:`<strong>Result upload complete:</strong> ${dept} 301 results synced.`, time:'2 hours ago', read:false },
+                { id:4, icon:'⚠️', text:`<strong>Action required:</strong> 3 broadsheets pending your approval.`, time:'Yesterday', read:false },
+            ];
         }
 
-        function markAllRead() {
-            const items = document.querySelectorAll('.notification-item');
-            items.forEach(item => {
-                item.style.opacity = '0';
-                setTimeout(() => item.remove(), 300);
+        function renderNotifs() {
+            const list = document.getElementById('notifList');
+            const count = document.getElementById('notifBadge');
+            if(!list || !count) return;
+            
+            list.innerHTML = '';
+            let unread = 0;
+            NOTIFS_CR.forEach(n => {
+                if(!n.read) unread++;
+                list.innerHTML += `
+                    <div class="notification-item ${n.read ? 'notif-read' : ''}" style="${n.read ? 'opacity:0.6' : ''}">
+                        <div class="notification-icon" style="background-color: rgba(139, 92, 246, 0.1); color: var(--coord-color);">
+                            ${n.icon}
+                        </div>
+                        <div class="notification-content" style="cursor:pointer;" onclick="routeToTarget('${n.target || ''}', ${n.id})">
+                            <p>${n.text}</p>
+                            <span class="notification-time">${n.time}</span>
+                        </div>
+                        <button class="dismiss-btn" onclick="dismissNotif(${n.id}, event)"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                `;
             });
-            notifCount = 0;
-            setTimeout(updateBadge, 300);
-        }
-
-        function updateBadge() {
-            const badge = document.getElementById('notifBadge');
-            if (notifCount > 0) {
-                badge.textContent = notifCount > 9 ? '9+' : notifCount;
+            if(unread > 0){
+                count.style.display = 'flex';
+                count.innerText = unread > 9 ? '9+' : unread;
             } else {
-                badge.style.display = 'none';
+                count.style.display = 'none';
+                list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted)">No new notifications</div>';
             }
+        }
+        
+        function dismissNotif(id, event) {
+            let n = NOTIFS_CR.find(x => x.id === id);
+            if(n) n.read = true;
+            renderNotifs();
+            if(event) event.stopPropagation();
+        }
+        
+        function routeToTarget(target, id) {
+            if (id) {
+                const n = NOTIFS_CR.find(x => x.id === id);
+                if (n) n.read = true;
+                renderNotifs();
+            }
+            document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open'));
+            if (!target) return;
+            const modal = document.getElementById(target);
+            if (modal && modal.classList.contains('modal-overlay')) {
+                openModal(target);
+            } else {
+                const el = document.getElementById(target);
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+        }
+        
+        function markAllRead() {
+            NOTIFS_CR.forEach(n => n.read = true);
+            renderNotifs();
         }
 
         // Accordions
@@ -1839,6 +1889,52 @@
             });
         });
 
+        // Close modal on Escape key
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-overlay.open').forEach(modal => {
+                    modal.classList.remove('open');
+                });
+                document.body.style.overflow = '';
+            }
+        });
+
+        function handleAddExam(e) {
+            e.preventDefault();
+            const course = document.getElementById('examCourse').value;
+            const date = document.getElementById('examDate').value;
+            const venue = document.getElementById('examVenue').value;
+            const status = document.getElementById('examStatus').value;
+            
+            if (window.ICEPStateManager) {
+                window.ICEPStateManager.pushExam({ course, date, venue, status });
+            }
+            
+            const statClass = status === 'Confirmed' ? 'badge-confirmed' : 'badge-pending';
+            const tbody = document.querySelector('#examModal tbody');
+            const preview = document.querySelector('.preview-grid');
+            
+            if(tbody) {
+                tbody.insertAdjacentHTML('beforeend', `<tr>
+                    <td>${course}</td>
+                    <td>${date.replace('T', ' ')}</td>
+                    <td>${venue}</td>
+                    <td><span class="badge-status ${statClass}">${status}</span></td>
+                </tr>`);
+            }
+            
+            if(preview) {
+                preview.insertAdjacentHTML('beforeend', `<div class="preview-card">
+                    <h4>${course}</h4>
+                    <p><i class="fa-regular fa-clock"></i> ${date.replace('T', ' ')}</p>
+                    <p><i class="fa-solid fa-location-dot"></i> ${venue}</p>
+                    <span class="badge-status ${statClass}">${status}</span>
+                </div>`);
+            }
+            
+            document.getElementById('addExamForm').reset();
+        }
+
         function initSearchDropdowns() {
           const deptSel = document.getElementById('filterDept');
           if (!deptSel || typeof ICEP_DEPARTMENTS === 'undefined') return;
@@ -1870,6 +1966,37 @@
           });
           applyHierarchicalSearch();
         });
+        
+        document.getElementById('filterDept')?.addEventListener('change', function() {
+          const deptName = this.value;
+          const levelSel = document.getElementById('filterLevel');
+          if (!levelSel) return;
+          
+          const currentLevel = levelSel.value;
+          levelSel.innerHTML = '<option value="">All Levels</option>';
+          
+          let levels = [100, 200, 300, 400, 500]; // fallback
+          if (deptName && typeof ICEP_DEPARTMENTS !== 'undefined') {
+            const deptObj = ICEP_DEPARTMENTS.find(d => d.name === deptName);
+            if (deptObj && deptObj.levels_offered) {
+              levels = deptObj.levels_offered;
+            }
+          }
+          
+          levels.forEach(lv => {
+            const opt = document.createElement('option');
+            opt.value = lv;
+            opt.textContent = lv + ' Level';
+            levelSel.appendChild(opt);
+          });
+          
+          // Restore selected value if still valid
+          if (levels.includes(Number(currentLevel))) {
+            levelSel.value = currentLevel;
+          }
+          
+          applyHierarchicalSearch();
+        });
 
         function renderDeptOverview() {
           const container = document.getElementById('deptOverviewGrid');
@@ -1893,7 +2020,7 @@
               <div class="dept-icon"><i class="fas fa-building-columns"></i></div>
               <div class="dept-info">
                 <h4>${d.name}</h4>
-                <p>${d.student_count} students · ${d.levels_offered.length * 2} semesters</p>
+                <p>${d.student_count || 120} students · ${(d.levels_offered ? d.levels_offered.length : 4) * 2} semesters</p>
                 <p style="margin-top:4px;font-size:11px">HOD: ${d.hod}</p>
                 ${rep ? `<p style="font-size:11px;color:var(--coord-color)">400L Rep: ${rep.name}</p>` : ''}
               </div>
@@ -1980,8 +2107,7 @@
           grid.innerHTML = display.map(p => `
             <div class="search-result-card">
               <div class="search-avatar-frame">
-                <img src="${p.avatar || p.image || 'images/student_01.jpg'}" class="search-avatar" alt="${p.name}"
-                  onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(p.name)}&background=8b5cf6&color=fff&bold=true&size=100'">
+                <img src="https://api.dicebear.com/7.x/micah/svg?seed=${encodeURIComponent(p.matric)}&backgroundColor=121a2f" class="search-avatar" alt="${p.name}">
               </div>
               <div class="search-result-info">
                 <div class="search-result-name">${p.name}</div>
@@ -2011,3 +2137,4 @@
     </script>
 </body>
 </html>
+

@@ -20,6 +20,7 @@
   </script>
 
   <!-- Central ICEP Dataset -->
+  <script src="scripts/state_manager.js"></script>
   <script src="data/icep_dataset.js"></script>
 
   <style>
@@ -542,7 +543,7 @@
       <li><a href="#">Courses</a></li>
       <li><a href="#">Academic Audit</a></li>
       <li><a href="#">Financial Audit</a></li>
-      <li><a href="#">Timetable</a></li>
+      <li><a href="#" onclick="openModal('timetableModal');renderStudentTimetable();return false;">Timetable</a></li>
     </ul>
     <div class="nav-right">
       <!-- PORTAL SWITCHER -->
@@ -596,7 +597,7 @@
 
         <!-- PORTRAIT — MAIN ATTRACTION -->
         <div class="portrait-wrap">
-          <img src="images/emmanuel_portrait.jpg" alt="Emmanuel Chukwuemeka" class="portrait-img" id="studentAvatar" onerror="this.src='https://ui-avatars.com/api/?name=Emmanuel+Chukwuemeka&size=200&background=D9534F&color=fff&bold=true&font-size=0.4'" />
+          <img src="images/emmanuel_portrait.jpg" alt="Emmanuel Chukwuemeka" class="portrait-img" id="studentAvatar" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=Emmanuel+Chukwuemeka&size=200&background=D9534F&color=fff&bold=true&font-size=0.4'" />
           <div class="portrait-status"><i class="fas fa-circle" style="font-size:7px"></i> Active &amp; Verified</div>
           <!-- year badge removed -->
         </div>
@@ -1114,14 +1115,44 @@
         </div>
         <table class="result-table">
           <tbody>
-            <tr><td><strong>Matriculation Number:</strong></td><td>2026/MKT/0472</td></tr>
-            <tr><td><strong>Faculty:</strong></td><td>Management Sciences</td></tr>
-            <tr><td><strong>Department:</strong></td><td>Marketing</td></tr>
-            <tr><td><strong>Program:</strong></td><td>B.Sc. Marketing</td></tr>
-            <tr><td><strong>Level:</strong></td><td>400 Level</td></tr>
-            <tr><td><strong>Admission Year:</strong></td><td>2023</td></tr>
-            <tr><td><strong>Current CGPA:</strong></td><td><span style="color:var(--accent);font-weight:900;">4.82</span></td></tr>
-            <tr><td><strong>Account Status:</strong></td><td><span class="acc-badge badge-success" style="display:inline-block">Active</span></td></tr>
+            <tr><td><strong>Matriculation Number:</strong></td><td id="modalMatric">2026/MKT/0472</td></tr>
+            <tr><td><strong>Faculty:</strong></td><td id="modalFaculty">Management Sciences</td></tr>
+            <tr><td><strong>Department:</strong></td><td id="modalDept">Marketing</td></tr>
+            <tr><td><strong>Level:</strong></td><td id="modalLevel">400 Level</td></tr>
+            <tr><td><strong>Current CGPA:</strong></td><td><span style="color:var(--accent);font-weight:900;" id="modalCGPA">4.82</span></td></tr>
+            <tr><td><strong>Blood Group:</strong></td><td id="modalBloodGroup">N/A</td></tr>
+            <tr><td><strong>Account Status:</strong></td><td><span class="acc-badge badge-success" style="display:inline-block" id="modalStatus">Active</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TIMETABLE MODAL -->
+  <div class="modal-overlay" id="timetableModal" onclick="handleModalOverlayClick(event,'timetableModal')">
+    <div class="modal-sheet">
+      <div class="modal-top-stripe" style="background:linear-gradient(90deg,#3b82f6,#2563eb)"></div>
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <h3>My Weekly Timetable</h3>
+          <p>Personalized lecture schedule based on enrolled courses</p>
+        </div>
+        <button class="modal-close" onclick="closeModal('timetableModal')"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <table class="data-table" id="timetableTable">
+          <thead>
+            <tr>
+              <th>Day</th>
+              <th>Course Code</th>
+              <th>Title</th>
+              <th>Time</th>
+              <th>Venue</th>
+              <th>Lecturer</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Populated via JS -->
           </tbody>
         </table>
       </div>
@@ -1154,13 +1185,23 @@
     // ═══════════════════════════════════════════════
     // Each notification has: target (modal id or anchor), addedAt (timestamp ms)
     const NOW = Date.now();
-    const NOTIFS = [
-      { id:1, icon:'📋', text:'Results for MKT 401 — Consumer Behavior have been uploaded.', time:'2 min ago', read:false, target:'semesterModal', addedAt: NOW - 2*60*1000 },
-      { id:2, icon:'📅', text:'Re-sit registration window opens October 15, 2026.', time:'1 hr ago', read:false, target:'acc2', addedAt: NOW - 60*60*1000 },
-      { id:3, icon:'🎓', text:'Supervisor assignment for MKT 499 (Final Year Project) is still pending.', time:'3 hrs ago', read:false, target:'degreeModal', addedAt: NOW - 3*60*60*1000 },
-      { id:4, icon:'📢', text:'Faculty notice: 400L exam timetable has been released.', time:'Yesterday', read:false, target:'acc3', addedAt: NOW - 26*60*60*1000 },
-      { id:5, icon:'💳', text:'School fees second instalment deadline is in 7 days.', time:'Yesterday', read:false, target:'acc4', addedAt: NOW - 27*60*60*1000 },
-    ];
+    let NOTIFS = [];
+    
+    function generateDynamicNotifs() {
+      const persona = window.ICEPStateManager ? window.ICEPStateManager.getActivePersona() : null;
+      NOTIFS = [
+        { id:1, icon:'📋', text:'Results for MKT 401 — Consumer Behavior have been uploaded.', time:'2 min ago', read:false, target:'semesterModal', addedAt: NOW - 2*60*1000 },
+        { id:2, icon:'📅', text:'Re-sit registration window opens October 15, 2026.', time:'1 hr ago', read:false, target:'acc2', addedAt: NOW - 60*60*1000 },
+        { id:3, icon:'🎓', text:'Supervisor assignment for MKT 499 (Final Year Project) is still pending.', time:'3 hrs ago', read:false, target:'degreeModal', addedAt: NOW - 3*60*60*1000 },
+        { id:4, icon:'📢', text:'Faculty notice: 400L exam timetable has been released.', time:'Yesterday', read:false, target:'acc3', addedAt: NOW - 26*60*60*1000 },
+        { id:5, icon:'💳', text:'School fees second instalment deadline is in 7 days.', time:'Yesterday', read:false, target:'acc4', addedAt: NOW - 27*60*60*1000 },
+      ];
+      
+      // Add 'Dues Deadline' alert specific to students
+      if(persona && persona.role === 'student' || !persona) {
+          NOTIFS.unshift({ id:6, icon:'⚠️', text:'Dues Deadline: Departmental dues must be paid by Friday.', time:'Just now', read:false, target:'acc4', addedAt: NOW });
+      }
+    }
 
     function isNew(addedAt) { return (Date.now() - addedAt) < 86400000; }
 
@@ -1393,9 +1434,38 @@
     }
 
     // ─── INIT ───
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('DOMContentLoaded', async () => {
+      if (window.ICEPStateManager && window.ICEPStateManager.prunePortals) {
+        window.ICEPStateManager.prunePortals();
+      }
       document.getElementById('acc1').classList.add('acc-open');
+      
+      // Inject Skeleton Loader Overlay for Profile
+      const heroCard = document.querySelector('.hero-card');
+      if (heroCard) {
+        heroCard.style.position = 'relative';
+        const skeletonOverlay = document.createElement('div');
+        skeletonOverlay.className = 'skeleton-overlay';
+        skeletonOverlay.innerHTML = `
+          <div class="neu-skeleton-card" style="height:100%; position:absolute; top:0; left:0; right:0; bottom:0; z-index:10;"></div>
+        `;
+        heroCard.appendChild(skeletonOverlay);
+      }
+      
+      // Fetch data asynchronously via StateManager
+      if (window.ICEPStateManager) {
+        await ICEPStateManager.fetchMockData('ICEP_STUDENTS');
+      }
+
+      // Remove Skeleton Loader
+      if (heroCard) {
+        const skeletonOverlay = heroCard.querySelector('.skeleton-overlay');
+        if(skeletonOverlay) skeletonOverlay.remove();
+      }
+
+      generateDynamicNotifs();
       renderNotifs();
+
       // Sync dark mode icon
       if(document.documentElement.getAttribute('data-theme') === 'dark') {
         const i = document.getElementById('themeIcon');
@@ -1426,9 +1496,30 @@
             if (deptEl) deptEl.textContent = 'Dept. of ' + matched.department + ', ' + (matched.faculty || 'Faculty of Management Sciences');
             if (cgpaEl) cgpaEl.textContent = matched.cgpa || 'N/A';
             if (levelEl) levelEl.textContent = matched.level + 'L';
+            
+            // Populate modal fields
+            const modalMatric = document.getElementById('modalMatric');
+            const modalFaculty = document.getElementById('modalFaculty');
+            const modalDept = document.getElementById('modalDept');
+            const modalLevel = document.getElementById('modalLevel');
+            const modalCGPA = document.getElementById('modalCGPA');
+            const modalBloodGroup = document.getElementById('modalBloodGroup');
+            const modalStatus = document.getElementById('modalStatus');
+            
+            if(modalMatric) modalMatric.textContent = matched.matric;
+            if(modalFaculty) modalFaculty.textContent = matched.faculty || 'Management Sciences';
+            if(modalDept) modalDept.textContent = matched.department;
+            if(modalLevel) modalLevel.textContent = matched.level + ' Level';
+            if(modalCGPA) modalCGPA.textContent = matched.cgpa || 'N/A';
+            if(modalBloodGroup) modalBloodGroup.textContent = matched.bloodGroup || 'N/A';
+            if(modalStatus) modalStatus.textContent = matched.status || 'Active';
+            
             if (avatarEl) {
-              avatarEl.src = matched.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(matched.name)}&size=200&background=D9534F&color=fff&bold=true`;
+              avatarEl.src = `https://api.dicebear.com/7.x/micah/svg?seed=${encodeURIComponent(matched.matric)}&backgroundColor=121a2f`;
               avatarEl.alt = matched.name;
+              avatarEl.onerror = function() {
+                  this.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(matched.name)}&size=200&background=D9534F&color=fff&bold=true`;
+              }
             }
           }
         }
@@ -1436,6 +1527,55 @@
         console.error('Error applying persona to profile', e);
       }
     });
+
+    function renderStudentTimetable() {
+      const tbody = document.querySelector('#timetableTable tbody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      
+      const personaStr = localStorage.getItem('activePersona');
+      if (!personaStr) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No active persona</td></tr>';
+        return;
+      }
+      const persona = JSON.parse(personaStr);
+      
+      if (typeof window.ICEPStateManager === 'undefined') return;
+      
+      window.ICEPStateManager.fetchMockData('ICEP_TIMETABLE').then(timetable => {
+        let matched = null;
+        if (typeof window.ICEP_STUDENTS !== 'undefined') {
+          matched = window.ICEP_STUDENTS.find(s => s.name === persona.name || s.matric === persona.matric);
+        }
+        
+        let filtered = [];
+        if (matched && matched.courses && matched.courses.length > 0) {
+          filtered = timetable.filter(t => matched.courses.includes(t.courseCode));
+        } else {
+          filtered = timetable.filter(t => t.courseCode.startsWith(persona.dept ? persona.dept.substring(0,3).toUpperCase() : ''));
+        }
+        
+        if (filtered.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No scheduled classes found.</td></tr>';
+          return;
+        }
+        
+        const dayOrder = { "Monday":1, "Tuesday":2, "Wednesday":3, "Thursday":4, "Friday":5, "Saturday":6 };
+        filtered.sort((a,b) => dayOrder[a.day] - dayOrder[b.day]);
+        
+        tbody.innerHTML = filtered.map(t => `
+          <tr>
+            <td style="font-weight:700;">${t.day}</td>
+            <td style="color:var(--accent); font-weight:600;">${t.courseCode}</td>
+            <td>${t.courseTitle}</td>
+            <td><i class="fa-regular fa-clock"></i> ${t.startTime} - ${t.endTime}</td>
+            <td><i class="fa-solid fa-location-dot"></i> ${t.venue}</td>
+            <td>${t.lecturer}</td>
+          </tr>
+        `).join('');
+      });
+    }
   </script>
 </body>
 </html>
+
