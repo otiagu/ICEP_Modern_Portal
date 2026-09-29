@@ -23,7 +23,7 @@ FACULTIES = {
     "Education": ["Edu/Accountancy", "Edu/Economics", "Edu/English", "Edu/Govt", "Edu/Biology", "Edu/Religion", "Edu/Igbo", "Edu/Guidance & Counseling"]
 }
 
-LEVELS = [100, 200, 300, 400]
+LEVELS = [100, 200, 300, 400, 500]
 
 # Generate unique names
 FIRST_NAMES_M = ["Emmanuel", "Chukwudi", "Tunde", "Farouk", "Ibrahim", "Obinna", "Adebayo", "Suleiman", "Emeka", "Chinedu", "Musa", "Abubakar", "Olumide", "Nnamdi", "Babatunde", "Yusuf", "Kehinde", "Kolawole"]
@@ -190,9 +190,13 @@ for dept in depts_data:
     # 2 classes per day for this dept
     for day in days:
         for _ in range(2):
-            code = f"{dept_name[:3].upper()} {random.choice([101, 102, 201, 202, 301, 302, 401, 402])}"
+            course_num = random.choice([101, 102, 201, 202, 301, 302, 401, 402, 501, 502])
+            code = f"{dept_name[:3].upper()} {course_num}"
+            level = (course_num // 100) * 100
             timetable_data.append({
                 "day": day,
+                "department": dept_name,
+                "level": level,
                 "courseCode": code,
                 "courseTitle": f"Topics in {dept_name}",
                 "startTime": "09:00",
@@ -231,6 +235,26 @@ try {{
     }}
 }} catch(e) {{
     console.error("Failed to load local storage data", e);
+}}
+
+// Helper Functions
+function getTimetableByDeptLevel(department, level) {{
+    return ICEP_TIMETABLE.filter(t => t.department === department && t.level === parseInt(level));
+}}
+
+function saveTimetableEntry(entry) {{
+    let custom = [];
+    try {{
+        const stored = localStorage.getItem('ICEP_TIMETABLE_CUSTOM');
+        if (stored) custom = JSON.parse(stored);
+    }} catch(e) {{}}
+    custom.push(entry);
+    localStorage.setItem('ICEP_TIMETABLE_CUSTOM', JSON.stringify(custom));
+    ICEP_TIMETABLE.push(entry);
+}}
+
+function loadTimetable() {{
+    return ICEP_TIMETABLE;
 }}
 """
 

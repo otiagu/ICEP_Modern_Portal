@@ -860,7 +860,7 @@
             <div class="input-group">
               <label>Academic Level</label>
               <select id="bLevel">
-                <option>100 Level</option><option>200 Level</option><option>300 Level</option><option selected>400 Level</option>
+                <option>100 Level</option><option>200 Level</option><option>300 Level</option><option selected>400 Level</option><option>500 Level</option>
               </select>
             </div>
             <div class="input-group">
@@ -953,7 +953,7 @@
               <thead>
                 <tr><th>Day</th><th>Time</th><th>Course Code</th><th>Course Title</th><th>Venue</th><th>Lecturer</th></tr>
               </thead>
-              <tbody>
+              <tbody id="masterTimetableBody">
                 <tr><td>Mon</td><td>8:00–10:00 AM</td><td>MKT 401</td><td>Advanced Research</td><td>Hall B, Faculty Bldg</td><td>Prof. O. K. Balogun</td></tr>
                 <tr><td>Tue</td><td>11:00 AM–1:00 PM</td><td>MKT 403</td><td>Consumer Behavior</td><td>Auditorium 2</td><td>Dr. Mrs. A. N. Eze</td></tr>
                 <tr><td>Wed</td><td>2:00–4:00 PM</td><td>MKT 405</td><td>Brand Management</td><td>Lecture Theatre C</td><td>Dr. S. I. Ahmed</td></tr>
@@ -965,13 +965,13 @@
           <div style="margin-top:20px;padding:16px;background:rgba(15,23,42,0.03);border-radius:16px;">
             <h4 style="margin-bottom:12px;font-size:14px;">Add New Lecture Schedule</h4>
             <div style="display:flex;gap:10px;flex-wrap:wrap;">
-              <input type="text" placeholder="Day" class="score-input" style="flex:1;width:auto;text-align:left;">
-              <input type="text" placeholder="Time" class="score-input" style="flex:1;width:auto;text-align:left;">
-              <input type="text" placeholder="Course Code" class="score-input" style="flex:1;width:auto;text-align:left;">
-              <input type="text" placeholder="Course Title" class="score-input" style="flex:1;width:auto;text-align:left;">
-              <input type="text" placeholder="Venue" class="score-input" style="flex:1;width:auto;text-align:left;">
-              <input type="text" placeholder="Lecturer in Charge" class="score-input" style="flex:1;width:auto;text-align:left;">
-              <button class="btn-primary" onclick="showToast('Added successfully!')"><i class="fas fa-plus"></i> Add</button>
+              <input type="text" id="ttDay" placeholder="Day" class="score-input" style="flex:1;width:auto;text-align:left;">
+              <input type="text" id="ttTime" placeholder="Time" class="score-input" style="flex:1;width:auto;text-align:left;">
+              <input type="text" id="ttCode" placeholder="Course Code" class="score-input" style="flex:1;width:auto;text-align:left;">
+              <input type="text" id="ttTitle" placeholder="Course Title" class="score-input" style="flex:1;width:auto;text-align:left;">
+              <input type="text" id="ttVenue" placeholder="Venue" class="score-input" style="flex:1;width:auto;text-align:left;">
+              <input type="text" id="ttLec" placeholder="Lecturer in Charge" class="score-input" style="flex:1;width:auto;text-align:left;">
+              <button class="btn-primary" onclick="addLectureSchedule()"><i class="fas fa-plus"></i> Add</button>
             </div>
           </div>
         </div>
@@ -1176,7 +1176,7 @@
       <div class="modal-body">
         <div class="form-group">
           <label>Select Faculty</label>
-          <select id="switch-faculty" class="form-control">
+          <select id="switch-faculty" class="form-control" onchange="updateDepts()">
             <option value="Management Sciences">Management Sciences</option>
             <option value="Social Sciences">Social Sciences</option>
             <option value="Physical Science">Physical Science</option>
@@ -1186,7 +1186,8 @@
         </div>
         <div class="form-group">
           <label>Select Department</label>
-          <input type="text" id="switch-dept" class="form-control" placeholder="e.g. Marketing, Computer Science, Economics...">
+          <select id="switch-dept" class="form-control">
+          </select>
         </div>
         <div class="form-group">
           <label>Select Level</label>
@@ -1195,6 +1196,7 @@
             <option value="200">200L</option>
             <option value="300">300L</option>
             <option value="400">400L</option>
+            <option value="500">500L</option>
           </select>
         </div>
         <button class="btn-primary" style="width:100%;margin-top:10px" onclick="executeSwitchDept()"><i class="fas fa-check"></i> Switch</button>
@@ -1315,6 +1317,68 @@
       }
     }
 
+    // ─── TIMETABLE CUSTOM DATA & FACULTY CASCADE ───
+    function addLectureSchedule() {
+      const day = document.getElementById('ttDay').value;
+      const time = document.getElementById('ttTime').value;
+      const code = document.getElementById('ttCode').value;
+      const title = document.getElementById('ttTitle').value;
+      const venue = document.getElementById('ttVenue').value;
+      const lec = document.getElementById('ttLec').value;
+      
+      if(!day || !time || !code) { showToast('Fill required fields!', true); return; }
+      
+      let saved = JSON.parse(localStorage.getItem('icep_timetable_custom') || '[]');
+      saved.push({ day, time, code, title, venue, lecturer: lec });
+      localStorage.setItem('icep_timetable_custom', JSON.stringify(saved));
+      
+      showToast('Added successfully!');
+      
+      document.getElementById('ttDay').value = '';
+      document.getElementById('ttTime').value = '';
+      document.getElementById('ttCode').value = '';
+      document.getElementById('ttTitle').value = '';
+      document.getElementById('ttVenue').value = '';
+      document.getElementById('ttLec').value = '';
+      
+      renderMasterTimetable();
+      if(document.getElementById('time-cards').classList.contains('active-panel')) {
+         renderTimetableDayCards();
+      }
+    }
+    
+    function renderMasterTimetable() {
+       const tbody = document.getElementById('masterTimetableBody');
+       if(!tbody) return;
+       let html = `
+                <tr><td>Mon</td><td>8:00–10:00 AM</td><td>MKT 401</td><td>Advanced Research</td><td>Hall B, Faculty Bldg</td><td>Prof. O. K. Balogun</td></tr>
+                <tr><td>Tue</td><td>11:00 AM–1:00 PM</td><td>MKT 403</td><td>Consumer Behavior</td><td>Auditorium 2</td><td>Dr. Mrs. A. N. Eze</td></tr>
+                <tr><td>Wed</td><td>2:00–4:00 PM</td><td>MKT 405</td><td>Brand Management</td><td>Lecture Theatre C</td><td>Dr. S. I. Ahmed</td></tr>
+                <tr><td>Thu</td><td>9:00–11:00 AM</td><td>MKT 407</td><td>International Marketing</td><td>Hall A, Faculty Bldg</td><td>Prof. C. E. Chukwu</td></tr>
+                <tr><td>Fri</td><td>10:00 AM–12:00 PM</td><td>MKT 409</td><td>Strategic Marketing</td><td>Hall D, Main Campus</td><td>Dr. K. T. Ogundipe</td></tr>
+       `;
+       let custom = JSON.parse(localStorage.getItem('icep_timetable_custom') || '[]');
+       custom.forEach(item => {
+           html += `<tr><td>${item.day}</td><td>${item.time}</td><td>${item.code}</td><td>${item.title}</td><td>${item.venue}</td><td>${item.lecturer}</td></tr>`;
+       });
+       tbody.innerHTML = html;
+    }
+
+    const facultyToDept = {
+      "Management Sciences": ["Marketing", "Accounting", "Business Administration", "Finance"],
+      "Social Sciences": ["Economics", "Political Science", "Sociology"],
+      "Physical Science": ["Computer Science", "Physics", "Chemistry"],
+      "Humanities": ["History", "English", "Philosophy"],
+      "Education": ["Adult Education", "Educational Management"]
+    };
+    function updateDepts() {
+      const fac = document.getElementById('switch-faculty').value;
+      const deptSelect = document.getElementById('switch-dept');
+      if(!deptSelect) return;
+      const depts = facultyToDept[fac] || [];
+      deptSelect.innerHTML = depts.map(d => `<option value="${d}">${d}</option>`).join('');
+    }
+
     // ─── SEMESTER-AWARE COURSE SELECTOR ───
     // Courses for MKT 400L by semester (pulled from dataset if available, else fallback)
     const MKT400_COURSES = {
@@ -1400,6 +1464,8 @@
       renderNotifs();
       // Init semester-based course selector
       updateCoursesBySelectedSem();
+      updateDepts();
+      renderMasterTimetable();
       // Sync student count chip
       if (classListStudents) {
         document.querySelectorAll('[data-stat="students"]').forEach(el => {
@@ -1865,6 +1931,26 @@
         } else {
           data = rawTimetable;
         }
+      }
+
+      let custom = JSON.parse(localStorage.getItem('icep_timetable_custom') || '[]');
+      if(custom.length > 0) {
+          let dataDict = {};
+          data.forEach(d => { dataDict[d.day] = d.slots; });
+          custom.forEach(c => {
+             let dayNorm = c.day;
+             if(dayNorm.toLowerCase().startsWith('mon')) dayNorm = 'Monday';
+             else if(dayNorm.toLowerCase().startsWith('tue')) dayNorm = 'Tuesday';
+             else if(dayNorm.toLowerCase().startsWith('wed')) dayNorm = 'Wednesday';
+             else if(dayNorm.toLowerCase().startsWith('thu')) dayNorm = 'Thursday';
+             else if(dayNorm.toLowerCase().startsWith('fri')) dayNorm = 'Friday';
+             let timeStr = c.time.replace('–', '-');
+             if(!dataDict[dayNorm]) dataDict[dayNorm] = [];
+             dataDict[dayNorm].push({ code: c.code, title: c.title, time: timeStr, venue: c.venue, lecturer: c.lecturer });
+          });
+          data = Object.keys(dataDict).map(day => ({ day, slots: dataDict[day] }));
+          const dayOrder = { "Monday": 1, "Tuesday": 2, "Wednesday": 3, "Thursday": 4, "Friday": 5, "Saturday": 6, "Sunday": 7 };
+          data.sort((a,b) => (dayOrder[a.day]||99) - (dayOrder[b.day]||99));
       }
 
       const now = new Date();

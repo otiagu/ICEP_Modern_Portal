@@ -517,12 +517,12 @@
       <div class="mobile-menu-title"><i class="fas fa-graduation-cap" style="color:var(--accent)"></i> ICE<span>P</span></div>
       <button class="mobile-menu-close" onclick="closeMobileMenu()"><i class="fas fa-times"></i></button>
     </div>
-    <a href="#" class="mobile-nav-link active"><span><i class="fas fa-th-large" style="margin-right:10px"></i>Dashboard</span><i class="fas fa-chevron-right"></i></a>
-    <a href="#" class="mobile-nav-link"><span><i class="fas fa-book" style="margin-right:10px"></i>Courses &amp; Resources</span><i class="fas fa-chevron-right"></i></a>
-    <a href="#" class="mobile-nav-link"><span><i class="fas fa-chart-bar" style="margin-right:10px"></i>Academic Audit</span><i class="fas fa-chevron-right"></i></a>
-    <a href="#" class="mobile-nav-link"><span><i class="fas fa-wallet" style="margin-right:10px"></i>Financial Audit</span><i class="fas fa-chevron-right"></i></a>
-    <a href="#" class="mobile-nav-link"><span><i class="fas fa-calendar-alt" style="margin-right:10px"></i>Timetable</span><i class="fas fa-chevron-right"></i></a>
-    <a href="#" class="mobile-nav-link"><span><i class="fas fa-cog" style="margin-right:10px"></i>Settings</span><i class="fas fa-chevron-right"></i></a>
+    <a href="#" class="mobile-nav-link active" onclick="closeMobileMenu(); return false;"><span><i class="fas fa-th-large" style="margin-right:10px"></i>Dashboard</span><i class="fas fa-chevron-right"></i></a>
+    <a href="#" class="mobile-nav-link" onclick="openModal('coursesModal'); closeMobileMenu(); return false;"><span><i class="fas fa-book" style="margin-right:10px"></i>Courses &amp; Resources</span><i class="fas fa-chevron-right"></i></a>
+    <a href="#" class="mobile-nav-link" onclick="openModal('degreeModal'); closeMobileMenu(); return false;"><span><i class="fas fa-chart-bar" style="margin-right:10px"></i>Academic Audit</span><i class="fas fa-chevron-right"></i></a>
+    <a href="#" class="mobile-nav-link" onclick="openModal('financeModal'); closeMobileMenu(); return false;"><span><i class="fas fa-wallet" style="margin-right:10px"></i>Financial Audit</span><i class="fas fa-chevron-right"></i></a>
+    <a href="#" class="mobile-nav-link" onclick="openModal('timetableModal'); renderStudentTimetable(); closeMobileMenu(); return false;"><span><i class="fas fa-calendar-alt" style="margin-right:10px"></i>Timetable</span><i class="fas fa-chevron-right"></i></a>
+    <a href="#" class="mobile-nav-link" onclick="openModal('settingsModal'); closeMobileMenu(); return false;"><span><i class="fas fa-cog" style="margin-right:10px"></i>Settings</span><i class="fas fa-chevron-right"></i></a>
     <div class="mobile-menu-divider"></div>
     <div class="mobile-menu-section" style="padding:8px 18px;font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;">Other Portals</div>
     <a href="ICEP_login_modern.html" class="mobile-nav-link"><span><i class="fas fa-right-to-bracket" style="margin-right:10px;color:#6366f1"></i>Login Page</span><i class="fas fa-chevron-right"></i></a>
@@ -532,17 +532,17 @@
 
     <div class="mobile-menu-divider"></div>
     <button class="mobile-nav-link" onclick="toggleDarkMode();closeMobileMenu()" style="background:none;border:none;width:100%;text-align:left;cursor:pointer;"><span><i class="fas fa-moon" style="margin-right:10px;color:var(--accent)" id="mobileThemeIcon"></i><span id="mobileThemeLabel">Toggle Dark Mode</span></span><i class="fas fa-chevron-right"></i></button>
-    <a href="ICEP_login_modern.html" class="mobile-nav-link" style="margin-top:auto;color:var(--accent);border-color:rgba(217,83,79,0.3);"><span><i class="fas fa-right-from-bracket" style="margin-right:10px"></i>Sign Out</span><i class="fas fa-chevron-right"></i></a>
+    <a href="ICEP_login_modern.html" onclick="localStorage.removeItem('activePersona');" class="mobile-nav-link" style="margin-top:auto;color:var(--accent);border-color:rgba(217,83,79,0.3);"><span><i class="fas fa-right-from-bracket" style="margin-right:10px"></i>Sign Out</span><i class="fas fa-chevron-right"></i></a>
   </div>
 
   <!-- TOPNAV -->
   <nav class="topnav">
     <a href="#" class="nav-brand"><i class="fas fa-graduation-cap" style="color:var(--accent);font-size:20px"></i>ICE<span style="color:var(--accent)">P</span></a>
     <ul class="nav-links">
-      <li><a href="#" class="active">Dashboard</a></li>
-      <li><a href="#">Courses</a></li>
-      <li><a href="#">Academic Audit</a></li>
-      <li><a href="#">Financial Audit</a></li>
+      <li><a href="#" class="active" onclick="return false;">Dashboard</a></li>
+      <li><a href="#" onclick="openModal('coursesModal'); return false;">Courses</a></li>
+      <li><a href="#" onclick="openModal('degreeModal'); return false;">Academic Audit</a></li>
+      <li><a href="#" onclick="openModal('financeModal'); return false;">Financial Audit</a></li>
       <li><a href="#" onclick="openModal('timetableModal');renderStudentTimetable();return false;">Timetable</a></li>
     </ul>
     <div class="nav-right">
@@ -578,7 +578,7 @@
         </div>
       </div>
       <div class="desktop-only" style="display:flex; align-items:center;">
-        <button class="btn-signout" onclick="window.location.href='ICEP_login_modern.html'"><i class="fas fa-right-from-bracket"></i> Sign Out</button>
+        <button class="btn-signout" onclick="localStorage.removeItem('activePersona'); window.location.href='ICEP_login_modern.html'"><i class="fas fa-right-from-bracket"></i> Sign Out</button>
       </div>
       <div class="hamburger" id="hamburger" onclick="toggleMobileMenu()">
         <span></span><span></span><span></span>
@@ -889,6 +889,7 @@
           <button class="modal-tab" onclick="switchTab(event,'tab200L')">200 Level</button>
           <button class="modal-tab" onclick="switchTab(event,'tab300L')">300 Level</button>
           <button class="modal-tab" onclick="switchTab(event,'tab400L')">400 Level</button>
+          <button class="modal-tab" onclick="switchTab(event,'tab500L')">500 Level</button>
         </div>
 
         <!-- 100L -->
@@ -987,6 +988,16 @@
             <div class="modal-summary-chip"><div class="m-val" style="color:var(--accent)">1*</div><div class="m-lbl">Outstanding (Carryover)</div></div>
             <div class="modal-summary-chip"><div class="m-val" style="color:var(--warn)">First Class</div><div class="m-lbl">Honours Standing</div></div>
           </div>
+        </div>
+
+        <!-- 500L -->
+        <div class="modal-tab-panel" id="tab500L">
+          <table class="result-table">
+            <thead><tr><th>#</th><th>Course Code</th><th>Course Title</th><th>Units</th><th>CA (40)</th><th>Exam (60)</th><th>Total</th><th>Grade</th></tr></thead>
+            <tbody>
+              <tr><td colspan="8" style="text-align:center;padding:20px;color:var(--muted)">No results available for 500 Level.</td></tr>
+            </tbody>
+          </table>
         </div>
 
       </div><!-- modal-body -->
@@ -1124,6 +1135,93 @@
             <tr><td><strong>Account Status:</strong></td><td><span class="acc-badge badge-success" style="display:inline-block" id="modalStatus">Active</span></td></tr>
           </tbody>
         </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- COURSES & RESOURCES MODAL -->
+  <div class="modal-overlay" id="coursesModal" onclick="handleModalOverlayClick(event,'coursesModal')">
+    <div class="modal-sheet">
+      <div class="modal-top-stripe" style="background:linear-gradient(90deg,#10b981,#34d399)"></div>
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <h3><i class="fas fa-book" style="color:#10b981;margin-right:8px"></i>Courses &amp; Resources</h3>
+          <p>Access your registered courses, materials, and assignments</p>
+        </div>
+        <button class="modal-close" onclick="closeModal('coursesModal')"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert-item" style="background:rgba(16,185,129,0.1);border-color:rgba(16,185,129,0.3);margin-bottom:20px;">
+          <i class="fas fa-info-circle" style="color:#10b981"></i>
+          <div class="alert-body">
+            <h4 style="color:#047857">LMS Integration Pending</h4>
+            <p style="color:var(--text)">Your course materials are currently being migrated to the new Learning Management System.</p>
+          </div>
+        </div>
+        <table class="result-table">
+          <thead><tr><th>Course Code</th><th>Course Title</th><th>Lecturer</th><th>Resources</th></tr></thead>
+          <tbody>
+            <tr><td>MKT 401</td><td>Consumer Behavior (Advanced)</td><td>Dr. A. Bello</td><td><button class="btn-secondary" style="padding:4px 10px;font-size:11px"><i class="fas fa-download"></i> Syllabus</button></td></tr>
+            <tr><td>MGT 405</td><td>Strategic Management</td><td>Prof. C. Okafor</td><td><button class="btn-secondary" style="padding:4px 10px;font-size:11px"><i class="fas fa-download"></i> Slides</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- FINANCIAL AUDIT MODAL -->
+  <div class="modal-overlay" id="financeModal" onclick="handleModalOverlayClick(event,'financeModal')">
+    <div class="modal-sheet">
+      <div class="modal-top-stripe" style="background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div>
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <h3><i class="fas fa-wallet" style="color:#f59e0b;margin-right:8px"></i>Financial Audit</h3>
+          <p>Tuition, fees, and payment history</p>
+        </div>
+        <button class="modal-close" onclick="closeModal('financeModal')"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-summary-row" style="margin-top:0; border-top:none; margin-bottom:20px;">
+          <div class="modal-summary-chip"><div class="m-val" style="color:var(--success)">₦0.00</div><div class="m-lbl">Outstanding Balance</div></div>
+          <div class="modal-summary-chip"><div class="m-val">Cleared</div><div class="m-lbl">Financial Status</div></div>
+        </div>
+        <table class="result-table">
+          <thead><tr><th>Session</th><th>Description</th><th>Amount</th><th>Status</th><th>Receipt</th></tr></thead>
+          <tbody>
+            <tr><td>2025/2026</td><td>Tuition - 1st Instalment</td><td>₦120,000</td><td><span class="grade-badge grade-A">Paid</span></td><td><a href="#">View</a></td></tr>
+            <tr><td>2025/2026</td><td>Departmental Dues</td><td>₦5,000</td><td><span class="grade-badge grade-C">Pending</span></td><td><button class="btn-secondary" style="padding:4px 10px;font-size:11px">Pay Now</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS MODAL -->
+  <div class="modal-overlay" id="settingsModal" onclick="handleModalOverlayClick(event,'settingsModal')">
+    <div class="modal-sheet">
+      <div class="modal-top-stripe" style="background:linear-gradient(90deg,#64748b,#94a3b8)"></div>
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <h3><i class="fas fa-cog" style="color:#64748b;margin-right:8px"></i>Account Settings</h3>
+          <p>Manage your profile preferences and security</p>
+        </div>
+        <button class="modal-close" onclick="closeModal('settingsModal')"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div style="display:flex; flex-direction:column; gap:16px;">
+          <div style="padding:16px; border:1px solid var(--border); border-radius:12px; background:rgba(15,23,42,0.02)">
+            <h4 style="margin-bottom:8px; font-size:14px; font-weight:700;">Password Management</h4>
+            <p style="font-size:13px; color:var(--muted); margin-bottom:12px;">Update your portal login password regularly to keep your account secure.</p>
+            <button class="btn-secondary" style="font-size:12px; padding:8px 16px;"><i class="fas fa-key"></i> Change Password</button>
+          </div>
+          <div style="padding:16px; border:1px solid var(--border); border-radius:12px; background:rgba(15,23,42,0.02)">
+            <h4 style="margin-bottom:8px; font-size:14px; font-weight:700;">Notification Preferences</h4>
+            <p style="font-size:13px; color:var(--muted); margin-bottom:12px;">Toggle email and SMS alerts for academic updates.</p>
+            <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
+              <input type="checkbox" checked> Enable Email Alerts
+            </label>
+          </div>
+        </div>
       </div>
     </div>
   </div>
