@@ -1531,11 +1531,13 @@
         `;
       });
       if(unread > 0){
-        count.style.display = 'flex';
-        count.innerText = unread > 9 ? '9+' : unread;
+        if (count) {
+          count.style.display = 'flex';
+          count.innerText = unread > 9 ? '9+' : unread;
+        }
       } else {
-        count.style.display = 'none';
-        list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted)">No new notifications</div>';
+        if (count) count.style.display = 'none';
+        if (list) list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted)">No new notifications</div>';
       }
     }
     function markAllRead(){

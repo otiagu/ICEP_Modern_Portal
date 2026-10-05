@@ -12,12 +12,12 @@ module.exports = defineConfig({
     headless: false,
     slowMo: 450,
     trace: 'on-first-retry',
-    viewport: { width: 390, height: 844 },
+    viewport: { width: 1280, height: 720 },
   },
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Pixel 5'] },
+      use: { browserName: 'chromium' },
     },
   ],
 });

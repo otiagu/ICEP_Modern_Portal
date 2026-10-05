@@ -256,6 +256,17 @@ function saveTimetableEntry(entry) {{
 function loadTimetable() {{
     return ICEP_TIMETABLE;
 }}
+
+// Expose to window for state manager to pick up
+if (typeof window !== 'undefined') {{
+    window.ICEP_FACULTIES = ICEP_FACULTIES;
+    window.ICEP_DEPARTMENTS = ICEP_DEPARTMENTS;
+    window.ICEP_COORDINATORS = ICEP_COORDINATORS;
+    window.ICEP_COURSE_REPS = ICEP_COURSE_REPS;
+    window.ICEP_STUDENTS = ICEP_STUDENTS;
+    window.ICEP_LECTURERS = ICEP_LECTURERS;
+    window.ICEP_TIMETABLE = ICEP_TIMETABLE;
+}}
 """
 
 with open(JS_FILE, "w", encoding="utf-8") as f:
