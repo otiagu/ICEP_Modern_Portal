@@ -782,7 +782,7 @@
     <div class="accordion-card" id="accStatus">
       <div class="acc-header" onclick="toggleAcc('accStatus')">
         <div class="acc-left">
-          <div class="acc-icon-wrap icon-blue" style="background:rgba(59,130,246,0.1);color:#3b82f6"><i class="fas fa-shield-check"></i></div>
+          <div class="acc-icon-wrap icon-blue" style="background:rgba(59,130,246,0.1);color:#3b82f6"><i class="fas fa-user-shield"></i></div>
           <div class="acc-titles">
             <div class="acc-title">Academic Status Tracker</div>
             <div class="acc-subtitle">Current Standing &amp; Clearance Eligibility</div>
@@ -830,6 +830,10 @@
             <strong style="color:var(--success); font-size:14px;"><i class="fas fa-award"></i> Eligible for Graduation Clearance</strong>
             <p style="font-size:12px; color:var(--muted); margin-top:4px;">Maintain this standing through the end of the academic year.</p>
           </div>
+          
+          <button class="btn-full-detail" style="margin-top:20px;" onclick="openModal('degreeModal')">
+            <i class="fas fa-graduation-cap"></i> Full Detail — View Complete Degree Audit
+          </button>
         </div>
       </div>
     </div>
@@ -1752,7 +1756,68 @@
       } catch (e) {
         console.error('Error applying persona to profile', e);
       }
+      
+      // Render dashboard timetable after persona loads
+      renderDashboardTimetable();
     });
+
+    function renderDashboardTimetable() {
+      const target = document.getElementById('dashboardTimetableTarget');
+      if (!target) return;
+      
+      const personaStr = localStorage.getItem('activePersona');
+      if (!personaStr) {
+        target.innerHTML = '<div class="acc-intro">No active persona</div>';
+        return;
+      }
+      const persona = JSON.parse(personaStr);
+      
+      if (typeof window.ICEPStateManager === 'undefined') return;
+      
+      window.ICEPStateManager.fetchMockData('ICEP_TIMETABLE').then(timetable => {
+        let matched = null;
+        if (typeof window.ICEP_STUDENTS !== 'undefined') {
+          matched = window.ICEP_STUDENTS.find(s => s.name === persona.name || s.matric === persona.matric);
+        }
+        
+        let filtered = [];
+        if (matched && matched.courses && matched.courses.length > 0) {
+          filtered = timetable.filter(t => matched.courses.includes(t.courseCode));
+        } else {
+          filtered = timetable.filter(t => t.courseCode.startsWith(persona.dept ? persona.dept.substring(0,3).toUpperCase() : ''));
+        }
+        
+        // Let's filter for just Monday for the dashboard mockup
+        let todayClasses = filtered.filter(t => t.day === 'Monday');
+        
+        if (todayClasses.length === 0) {
+          target.innerHTML = '<div class="acc-intro" style="color:var(--success);font-weight:600;"><i class="fas fa-glass-cheers"></i> No classes scheduled for today! Enjoy your day.</div>';
+          return;
+        }
+        
+        // Sort by start time (simple string sort works for HH:MM AM/PM if structured right, but assuming ordered in data)
+        let html = '<div class="acc-intro" style="margin-bottom:15px;">Your classes for today (Monday):</div>';
+        html += '<div style="display:flex; flex-direction:column; gap:10px;">';
+        
+        todayClasses.forEach(t => {
+          html += `
+            <div style="background:rgba(99,102,241,0.05); border-left:4px solid var(--accent); padding:12px; border-radius:4px; display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <strong style="color:var(--text); font-size:14px; display:block;">${t.courseCode} — ${t.courseTitle}</strong>
+                <span style="font-size:12px; color:var(--muted); margin-top:4px; display:inline-block;"><i class="fas fa-location-dot"></i> ${t.venue} | <i class="fas fa-user"></i> ${t.lecturer}</span>
+              </div>
+              <div style="font-weight:700; color:var(--accent); font-size:13px; text-align:right;">
+                <i class="far fa-clock"></i><br/>${t.startTime}
+              </div>
+            </div>
+          `;
+        });
+        
+        html += '</div>';
+        target.innerHTML = html;
+      });
+    }
+
 
     function renderStudentTimetable() {
       const tbody = document.querySelector('#timetableTable tbody');
