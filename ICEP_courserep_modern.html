@@ -650,6 +650,7 @@
       <li><a href="#" class="active">Dashboard</a></li>
       <li><a href="#">Class Roster</a></li>
       <li><a href="#">Results</a></li>
+      <li><a href="#" onclick="openModal('settingsModal'); return false;" title="Settings" class="desktop-settings"><i class="fas fa-cog"></i></a></li>
       <li><a href="#">Timetable</a></li>
       <li><a href="#">Payments</a></li>
     </ul>
@@ -1207,6 +1208,33 @@
   <!-- TOAST NOTIFICATION -->
   <div id="toast"><i class="fas fa-info-circle"></i> <span>Message</span></div>
 
+  <!-- SETTINGS MODAL -->
+  <div class="modal-overlay" id="settingsModal" onclick="handleModalOverlayClick(event,'settingsModal')">
+    <div class="modal-sheet">
+      <div class="modal-top-stripe" style="background:linear-gradient(90deg,#64748b,#94a3b8)"></div>
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <h3><i class="fas fa-cog" style="color:#64748b;margin-right:8px"></i>Account Settings</h3>
+          <p>Manage your profile preferences and security</p>
+        </div>
+        <button class="modal-close" onclick="closeModal('settingsModal')"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div style="display:flex; flex-direction:column; gap:16px;">
+          <div style="padding:16px; border:1px solid var(--border); border-radius:12px; background:rgba(15,23,42,0.02)">
+            <h4 style="margin-bottom:8px; font-size:14px; font-weight:700;">Theme Preferences</h4>
+            <button class="btn-secondary" onclick="toggleDarkMode(); closeModal('settingsModal')" style="font-size:12px; padding:8px 16px;"><i class="fas fa-moon"></i> Toggle Dark Mode</button>
+          </div>
+          <div style="padding:16px; border:1px solid var(--border); border-radius:12px; background:rgba(15,23,42,0.02)">
+            <h4 style="margin-bottom:8px; font-size:14px; font-weight:700;">Password Management</h4>
+            <p style="font-size:13px; color:var(--muted); margin-bottom:12px;">Update your portal login password regularly to keep your account secure.</p>
+            <button class="btn-secondary" style="font-size:12px; padding:8px 16px;"><i class="fas fa-key"></i> Change Password</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     // ─── DATA ───
     // Hardcoded fallback (Marketing 400L)
@@ -1454,6 +1482,14 @@
         classListStudents = studentsData.filter(s => s.department === 'Marketing' && s.level === 400);
       }
 
+      // Sort by CGPA (if available) descending, then Matriculation Number alphabetically
+      classListStudents.sort((a, b) => {
+        const cgpaA = a.cgpa || 0;
+        const cgpaB = b.cgpa || 0;
+        if (cgpaB !== cgpaA) return cgpaB - cgpaA;
+        return (a.matric || '').localeCompare(b.matric || '');
+      });
+
       // Re-render
       renderRosterGrid();
 
@@ -1638,9 +1674,10 @@
       const totalEl = document.getElementById(`total_${id}`);
       const badge = document.getElementById(`grade_${id}`);
       
-      const ca = parseInt(caInp.value) || 0;
-      const exam = parseInt(examInp.value) || 0;
-      const total = ca + exam;
+      const ca = Math.min(30, parseInt(caInp.value) || 0);
+      const exam = Math.min(70, parseInt(examInp.value) || 0);
+      let total = ca + exam;
+      if (total > 100) total = 100;
       
       totalEl.innerText = total;
       

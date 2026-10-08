@@ -544,6 +544,7 @@
       <li><a href="#" onclick="openModal('degreeModal'); return false;">Academic Audit</a></li>
       <li><a href="#" onclick="openModal('financeModal'); return false;">Financial Audit</a></li>
       <li><a href="#" onclick="openModal('timetableModal');renderStudentTimetable();return false;">Timetable</a></li>
+      <li><a href="#" onclick="openModal('settingsModal'); return false;" title="Settings" class="desktop-settings"><i class="fas fa-cog"></i></a></li>
     </ul>
     <div class="nav-right">
       <!-- PORTAL SWITCHER -->
@@ -621,7 +622,7 @@
             </div>
             <div class="stat-chip chip-level">
               <div class="chip-icon"><i class="fas fa-layer-group"></i></div>
-              <div class="chip-val" id="heroStudentLevel">400L</div>
+              <div class="chip-val" id="heroStudentLevel">500L</div>
               <div class="chip-label">Academic Level</div>
             </div>
             <div class="stat-chip chip-credits">
@@ -652,6 +653,34 @@
       <h2 class="section-title">Screening, Results &amp; Degree Audit</h2>
     </div>
 
+    <!-- ── ACCORDION 0: Today's Timetable ── -->
+    <div class="accordion-card" id="acc0">
+      <div class="acc-header" onclick="toggleAcc('acc0')">
+        <div class="acc-left">
+          <div class="acc-icon-wrap icon-purple" style="background:rgba(139,92,246,0.1);color:#8b5cf6"><i class="fas fa-calendar-day"></i></div>
+          <div class="acc-titles">
+            <div class="acc-title">Today's Class Schedule</div>
+            <div class="acc-subtitle">Quick view of your timetable for today</div>
+          </div>
+        </div>
+        <div class="acc-right">
+          <span class="acc-badge" style="background:rgba(139,92,246,0.1);color:#8b5cf6">Upcoming: MKT 599</span>
+          <div class="acc-chevron"><i class="fas fa-chevron-down"></i></div>
+        </div>
+      </div>
+      <div class="acc-body">
+        <div class="acc-body-inner" id="dashboardTimetableTarget">
+          <div class="acc-intro">Loading today's schedule from ICEPStateManager...</div>
+        </div>
+        <div class="acc-body-inner" style="padding-top:0">
+          <button class="btn-full-detail" onclick="openModal('timetableModal');renderStudentTimetable();">
+            <i class="fas fa-calendar-alt"></i> Full Detail — View Complete Weekly Timetable
+          </button>
+        </div>
+      </div>
+    </div>
+
+
     <!-- ── ACCORDION 1: Semester Results ── -->
     <div class="accordion-card" id="acc1">
       <div class="acc-header" onclick="toggleAcc('acc1')">
@@ -659,7 +688,7 @@
           <div class="acc-icon-wrap icon-blue"><i class="fas fa-book-open-reader"></i></div>
           <div class="acc-titles">
             <div class="acc-title">Semester Results &amp; Passed Courses</div>
-            <div class="acc-subtitle">400L First Semester — Academic Year 2025/2026</div>
+            <div class="acc-subtitle">500L First Semester — Academic Year 2026/2027</div>
           </div>
         </div>
         <div class="acc-right">
@@ -745,6 +774,62 @@
           <button class="btn-full-detail" onclick="openModal('carryoverModal')" style="background:linear-gradient(135deg,#f59e0b,#d97706);box-shadow:0 10px 28px rgba(245,158,11,0.3);">
             <i class="fas fa-clipboard-list"></i> Full Detail — Course Obligation Log &amp; Resolution Steps
           </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ACCORDION 2.5: Academic Status Tracker ── -->
+    <div class="accordion-card" id="accStatus">
+      <div class="acc-header" onclick="toggleAcc('accStatus')">
+        <div class="acc-left">
+          <div class="acc-icon-wrap icon-blue" style="background:rgba(59,130,246,0.1);color:#3b82f6"><i class="fas fa-shield-check"></i></div>
+          <div class="acc-titles">
+            <div class="acc-title">Academic Status Tracker</div>
+            <div class="acc-subtitle">Current Standing &amp; Clearance Eligibility</div>
+          </div>
+        </div>
+        <div class="acc-right">
+          <span class="acc-badge badge-success" id="academicStatusBadge">Good Standing</span>
+          <div class="acc-chevron"><i class="fas fa-chevron-down"></i></div>
+        </div>
+      </div>
+      <div class="acc-body">
+        <div class="acc-body-inner">
+          <div class="acc-intro">Your academic standing is evaluated based on CGPA &ge; 1.50 and financial clearance.</div>
+          
+          <div style="display:flex; flex-direction:column; gap:16px; margin-top:10px;">
+            <!-- Condition 1: CGPA -->
+            <div class="check-row">
+              <div class="check-row-left">
+                <div class="check-ico ico-done" id="statusCgpaIcon"><i class="fas fa-check"></i></div>
+                CGPA Requirement (1.50 minimum)
+              </div>
+              <span class="check-status status-done" id="statusCgpaText">Current: 4.82</span>
+            </div>
+            
+            <!-- Condition 2: Financial -->
+            <div class="check-row">
+              <div class="check-row-left">
+                <div class="check-ico ico-done" id="statusFinanceIcon"><i class="fas fa-check"></i></div>
+                Financial Clearance
+              </div>
+              <span class="check-status status-done" id="statusFinanceText">All Fees Cleared</span>
+            </div>
+
+            <!-- Condition 3: Disciplinary -->
+            <div class="check-row">
+              <div class="check-row-left">
+                <div class="check-ico ico-done"><i class="fas fa-check"></i></div>
+                Disciplinary Record
+              </div>
+              <span class="check-status status-done">Clean</span>
+            </div>
+          </div>
+
+          <div style="margin-top:20px; padding:12px; background:rgba(16,185,129,0.05); border:1px solid rgba(16,185,129,0.2); border-radius:8px; text-align:center;">
+            <strong style="color:var(--success); font-size:14px;"><i class="fas fa-award"></i> Eligible for Graduation Clearance</strong>
+            <p style="font-size:12px; color:var(--muted); margin-top:4px;">Maintain this standing through the end of the academic year.</p>
+          </div>
         </div>
       </div>
     </div>
@@ -840,7 +925,7 @@
             <div class="check-row">
               <div class="check-row-left">
                 <div class="check-ico ico-pend"><i class="fas fa-clock"></i></div>
-                Final Year Project (MKT 499)
+                Final Year Project (MKT 599)
               </div>
               <span class="check-status status-pend">Pending Supervisor</span>
             </div>
@@ -889,6 +974,7 @@
           <button class="modal-tab" onclick="switchTab(event,'tab200L')">200 Level</button>
           <button class="modal-tab" onclick="switchTab(event,'tab300L')">300 Level</button>
           <button class="modal-tab" onclick="switchTab(event,'tab400L')">400 Level</button>
+          <button class="modal-tab" onclick="switchTab(event,'tab500L')">500 Level</button>
           <button class="modal-tab" onclick="switchTab(event,'tab500L')">500 Level</button>
         </div>
 
@@ -979,7 +1065,6 @@
               <tr class="course-row" data-semester="2"><td class="course-row-num"></td><td>BUS 401</td><td>Entrepreneurship Development</td><td>3</td><td>34</td><td>51</td><td>85</td><td><span class="grade-badge grade-A">A</span></td></tr>
               <tr class="course-row" data-semester="2"><td class="course-row-num"></td><td>MKT 409</td><td>Public Relations Management</td><td>3</td><td>33</td><td>50</td><td>83</td><td><span class="grade-badge grade-A">A</span></td></tr>
               <tr class="course-row" data-semester="2"><td class="course-row-num"></td><td>MKT 411</td><td>Marketing Ethics &amp; Society</td><td>3</td><td>36</td><td>53</td><td>89</td><td><span class="grade-badge grade-A">A</span></td></tr>
-              <tr class="course-row" data-semester="2"><td class="course-row-num"></td><td>MKT 499</td><td>Final Year Project</td><td>6</td><td colspan="3" style="font-style:italic;color:var(--muted)">In Progress — Supervisor Pending</td><td><span class="grade-badge" style="background:rgba(100,116,139,0.1);color:#64748b">Pending</span></td></tr>
             </tbody>
           </table>
           <div class="modal-summary-row">
@@ -994,8 +1079,7 @@
         <div class="modal-tab-panel" id="tab500L">
           <table class="result-table">
             <thead><tr><th>#</th><th>Course Code</th><th>Course Title</th><th>Units</th><th>CA (40)</th><th>Exam (60)</th><th>Total</th><th>Grade</th></tr></thead>
-            <tbody>
-              <tr><td colspan="8" style="text-align:center;padding:20px;color:var(--muted)">No results available for 500 Level.</td></tr>
+              <tr class="course-row" data-semester="2"><td class="course-row-num"></td><td>MKT 599</td><td>Final Year Project / Thesis</td><td>6</td><td colspan="3" style="font-style:italic;color:var(--muted)">In Progress — Supervisor Pending</td><td><span class="grade-badge" style="background:rgba(100,116,139,0.1);color:#64748b">Pending</span></td></tr>
             </tbody>
           </table>
         </div>
@@ -1052,6 +1136,7 @@
             <tr><td>300L</td><td>First</td><td>145</td><td>30</td><td>4.83</td><td>4.68</td></tr>
             <tr><td>300L</td><td>Second</td><td>148</td><td>30</td><td>4.93</td><td>4.76</td></tr>
             <tr><td>400L</td><td>First</td><td>143</td><td>30</td><td>4.77</td><td>4.82</td></tr>
+            <tr><td>500L</td><td>First</td><td>143</td><td>0</td><td>N/A</td><td>N/A</td></tr>
           </tbody>
         </table>
         <div class="modal-summary-row">
@@ -1091,7 +1176,7 @@
             <tr><td>General Studies (GST)</td><td>10</td><td>10</td><td><span class="grade-badge grade-A">Complete</span></td></tr>
             <tr><td>Free Electives</td><td>15</td><td>14</td><td><span class="grade-badge grade-B">93%</span></td></tr>
             <tr><td>Industrial Training (SIWES)</td><td>6</td><td>6</td><td><span class="grade-badge grade-A">Complete</span></td></tr>
-            <tr><td>Final Year Project (MKT 499)</td><td>6</td><td>0</td><td><span class="grade-badge grade-C">In Progress</span></td></tr>
+            <tr><td>Final Year Project (MKT 599)</td><td>6</td><td>0</td><td><span class="grade-badge grade-C">In Progress</span></td></tr>
             <tr><td>Outstanding Carryovers</td><td>0</td><td>—</td><td><span class="grade-badge grade-F">1 Pending</span></td></tr>
           </tbody>
         </table>
@@ -1182,16 +1267,44 @@
       </div>
       <div class="modal-body">
         <div class="modal-summary-row" style="margin-top:0; border-top:none; margin-bottom:20px;">
-          <div class="modal-summary-chip"><div class="m-val" style="color:var(--success)">₦0.00</div><div class="m-lbl">Outstanding Balance</div></div>
-          <div class="modal-summary-chip"><div class="m-val">Cleared</div><div class="m-lbl">Financial Status</div></div>
+          <div class="modal-summary-chip"><div class="m-val" style="color:var(--warn)">₦10,000</div><div class="m-lbl">Outstanding Balance</div></div>
+          <div class="modal-summary-chip"><div class="m-val" style="color:var(--warn)">Pending</div><div class="m-lbl">Financial Status</div></div>
         </div>
-        <table class="result-table">
-          <thead><tr><th>Session</th><th>Description</th><th>Amount</th><th>Status</th><th>Receipt</th></tr></thead>
-          <tbody>
-            <tr><td>2025/2026</td><td>Tuition - 1st Instalment</td><td>₦120,000</td><td><span class="grade-badge grade-A">Paid</span></td><td><a href="#">View</a></td></tr>
-            <tr><td>2025/2026</td><td>Departmental Dues</td><td>₦5,000</td><td><span class="grade-badge grade-C">Pending</span></td><td><button class="btn-secondary" style="padding:4px 10px;font-size:11px">Pay Now</button></td></tr>
-          </tbody>
-        </table>
+
+        <!-- TABS FOR FINANCE -->
+        <div class="modal-sem-row" style="margin-bottom:16px;">
+          <button class="modal-sem-tab modal-sem-active" onclick="switchFinanceTab('pending')" id="finTabPending">Pending Dues &amp; Fees <span class="sem-count">2</span></button>
+          <button class="modal-sem-tab" onclick="switchFinanceTab('history')" id="finTabHistory">Payment History &amp; Receipts</button>
+        </div>
+
+        <!-- PENDING TAB -->
+        <div id="finPanelPending">
+          <table class="result-table">
+            <thead><tr><th>Session</th><th>Description</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td>2026/2027</td><td>Departmental Dues (MKT)</td><td>₦5,000</td><td><span class="grade-badge" style="background:rgba(245,158,11,0.1);color:#b45309">Pending</span></td><td><button class="btn-secondary" style="padding:6px 12px;font-size:12px;background:var(--accent);color:#fff;border:none" onclick="alert('Redirecting to Paystack gateway...')">Pay Now</button></td></tr>
+              <tr><td>2026/2027</td><td>Medical/Clinic Fee</td><td>₦5,000</td><td><span class="grade-badge" style="background:rgba(245,158,11,0.1);color:#b45309">Pending</span></td><td><button class="btn-secondary" style="padding:6px 12px;font-size:12px;background:var(--accent);color:#fff;border:none" onclick="alert('Redirecting to Paystack gateway...')">Pay Now</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div id="finPanelHistory" style="display:none;">
+          <table class="result-table" style="margin-bottom:24px;">
+            <thead><tr><th>Session</th><th>Description</th><th>Amount</th><th>Status</th><th>Receipt</th></tr></thead>
+            <tbody>
+              <tr><td>2026/2027</td><td>Tuition - 1st Instalment</td><td>₦120,000</td><td><span class="grade-badge grade-A">Cleared</span></td><td><a href="#" style="color:var(--accent);font-weight:bold"><i class="fas fa-download"></i> View</a></td></tr>
+              <tr><td>2025/2026</td><td>Full Tuition</td><td>₦240,000</td><td><span class="grade-badge grade-A">Cleared</span></td><td><a href="#" style="color:var(--accent);font-weight:bold"><i class="fas fa-download"></i> View</a></td></tr>
+            </tbody>
+          </table>
+
+          <div style="border:2px dashed var(--border); border-radius:12px; padding:30px 20px; text-align:center; background:rgba(15,23,42,0.02);">
+            <div style="font-size:28px; color:var(--muted); margin-bottom:12px;"><i class="fas fa-cloud-upload-alt"></i></div>
+            <h4 style="margin-bottom:8px; font-weight:700;">Upload Manual Payment Receipt</h4>
+            <p style="font-size:13px; color:var(--muted); margin-bottom:16px;">Drag and drop your bank teller or transfer receipt here, or click to browse. Supported formats: PDF, JPG, PNG (Max 2MB).</p>
+            <button class="btn-secondary"><i class="fas fa-folder-open"></i> Browse Files</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -1290,8 +1403,8 @@
       NOTIFS = [
         { id:1, icon:'📋', text:'Results for MKT 401 — Consumer Behavior have been uploaded.', time:'2 min ago', read:false, target:'semesterModal', addedAt: NOW - 2*60*1000 },
         { id:2, icon:'📅', text:'Re-sit registration window opens October 15, 2026.', time:'1 hr ago', read:false, target:'acc2', addedAt: NOW - 60*60*1000 },
-        { id:3, icon:'🎓', text:'Supervisor assignment for MKT 499 (Final Year Project) is still pending.', time:'3 hrs ago', read:false, target:'degreeModal', addedAt: NOW - 3*60*60*1000 },
-        { id:4, icon:'📢', text:'Faculty notice: 400L exam timetable has been released.', time:'Yesterday', read:false, target:'acc3', addedAt: NOW - 26*60*60*1000 },
+        { id:3, icon:'🎓', text:'Supervisor assignment for MKT 599 (Final Year Project) is still pending.', time:'3 hrs ago', read:false, target:'degreeModal', addedAt: NOW - 3*60*60*1000 },
+        { id:4, icon:'📢', text:'Faculty notice: 500L exam timetable has been released.', time:'Yesterday', read:false, target:'acc3', addedAt: NOW - 26*60*60*1000 },
         { id:5, icon:'💳', text:'School fees second instalment deadline is in 7 days.', time:'Yesterday', read:false, target:'acc4', addedAt: NOW - 27*60*60*1000 },
       ];
       
@@ -1479,6 +1592,21 @@
       if(elF) elF.textContent = `(${tot})`;
       if(el1) el1.textContent = `(${s1 + unsplit})`;
       if(el2) el2.textContent = `(${s2 + unsplit})`;
+    }
+
+    function switchFinanceTab(tab) {
+      document.getElementById('finTabPending').classList.remove('modal-sem-active');
+      document.getElementById('finTabHistory').classList.remove('modal-sem-active');
+      document.getElementById('finPanelPending').style.display = 'none';
+      document.getElementById('finPanelHistory').style.display = 'none';
+      
+      if(tab === 'pending') {
+        document.getElementById('finTabPending').classList.add('modal-sem-active');
+        document.getElementById('finPanelPending').style.display = 'block';
+      } else {
+        document.getElementById('finTabHistory').classList.add('modal-sem-active');
+        document.getElementById('finPanelHistory').style.display = 'block';
+      }
     }
 
     function switchModalSem(e, sem) {
