@@ -1285,9 +1285,8 @@
         <div id="finPanelPending">
           <table class="result-table">
             <thead><tr><th>Session</th><th>Description</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead>
-            <tbody>
-              <tr><td>2026/2027</td><td>Departmental Dues (MKT)</td><td>₦5,000</td><td><span class="grade-badge" style="background:rgba(245,158,11,0.1);color:#b45309">Pending</span></td><td><button class="btn-secondary" style="padding:6px 12px;font-size:12px;background:var(--accent);color:#fff;border:none" onclick="alert('Redirecting to Paystack gateway...')">Pay Now</button></td></tr>
-              <tr><td>2026/2027</td><td>Medical/Clinic Fee</td><td>₦5,000</td><td><span class="grade-badge" style="background:rgba(245,158,11,0.1);color:#b45309">Pending</span></td><td><button class="btn-secondary" style="padding:6px 12px;font-size:12px;background:var(--accent);color:#fff;border:none" onclick="alert('Redirecting to Paystack gateway...')">Pay Now</button></td></tr>
+            <tbody id="studentFeePendingTbody">
+              <tr><td colspan="5" style="text-align:center;">Loading pending fees...</td></tr>
             </tbody>
           </table>
         </div>
@@ -1296,9 +1295,8 @@
         <div id="finPanelHistory" style="display:none;">
           <table class="result-table" style="margin-bottom:24px;">
             <thead><tr><th>Session</th><th>Description</th><th>Amount</th><th>Status</th><th>Receipt</th></tr></thead>
-            <tbody>
-              <tr><td>2026/2027</td><td>Tuition - 1st Instalment</td><td>₦120,000</td><td><span class="grade-badge grade-A">Cleared</span></td><td><a href="#" style="color:var(--accent);font-weight:bold"><i class="fas fa-download"></i> View</a></td></tr>
-              <tr><td>2025/2026</td><td>Full Tuition</td><td>₦240,000</td><td><span class="grade-badge grade-A">Cleared</span></td><td><a href="#" style="color:var(--accent);font-weight:bold"><i class="fas fa-download"></i> View</a></td></tr>
+            <tbody id="studentFeeHistoryTbody">
+              <tr><td colspan="5" style="text-align:center;">Loading history...</td></tr>
             </tbody>
           </table>
 
@@ -1604,12 +1602,41 @@
       document.getElementById('finPanelPending').style.display = 'none';
       document.getElementById('finPanelHistory').style.display = 'none';
       
+      const historyData = JSON.parse(localStorage.getItem('icep_fee_history') || '[]');
+      const myMatric = document.getElementById('dashMatric').innerText;
+      let hasPaid = false; 
+      // Simple mock: if we have history, randomly assign as paid or pending for demo purposes
+      
       if(tab === 'pending') {
         document.getElementById('finTabPending').classList.add('modal-sem-active');
         document.getElementById('finPanelPending').style.display = 'block';
+        const pendingBody = document.getElementById('studentFeePendingTbody');
+        if (historyData.length > 0) {
+          let html = '';
+          historyData.forEach(f => {
+            // Assume latest drives are pending if amount > 5000 just for mock
+            if(f.amount > 3000) {
+              html += `<tr><td>2025/2026</td><td>${f.title}</td><td>₦${parseInt(f.amount).toLocaleString()}</td><td><span class="grade-badge" style="background:rgba(245,158,11,0.1);color:#b45309">Pending</span></td><td><button class="btn-secondary" style="padding:6px 12px;font-size:12px;background:var(--accent);color:#fff;border:none" onclick="alert('Redirecting to Paystack gateway...')">Pay Now</button></td></tr>`;
+            }
+          });
+          if(html === '') html = '<tr><td colspan="5" style="text-align:center;">No pending fees</td></tr>';
+          pendingBody.innerHTML = html;
+        } else {
+          pendingBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No pending fees</td></tr>';
+        }
       } else {
         document.getElementById('finTabHistory').classList.add('modal-sem-active');
         document.getElementById('finPanelHistory').style.display = 'block';
+        const historyBody = document.getElementById('studentFeeHistoryTbody');
+        if (historyData.length > 0) {
+          let html = '';
+          historyData.forEach(f => {
+            html += `<tr><td>2025/2026</td><td>${f.title}</td><td>₦${parseInt(f.amount).toLocaleString()}</td><td><span class="grade-badge grade-A">Cleared</span></td><td><a href="#" style="color:var(--accent);font-weight:bold"><i class="fas fa-download"></i> View</a></td></tr>`;
+          });
+          historyBody.innerHTML = html;
+        } else {
+          historyBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No history available</td></tr>';
+        }
       }
     }
 

@@ -144,8 +144,32 @@ class ICEPStateManager {
               if (customStudents) data = [...data, ...JSON.parse(customStudents)];
             }
             if (datasetName === 'ICEP_TIMETABLE') {
-              const customTimetable = localStorage.getItem('ICEP_TIMETABLE_CUSTOM');
-              if (customTimetable) data = [...data, ...JSON.parse(customTimetable)];
+              const customTimetable1 = localStorage.getItem('ICEP_TIMETABLE_CUSTOM');
+              const customTimetable2 = localStorage.getItem('icep_timetable_custom');
+              let cData = [];
+              if (customTimetable1) cData = cData.concat(JSON.parse(customTimetable1));
+              if (customTimetable2) {
+                // Course rep portal saves fields as: day, time, code, title, venue, lecturer
+                const c2 = JSON.parse(customTimetable2).map(item => {
+                  let start = item.time; let end = item.time;
+                  if (item.time && item.time.includes('-')) {
+                    const parts = item.time.split('-');
+                    start = parts[0].trim();
+                    end = parts[1].trim();
+                  }
+                  return {
+                    courseCode: item.code,
+                    courseTitle: item.title,
+                    day: item.day,
+                    startTime: start,
+                    endTime: end,
+                    venue: item.venue,
+                    lecturer: item.lecturer
+                  };
+                });
+                cData = cData.concat(c2);
+              }
+              if (cData.length > 0) data = [...data, ...cData];
             }
           } catch(e) {
             console.error("ICEPStateManager: Failed to parse custom data", e);
